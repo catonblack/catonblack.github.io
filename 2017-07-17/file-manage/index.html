@@ -15,18 +15,21 @@
 
 
 
-<meta name="description" content="硬件，EDA，FPGA，软件爱好者">
-<meta name="keywords" content="硬件，EDA，FPGA">
-<meta property="og:type" content="website">
-<meta property="og:title" content="文章分类">
-<meta property="og:url" content="https://catonblack.cn/categories/index.html">
+<meta name="description" content="对于我这种重度强迫症患者来说，多台PC间、以及多个项目间的文件管理一直是令我抓狂的地方。所以最近抽了一段时间来进行文件的整理，研究了一下Git、云盘以及符号链接的特性，并根据自己的使用习惯进行了设计。这里将这部分经验分享一下。">
+<meta name="keywords" content="NAS,云盘,Git,文件管理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="file-manage">
+<meta property="og:url" content="https://catonblack.cn/2017-07-17/file-manage/index.html">
 <meta property="og:site_name" content="黑山老喵小窝">
-<meta property="og:description" content="硬件，EDA，FPGA，软件爱好者">
+<meta property="og:description" content="对于我这种重度强迫症患者来说，多台PC间、以及多个项目间的文件管理一直是令我抓狂的地方。所以最近抽了一段时间来进行文件的整理，研究了一下Git、云盘以及符号链接的特性，并根据自己的使用习惯进行了设计。这里将这部分经验分享一下。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-06-25T14:12:04.666Z">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_file-manage/symlink.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_file-manage/symlink.jpg">
+<meta property="og:updated_time" content="2019-07-17T09:08:56.870Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="文章分类">
-<meta name="twitter:description" content="硬件，EDA，FPGA，软件爱好者">
+<meta name="twitter:title" content="file-manage">
+<meta name="twitter:description" content="对于我这种重度强迫症患者来说，多台PC间、以及多个项目间的文件管理一直是令我抓狂的地方。所以最近抽了一段时间来进行文件的整理，研究了一下Git、云盘以及符号链接的特性，并根据自己的使用习惯进行了设计。这里将这部分经验分享一下。">
+<meta name="twitter:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_file-manage/symlink.jpg">
 
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
@@ -58,7 +61,7 @@
 <link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
 
 
-<title>文章分类 | 黑山老喵小窝</title>
+<title>file-manage | 黑山老喵小窝</title>
 
 <script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
 <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
@@ -68,7 +71,7 @@
         fancybox: true,
         animate: true,
         isHome: false,
-        isPost: false,
+        isPost: true,
         isArchive: false,
         isTag: false,
         isCategory: false,
@@ -287,11 +290,11 @@
     </div>
     <link class="menu-list" tags="标签" friends="友情链接" about="关于我">
 </nav>
-      <div class="body-wrap"><article id="categories-" class="article article-type-categories" itemscope itemprop="blogPost">
+      <div class="body-wrap"><article id="post-file-manage" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/categories/index.html" class="article-date">
-      <time datetime="2019-06-25T14:06:58.000Z" itemprop="datePublished">2019-06-25</time>
+      <a href="/2017-07-17/file-manage/" class="article-date">
+      <time datetime="2017-07-17T08:38:40.000Z" itemprop="datePublished">2017-07-17</time>
 </a>
 
 
@@ -306,7 +309,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      文章分类
+      file-manage
     </h1>
   
 
@@ -314,8 +317,16 @@
       
       <div class="article-info article-info-post">
         
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/强迫症专题/">强迫症专题</a>
+    </div>
+
 
         
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Git/">Git</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/NAS/">NAS</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/云盘/">云盘</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/文件管理/">文件管理</a></li></ul>
+    </div>
+
         <div class="clearfix"></div>
       </div>
       
@@ -323,97 +334,122 @@
     <div class="article-entry" itemprop="articleBody">
       
           
-              <style>
-    .article-meta { display: none; }
-    #container .article .article-title { padding-right: 0; }
-    .article-header {
-        padding: 0;
-        padding-top: 26px;
-        border-left: none;
-        text-align: center;
-    }
-    .article-header:hover { border-left: none; }
-    .article-title { font-size: 1.6em }
-    .article-entry hr { margin: 0;}
-    .article-meta,
-    #container .article-info-post.article-info { display: none;}
-    #container .article .article-title { padding: 0; }
-</style>
-
-
-    <!-- Tag Cloud Page -->
-    <hr>
-<br>
-<ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/FPGA血泪史/">FPGA血泪史</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具使用技巧/">工具使用技巧</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/强迫症专题/">强迫症专题</a><span class="category-list-count">2</span></li></ul>
-
-<p class="count"></p>
-
-<div class="tags">
-    <a href="/tags/Git/" style="font-size: 25.5px; color: #404040">Git</a> <a href="/tags/GitHub/" style="font-size: 16px; color: #808080">GitHub</a> <a href="/tags/GitServer/" style="font-size: 16px; color: #808080">GitServer</a> <a href="/tags/Gitlab/" style="font-size: 16px; color: #808080">Gitlab</a> <a href="/tags/Mealy/" style="font-size: 16px; color: #808080">Mealy</a> <a href="/tags/Moore/" style="font-size: 16px; color: #808080">Moore</a> <a href="/tags/NAS/" style="font-size: 16px; color: #808080">NAS</a> <a href="/tags/云盘/" style="font-size: 16px; color: #808080">云盘</a> <a href="/tags/多信号同步/" style="font-size: 16px; color: #808080">多信号同步</a> <a href="/tags/多段式状态机/" style="font-size: 16px; color: #808080">多段式状态机</a> <a href="/tags/工程存档/" style="font-size: 16px; color: #808080">工程存档</a> <a href="/tags/异步时钟/" style="font-size: 25.5px; color: #404040">异步时钟</a> <a href="/tags/扁平化命名/" style="font-size: 16px; color: #808080">扁平化命名</a> <a href="/tags/文件管理/" style="font-size: 25.5px; color: #404040">文件管理</a> <a href="/tags/有限状态机/" style="font-size: 25.5px; color: #404040">有限状态机</a> <a href="/tags/状态机转换/" style="font-size: 16px; color: #808080">状态机转换</a> <a href="/tags/电平同步/" style="font-size: 16px; color: #808080">电平同步</a> <a href="/tags/综合/" style="font-size: 35px; color: #000">综合</a> <a href="/tags/脉冲同步/" style="font-size: 16px; color: #808080">脉冲同步</a> <a href="/tags/边沿检测同步/" style="font-size: 16px; color: #808080">边沿检测同步</a>
+        <div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_file-manage/symlink.jpg" width="300">
 </div>
-<style>
-    .category-list li{
-        display: inline-block;
-        margin: 0 1em .5em 0;
-        padding: 4px;
-        border: 1px solid lightgray;
-        font-size: 1.2rem;
-    }
-    .category-list a { color: gray; }
-    .category-list-item:hover a {
-        color: gray;
-        text-decoration: none;
-    }
-    .category-list-count {
-        margin-left: 2px;
-        font-size: .9rem;
-    }
-    .article-entry ul li:before{ display: none; }
-    .article-inner { text-align: center; }
-    .tags {
-        max-width: 42em;
-        margin: 2em auto;
-        margin-top: 0em;
-    }
-    .tags a {
-        margin-right: 1em;
-        line-height: 65px;
-        border-bottom: 1px solid gray;
-        white-space: nowrap;
-        transition: border-bottom .5s;
-    }
-    .tags a:hover {
-        border-bottom: 3px dotted gray;
-        text-decoration: none;
-    }
-    #count > span {
-        margin: auto .2em;
-        font-weight: bold;
-    }
-</style>
 
-<!-- Count tags and categories -->
-<p id="count">
-        已有<span><script>document.write($(".category-list-item").length)</script></span>个分类，
-        共计<span><script>document.write($(".tags > a").length)</script></span>个标签
-</p>
-<script>
-    $('#count').appendTo('.count');
-</script>
+<p>对于我这种重度强迫症患者来说，多台PC间、以及多个项目间的文件管理一直是令我抓狂的地方。所以最近抽了一段时间来进行文件的整理，研究了一下Git、云盘以及符号链接的特性，并根据自己的使用习惯进行了设计。这里将这部分经验分享一下。</p>
+<a id="more"></a>
 
+<p>以下内容适合有多台PC的Windows用户，只有一台PC（以后也不会同时用多台PC）的人可以不看了，用MAC的土豪不用看了，因为没在MAC上试过（估计也不行），用Linux的人也不用看了，理由同上。</p>
+<p>与其说是NAS,云盘和Git的使用心得，不如说是建立了一套基于中心库的文件管理方式。</p>
+<h2 id="背景："><a href="#背景：" class="headerlink" title="背景："></a>背景：</h2><p>假设有四台电脑：第一台台式机，放在办公室作为主力PC；第二台台式机，放在实验室用于调试；第三台台式机，放在家里；第四台笔记本，随身携带。<br>开始蛋疼了：</p>
+<pre><code>PC1： C:30G  D:200G E:200G F:1.5T
+PC2： C:60G  D:200G
+PC3： C:256G D:256G E:150G F:500G G:1.5T
+PC4： C:512G</code></pre><h3 id="蛋疼点1："><a href="#蛋疼点1：" class="headerlink" title="蛋疼点1："></a>蛋疼点1：</h3><p>假如在办公室改的图纸，要拿到实验室去调，发现一些问题需要晚上拿回家再改，那样就得需要用个U盘从这台PC拷到另一台PC，拷来拷去，如果中间还需要修改和添加批注的话，时间一长，自己也很有可能不知道哪个文件是哪个版本。。。</p>
+<h3 id="蛋疼点2："><a href="#蛋疼点2：" class="headerlink" title="蛋疼点2："></a>蛋疼点2：</h3><p>假设AD指向的库目录没法一致，例如PC1指向的是D盘，PC3指向的是G盘，PC4指向的是C盘。那么当把一个项目从PC1拷到PC3的时候就会出现一大堆弹窗，通知你没找到库，然后就得一个个手动添加，AD指向的库目录有的还特别深，感觉整TM不爽。。。</p>
+<h3 id="蛋疼点3："><a href="#蛋疼点3：" class="headerlink" title="蛋疼点3："></a>蛋疼点3：</h3><p>如果各个项目之间有交叉有耦合，例如项目1里面的器件可以在项目2里面用，在项目1的规格书里添加了备注，这时候项目2开始了，可以把项目1的文件复制到项目2，之后又在项目2中添加备注，多次往复添加的备注就会不一样，时间一长铁定遗忘。</p>
+<h3 id="蛋疼点4："><a href="#蛋疼点4：" class="headerlink" title="蛋疼点4："></a>蛋疼点4：</h3><p>使用Onenote和Endnote的时候，不建议直接将文件附件直接插入，理由同上，会导致同一个文件有多个版本，内容会不一致；也不建议直接打印到笔记本里，因为Onenote会打印成图片，小的文件还好，大的文件就会大大增加Onenote的体积，3M的PDF就可能会变成100M+的图片，十分蛋疼。这种时候就建议有一个指向链接，链接到相应的文件，而假如在不同的电脑上链接的位置不一样就又会导致蛋蛋火辣辣地疼。</p>
+<h3 id="蛋疼点5："><a href="#蛋疼点5：" class="headerlink" title="蛋疼点5："></a>蛋疼点5：</h3><p>如果直接使用NAS等网盘工具进行同步的话，需要同步的代码编译出来的一大堆文件不光占地方，而且极容易导致同步冲突。虽然可以添加文件例外，但是不同项目有着不同的要求，每一个都不太一样，无法使用通用的文件例外适配所有程序。</p>
+<h3 id="蛋疼点6："><a href="#蛋疼点6：" class="headerlink" title="蛋疼点6："></a>蛋疼点6：</h3><p>有些文件不希望他实时同步，例如Comsol的文件，结果会存在mph文件中，使得文件特别大，这种文件一般是希望把结果删掉之后再保存的，不然的话，一下子就好几个G，没有哪个网盘可以HOLD住的。</p>
+<p>———————————————-还要用，所以不割————————————————</p>
+<p>首先要大致介绍一下<strong>符号链接</strong>：这东西就类似于指针，假设把G:\Lib指向C:\Lib，文件的位置依然在G:\Lib，但是操作C:\Lib中的文件也会有同样地更改，这点类似于快捷方式。<br>但是它不同于快捷方式的地方在于：</p>
+<pre><code>1. 快捷方式其实是一个.INK的文件，使用资源管理器打开；符号链接只是一个指向链接，由操作系统调度。
+2. 其他软件中是无法打开快捷方式的，但是可以打开符号链接。
+3. 复制快捷方式得到的还是快捷方式，但是复制符号链接得到的是源文件。例如你复制C:\Lib，其实得到是G:\下的文件。</code></pre><p>Git的介绍再另一篇里有，在此不再赘述。</p>
+<p>—————————————————可以割了—————————————————-</p>
+<h2 id="接下来就是见证奇迹的时刻"><a href="#接下来就是见证奇迹的时刻" class="headerlink" title="接下来就是见证奇迹的时刻"></a>接下来就是见证奇迹的时刻</h2><p>如下图所示，所有文件夹的真实位置在G盘根目录下，先将所有目录在C:/CentralLib中进行重新分配，尽可能设计成扁平化的文件夹风格。因为每台windows电脑肯定有C盘（什么？你的windows装在了D盘！好吧，你牛X），这样就让系统误认为所有文件都在C盘。然后从C盘将文件分别映射到E:/Work下的各个工程文件夹，这样就能保证不同的工程文件夹后来用的是同一套库了。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_file-manage/symlink.jpg" width="800">
+</div>
 
-          
-        
+<h3 id="特点："><a href="#特点：" class="headerlink" title="特点："></a>特点：</h3><ol>
+<li><p><strong>网盘</strong>适合同步几十K~几十M的文件，最好是不会产生大量临时文件的那种，即使产生临时文件也是可以随时删掉而不会对文件造成影响。例如PDF,OFFICE文档，pcb文件，压缩后的工程存档。</p>
+</li>
+<li><p><strong>NAS</strong>因为是内网，所以同步速度特别快，除了对网盘文件进行同步以外，还可以对一些临时性的文件进行快速同步，以免文件丢失。例如网上下载到的参考固件，网上下到的一些小工具等。</p>
+</li>
+<li><p><strong>GIT</strong>适合对二进制文件同步，因为它每次只上传修改后的部分，而且可以手动调整分支，可以指定上传的文件。这些性质对于代码，仿真这种可能会有多种分支，试错成本又低的场合是非常合适的。</p>
+</li>
+<li><p>使用符号链接，在C盘创建一个虚拟的中心库，然后再将工作盘和其他文件指向这个中心库，原始文件则可以按照各自最合适的方式进行同步。</p>
+</li>
+<li><p>没有适配所有文件的同步方式，建议使用各自最合适的同步方式来同步。</p>
+</li>
+<li><p>当项目需要存档和打包的时候，直接复制就可以了，复制符号链接得到的是源文件。</p>
+</li>
+</ol>
+<h2 id="2019-03-01-更新"><a href="#2019-03-01-更新" class="headerlink" title="2019-03-01 更新"></a>2019-03-01 更新</h2><p>最近确定硬盘挂了，在酿成大错之前赶快备份数据，这时候之前的符号链接让我犯难了，不能直接copy，这样的话会将源文件直接复制过去的，所以这里用了xcopy指令。</p>
+<p>复制包含符号链接的目录：</p>
+<figure class="highlight bat"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">xcopy</span> e:\test j:\test /e /B</span><br></pre></td></tr></table></figure>
+
+<p>源 e:\test</p>
+<p>目标 j:\test</p>
+
       
     </div>
     
   </div>
   
     
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2017-07-17/file-manage/">file-manage</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">黑山老喵</a></p>
+        <p><span>发布时间:</span>2017-07-17, 16:38:40</p>
+        <p><span>最后更新:</span>2019-07-17, 17:08:56</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2017-07-17/file-manage/" title="file-manage">https://catonblack.cn/2017-07-17/file-manage/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://catonblack.cn/2017-07-17/file-manage/　　作者: 黑山老喵" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target="_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
 
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2017-07-17/folder-manage/">
+                    工程存档文件夹命名
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2017-07-16/use-git/">
+                    Git管理工程的方法
+                </a>
+            </div>
+        
+    </nav>
 
   
 </article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#背景："><span class="toc-number">1.</span> <span class="toc-text">背景：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#蛋疼点1："><span class="toc-number">1.1.</span> <span class="toc-text">蛋疼点1：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#蛋疼点2："><span class="toc-number">1.2.</span> <span class="toc-text">蛋疼点2：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#蛋疼点3："><span class="toc-number">1.3.</span> <span class="toc-text">蛋疼点3：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#蛋疼点4："><span class="toc-number">1.4.</span> <span class="toc-text">蛋疼点4：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#蛋疼点5："><span class="toc-number">1.5.</span> <span class="toc-text">蛋疼点5：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#蛋疼点6："><span class="toc-number">1.6.</span> <span class="toc-text">蛋疼点6：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#接下来就是见证奇迹的时刻"><span class="toc-number">2.</span> <span class="toc-text">接下来就是见证奇迹的时刻</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#特点："><span class="toc-number">2.1.</span> <span class="toc-text">特点：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2019-03-01-更新"><span class="toc-number">3.</span> <span class="toc-text">2019-03-01 更新</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录" title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
 
 
 
@@ -431,7 +467,7 @@
         </div>
         <script>
             window._bd_share_config={
-                "common":{"bdSnsKey":{},"bdText":"文章分类　| 黑山老喵小窝　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+                "common":{"bdSnsKey":{},"bdText":"file-manage　| 黑山老喵小窝　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
         </script>
     
 
@@ -444,6 +480,46 @@
 
 
 
+    
+        <section id="comments" style="margin: 2em; padding: 2em; background: rgba(255, 255, 255, 0.5)">
+    <div id="vcomment" class="comment"></div>
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src="//unpkg.com/valine@1.2.0-beta1/dist/Valine.min.js"></script>
+    <script>
+      new Valine({
+        el: '#vcomment',
+        notify: 'true',
+        verify: 'true',
+        app_id: "0tk0hycE3Yips8Txim7EBtm5-gzGzoHsz",
+        app_key: "nW716Qi1t7lY4m6zXI9MSYJs",
+        placeholder: "Just go go!",
+        avatar: "mp"
+      });
+    </script>
+</section>
+
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2017-07-17/folder-manage/" title="上一篇: 工程存档文件夹命名">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2017-07-16/use-git/" title="下一篇: Git管理工程的方法">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/moore-mealy/">摩尔状态机和米勒状态机特性对比</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/fsm-style/">状态机一段式、二段式和三段式写法的实际效果</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/multisignal-cdc/">跨时钟传递多个时钟信号</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/async-clock-sync/">异步时钟信号同步化及其综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-07-17/folder-manage/">工程存档文件夹命名</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-07-17/file-manage/">file-manage</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-07-16/use-git/">Git管理工程的方法</a></li></ul>
 
 
 

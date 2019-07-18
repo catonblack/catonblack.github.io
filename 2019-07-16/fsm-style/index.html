@@ -1,0 +1,1862 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<meta name="author" content="黑山老喵">
+
+
+
+<meta name="description" content="根据写法不同，状态机分为一段式状态机、两段式状态机和三段式状态机。对于硬件描述语言来说，不同的写法往往会综合出不同的硬件电路。网上大多数资料都仅仅只是介绍了各种状态机的写法，而今天我要来研究研究不同写法综合出来的实际结果的差异。">
+<meta name="keywords" content="综合,有限状态机,多段式状态机">
+<meta property="og:type" content="article">
+<meta property="og:title" content="状态机一段式、二段式和三段式写法的实际效果">
+<meta property="og:url" content="https://catonblack.cn/2019-07-16/fsm-style/index.html">
+<meta property="og:site_name" content="黑山老喵小窝">
+<meta property="og:description" content="根据写法不同，状态机分为一段式状态机、两段式状态机和三段式状态机。对于硬件描述语言来说，不同的写法往往会综合出不同的硬件电路。网上大多数资料都仅仅只是介绍了各种状态机的写法，而今天我要来研究研究不同写法综合出来的实际结果的差异。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_state.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_state.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/state_1state.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_1phase_moore_ise_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_1phase_moore_synplify_xilinx_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_1phase_moore_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_1phase_moore_synplify_xilinx_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_1phase_moore_quartus_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_1phase_moore_synplify_altera_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_1phase_moore_quartus_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_1phase_moore_synplify_altera_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/state_2state.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_2phase_moore_ise_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_2phase_moore_synplify_xilinx_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_2phase_moore_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_2phase_moore_synplify_xilinx_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_2phase_moore_quartus_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_2phase_moore_synplify_altera_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_2phase_moore_quartus_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_2phase_moore_synplify_altera_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/state_3state.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_3phase_moore_ise_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_3phase_moore_synplify_xilinx_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_3phase_moore_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_3phase_moore_synplify_xilinx_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_3phase_moore_quartus_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_3phase_moore_synplify_altera_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_3phase_moore_quartus_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_3phase_moore_synplify_altera_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_state.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_1phase_moore_ise_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_1phase_moore_synplify_xilinx_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_1phase_moore_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_1phase_moore_synplify_xilinx_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_1phase_moore_quartus_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_1phase_moore_synplify_altera_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_1phase_moore_quartus_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_1phase_moore_synplify_altera_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_2phase_moore_ise_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_2phase_moore_synplify_xilinx_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_2phase_moore_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_2phase_moore_synplify_xilinx_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_2phase_moore_quartus_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_2phase_moore_synplify_altera_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_2phase_moore_quartus_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_2phase_moore_synplify_altera_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_3phase_moore_ise_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_3phase_moore_synplify_xilinx_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_3phase_moore_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_3phase_moore_synplify_xilinx_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_3phase_moore_quartus_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_3phase_moore_synplify_altera_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_3phase_moore_quartus_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_3phase_moore_synplify_altera_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_1phase_moore_ise_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_2phase_moore_ise_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_3phase_moore_ise_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_1phase_moore_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_2phase_moore_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_2phase_moore_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_1phase_moore_synplify_xilinx_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_2phase_moore_synplify_xilinx_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_3phase_moore_synplify_xilinx_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_1phase_moore_quartus_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_2phase_moore_quartus_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_3phase_moore_quartus_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_1phase_moore_quartus_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_2phase_moore_quartus_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_3phase_moore_quartus_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_1phase_moore_synplify_altera_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_2phase_moore_synplify_altera_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_3phase_moore_synplify_altera_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_1phase_moore_ise_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_2phase_moore_ise_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_3phase_moore_ise_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_1phase_moore_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_2phase_moore_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_2phase_moore_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_1phase_moore_synplify_xilinx_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_2phase_moore_synplify_xilinx_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_3phase_moore_synplify_xilinx_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_1phase_moore_quartus_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_2phase_moore_quartus_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_3phase_moore_quartus_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_1phase_moore_quartus_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_2phase_moore_quartus_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_3phase_moore_quartus_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_1phase_moore_synplify_altera_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_2phase_moore_synplify_altera_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_3phase_moore_synplify_altera_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/statecomp1.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/statecomp2.png">
+<meta property="og:updated_time" content="2019-07-17T09:10:30.430Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="状态机一段式、二段式和三段式写法的实际效果">
+<meta name="twitter:description" content="根据写法不同，状态机分为一段式状态机、两段式状态机和三段式状态机。对于硬件描述语言来说，不同的写法往往会综合出不同的硬件电路。网上大多数资料都仅仅只是介绍了各种状态机的写法，而今天我要来研究研究不同写法综合出来的实际结果的差异。">
+<meta name="twitter:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_state.png">
+
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="黑山老喵小窝" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/favicon.png">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>状态机一段式、二段式和三段式写法的实际效果 | 黑山老喵小窝</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "//hm.baidu.com/hm.js?9871d0915604e1e9dc64974db7659410";
+            var s = document.getElementsByTagName("script")[0]; 
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+</head></html>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/avatar.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">黑山老喵</a></h1>
+        </hgroup>
+
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="true">
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class="no-result">No results found <i class="fa fa-spinner fa-pulse"></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/categories/">分类</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto:catonblack@live.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" href="http://github.com/catonblack" title="GitHub"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Git/">Git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/GitHub/">GitHub</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/GitServer/">GitServer</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Gitlab/">Gitlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Mealy/">Mealy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Moore/">Moore</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NAS/">NAS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/云盘/">云盘</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/多信号同步/">多信号同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/多段式状态机/">多段式状态机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/工程存档/">工程存档</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/异步时钟/">异步时钟</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/扁平化命名/">扁平化命名</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/文件管理/">文件管理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/有限状态机/">有限状态机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/状态机转换/">状态机转换</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/电平同步/">电平同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/综合/">综合</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/脉冲同步/">脉冲同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/边沿检测同步/">边沿检测同步</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/">MOxFIVE</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://catonblack.cn">Github</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://console.cloud.tencent.com/domain">腾讯云</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://tongji.baidu.com/web/28226238/overview/index?siteId=13598139">百度统计</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://www.livere.com/city-demo/insight">来必力</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://portal.qiniu.com/create">七牛云</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://valine.js.org/quickstart.html">Valine</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.coding.me/yelee/">Yelee</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">来自老和山职业技术学院的非典型理工男。专注于硬件、嵌入式、FPGA设计，涉足领域包括科学仪器、医疗仪器和可穿戴设备，在相关领域有6年一线实战经验。喜欢尝试新鲜事物，对物理、化学、医学、心理学等学科有一定的了解。</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">黑山老喵</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/avatar.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">黑山老喵</a></h1>
+            </hgroup>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/categories/">分类</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto:catonblack@live.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="http://github.com/catonblack" title="GitHub"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我">
+</nav>
+      <div class="body-wrap"><article id="post-fsm-style" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019-07-16/fsm-style/" class="article-date">
+      <time datetime="2019-07-16T11:15:18.000Z" itemprop="datePublished">2019-07-16</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      状态机一段式、二段式和三段式写法的实际效果
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/FPGA血泪史/">FPGA血泪史</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/多段式状态机/">多段式状态机</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/有限状态机/">有限状态机</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/综合/">综合</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_state.png" width="300">
+</div>
+
+<p>根据写法不同，状态机分为一段式状态机、两段式状态机和三段式状态机。对于硬件描述语言来说，不同的写法往往会综合出不同的硬件电路。网上大多数资料都仅仅只是介绍了各种状态机的写法，而今天我要来研究研究不同写法综合出来的实际结果的差异。</p>
+<a id="more"></a>
+
+<h2 id="好的状态机标准"><a href="#好的状态机标准" class="headerlink" title="好的状态机标准"></a>好的状态机标准</h2><p>好的状态机的标准很多，最重要的几个方面如下：</p>
+<ol>
+<li>状态机要安全，是指FSM不会进入死循环，特别是不会进入非预知的状态，而且由于某些扰动进入非设计状态，也能很快的恢复到正常的状态循环中来。这里面有两层含义：其一要求该FSM的综合实现结果无毛刺等异常扰动；其二要求FSM要完备，即使受到异常扰动进入非设计状态，也能很快恢复到正常状态。</li>
+<li>状态机的设计要满足设计的面积和速度的要求。</li>
+<li>状态机的设计要清晰易懂、易维护。</li>
+</ol>
+<p>有限状态机有三种常见的编写方法，一段式，两段式和三段式，他们各自有着不同的优缺点，下面将进行对比。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_state.png" width="600">
+</div>
+
+<h2 id="一段式状态机-不推荐"><a href="#一段式状态机-不推荐" class="headerlink" title="一段式状态机 不推荐"></a>一段式状态机 不推荐</h2><p>当把整个状态机写在一个always模块中，并且这个模块既包含状态转移，又含有组合逻辑输入/输出时，称为一段式状态机。<strong>不推荐</strong>采用这种状态机，因为从代码风格方面来讲，<strong>一般都会要求把组合逻辑和时序逻辑分开</strong>；从代码维护和升级来说，组合逻辑和书序逻辑混合在一起不利于代码维护和修改，也不利于约束。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/state_1state.png" width="600">
+</div>
+
+<p>特点:</p>
+<pre><code>1. 将所有的逻辑写在一个always块中，增加代码复杂度，给后期更改维护带来不便。
+2. 由于其中有状态寄存器，整体使用non-blockin，描述输出组合逻辑时，需要提前一个时钟，需要额外注意。</code></pre><p>Code:</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> top_sys (</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>      clk,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>      rst,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>      sig1,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>      sig2,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>      sig3,</span><br><span class="line"></span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>       q_sig4,</span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span> [<span class="number">1</span>:<span class="number">0</span>] q_sm_state</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line"><span class="comment">//parameter</span></span><br><span class="line"><span class="keyword">parameter</span>  IDLE       = <span class="number">2'b00</span>;</span><br><span class="line"><span class="keyword">parameter</span>  WAIT       = <span class="number">2'b01</span>;</span><br><span class="line"><span class="keyword">parameter</span>  DONE       = <span class="number">2'b10</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//statemachine</span></span><br><span class="line"><span class="keyword">always</span> @(<span class="keyword">posedge</span> clk <span class="keyword">or</span> <span class="keyword">posedge</span> rst) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">if</span>(rst) <span class="keyword">begin</span></span><br><span class="line">        q_sig4     &lt;= <span class="number">0</span>;</span><br><span class="line">        q_sm_state &lt;= IDLE;</span><br><span class="line">    <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">        <span class="keyword">case</span>(q_sm_state)</span><br><span class="line">            IDLE: <span class="keyword">begin</span></span><br><span class="line">                <span class="keyword">if</span>(sig1 || sig2) <span class="keyword">begin</span></span><br><span class="line">                q_sm_state &lt;= WAIT;</span><br><span class="line">                q_sig4 &lt;= <span class="number">1'b0</span>;</span><br><span class="line">                <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">                q_sm_state &lt;= IDLE;</span><br><span class="line">                q_sig4 &lt;= <span class="number">1'b0</span>;</span><br><span class="line">                <span class="keyword">end</span></span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            WAIT: <span class="keyword">begin</span></span><br><span class="line">                <span class="keyword">if</span>(sig2 &amp;&amp; sig3) <span class="keyword">begin</span></span><br><span class="line">                    q_sm_state &lt;= DONE;</span><br><span class="line">                    q_sig4     &lt;= <span class="number">1'b0</span>;</span><br><span class="line">                <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">                    q_sm_state &lt;= WAIT;</span><br><span class="line">                    q_sig4     &lt;= <span class="number">1'b0</span>;</span><br><span class="line">                <span class="keyword">end</span></span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            DONE:<span class="keyword">begin</span></span><br><span class="line">                <span class="keyword">if</span>(sig3) <span class="keyword">begin</span></span><br><span class="line">                    q_sm_state &lt;= IDLE;</span><br><span class="line">                    q_sig4     &lt;= <span class="number">1'b1</span>;</span><br><span class="line">                <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">                    q_sm_state &lt;= DONE;</span><br><span class="line">                    q_sig4     &lt;= <span class="number">1'b0</span>;</span><br><span class="line">                <span class="keyword">end</span></span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="keyword">default</span>: <span class="keyword">begin</span></span><br><span class="line">                q_sm_state &lt;= IDLE;</span><br><span class="line">                q_sig4     &lt;= <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">endcase</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<p>Xilinx</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_1phase_moore_ise_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_1phase_moore_synplify_xilinx_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) ISE Spartan6 RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Spartan6 RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <!----td代表一个单元格----->
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_1phase_moore_ise_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_1phase_moore_synplify_xilinx_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Spartan6 Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<p>Altera</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_1phase_moore_quartus_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_1phase_moore_synplify_altera_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) QuartusII Cyclone IV E RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Cyclone IV E RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <!----td代表一个单元格----->
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_1phase_moore_quartus_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_1phase_moore_synplify_altera_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) QuartusII Cyclone IV E Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Cyclone IV E Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<h2 id="两段式状态机-推荐使用"><a href="#两段式状态机-推荐使用" class="headerlink" title="两段式状态机 推荐使用"></a>两段式状态机 推荐使用</h2><p>所谓的两段式状态机就是采用一个always语句来实现时序逻辑，另外一个always语句来实现组合逻辑，提高了代码的可读性，易于维护。不同于一段式状态机的是，它需要定义两个状态—-现态和次态，然后通过现态和次态的转换来实现时序逻辑。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/state_2state.png" width="600">
+</div>
+
+<p>特点:</p>
+<pre><code>1. 两段式状态机可以较清晰完整的显示出状态机的结构。
+2. 可以轻易的将状态图state diagram转换为verilog code。
+3. 代码清晰，降低编写维护复杂度。</code></pre><p>Code:</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> top_sys (</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>      clk,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>      rst,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>      sig1,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>      sig2,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>      sig3,</span><br><span class="line"></span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>       q_sig4,</span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span> [<span class="number">1</span>:<span class="number">0</span>] current_state</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line"><span class="keyword">reg</span> [<span class="number">1</span>:<span class="number">0</span>] next_state;</span><br><span class="line"></span><br><span class="line"><span class="comment">//参数声明</span></span><br><span class="line"><span class="keyword">parameter</span>  IDLE       = <span class="number">2'b00</span>;</span><br><span class="line"><span class="keyword">parameter</span>  WAIT       = <span class="number">2'b01</span>;</span><br><span class="line"><span class="keyword">parameter</span>  DONE       = <span class="number">2'b10</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//状态跳转程序设计</span></span><br><span class="line"><span class="keyword">always</span> @(<span class="keyword">posedge</span> clk <span class="keyword">or</span> <span class="keyword">posedge</span> rst)</span><br><span class="line">    <span class="keyword">if</span>(rst)</span><br><span class="line">        current_state &lt;= IDLE;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        current_state &lt;= next_state;</span><br><span class="line"></span><br><span class="line"> <span class="comment">//状态逻辑输出</span></span><br><span class="line"><span class="keyword">always</span> @(*) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">case</span>(current_state)</span><br><span class="line">        IDLE: <span class="keyword">begin</span></span><br><span class="line">            <span class="keyword">if</span>(sig1 || sig2) <span class="keyword">begin</span></span><br><span class="line">                next_state = WAIT;</span><br><span class="line">                q_sig4    = <span class="number">1'b0</span>;</span><br><span class="line">            <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">                next_state = IDLE;</span><br><span class="line">                q_sig4     = <span class="number">1'b0</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">        WAIT: <span class="keyword">begin</span></span><br><span class="line">            <span class="keyword">if</span>(sig2 &amp;&amp; sig3) <span class="keyword">begin</span></span><br><span class="line">                next_state = DONE;</span><br><span class="line">                q_sig4     = <span class="number">1'b0</span>;</span><br><span class="line">            <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">                next_state = WAIT;</span><br><span class="line">                q_sig4     = <span class="number">1'b0</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">        DONE:<span class="keyword">begin</span></span><br><span class="line">            <span class="keyword">if</span>(sig3) <span class="keyword">begin</span></span><br><span class="line">                next_state = IDLE;</span><br><span class="line">                q_sig4     = <span class="number">1'b1</span>;</span><br><span class="line">            <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">                next_state = DONE;</span><br><span class="line">                q_sig4     = <span class="number">1'b0</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">default</span>: <span class="keyword">begin</span></span><br><span class="line">            next_state = IDLE;</span><br><span class="line">            q_sig4     = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">endcase</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<p>Xilinx</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_2phase_moore_ise_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_2phase_moore_synplify_xilinx_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) ISE Spartan6 RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Spartan6 RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <!----td代表一个单元格----->
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_2phase_moore_ise_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_2phase_moore_synplify_xilinx_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Spartan6 Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<p>Altera</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_2phase_moore_quartus_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_2phase_moore_synplify_altera_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) QuartusII Cyclone IV E RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Cyclone IV E RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <!----td代表一个单元格----->
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_2phase_moore_quartus_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_2phase_moore_synplify_altera_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) QuartusII Cyclone IV E Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Cyclone IV E Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<h2 id="三段式状态机-推荐使用"><a href="#三段式状态机-推荐使用" class="headerlink" title="三段式状态机 推荐使用"></a>三段式状态机 推荐使用</h2><p>三段式状态机与两段式状态机的区别：两段式直接采用组合逻辑输出，而三段式则通过在组合逻辑后再增加一级寄存器来实现时序逻辑输出。这样做的好处是可以有效地滤去组合逻辑输出的毛刺，同时可以有效地进行时序计算与约束，另外对于总线形式的输出信号来说，容易使总线数据对齐，从而减小总线数据间的偏移，减小接收端数据采样出错的频率。<br>三段式状态机的基本格式是：第一个always语句实现同步状态跳转；第二个always语句实现组合逻辑；第三个always语句实现同步输出。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/state_3state.png" width="600">
+</div>
+
+<p>特点:</p>
+<pre><code>1. 三段式状态机可以清晰完整的显示出状态机的结构。
+2. 可以轻易的将状态图state diagram转换为verilog code。
+3. 代码清晰，降低编写维护复杂度。
+4. 在简单状态机（状态少，转移条件少这类）的应用上，三段式代码量和一二段的比较起来长些。</code></pre><p>Code:</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> top_sys (</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>      clk,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>      rst,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>      sig1,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>      sig2,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>      sig3,</span><br><span class="line"></span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>       q_sig4,</span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span> [<span class="number">1</span>:<span class="number">0</span>] current_state</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line"><span class="keyword">reg</span> [<span class="number">1</span>:<span class="number">0</span>] next_state;</span><br><span class="line"></span><br><span class="line"><span class="comment">//参数声明</span></span><br><span class="line"><span class="keyword">parameter</span>  IDLE       = <span class="number">2'b00</span>;</span><br><span class="line"><span class="keyword">parameter</span>  WAIT       = <span class="number">2'b01</span>;</span><br><span class="line"><span class="keyword">parameter</span>  DONE       = <span class="number">2'b10</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//状态跳转程序设计</span></span><br><span class="line"><span class="keyword">always</span> @(<span class="keyword">posedge</span> clk <span class="keyword">or</span> <span class="keyword">posedge</span> rst)</span><br><span class="line">    <span class="keyword">if</span>(rst)</span><br><span class="line">        current_state &lt;= IDLE;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        current_state &lt;= next_state;</span><br><span class="line"></span><br><span class="line"><span class="comment">//状态跳转输出</span></span><br><span class="line"><span class="keyword">always</span> @(*) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">case</span>(current_state)</span><br><span class="line">        IDLE: <span class="keyword">begin</span></span><br><span class="line">        <span class="keyword">if</span>(sig1 || sig2) <span class="keyword">begin</span></span><br><span class="line">                next_state = WAIT;</span><br><span class="line">            <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">                next_state = IDLE;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">        WAIT: <span class="keyword">begin</span></span><br><span class="line">        <span class="keyword">if</span>(sig2 &amp;&amp; sig3) <span class="keyword">begin</span></span><br><span class="line">                next_state = DONE;</span><br><span class="line">            <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">                next_state = WAIT;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">        DONE:<span class="keyword">begin</span></span><br><span class="line">            <span class="keyword">if</span>(sig3) <span class="keyword">begin</span></span><br><span class="line">                next_state = IDLE;</span><br><span class="line">            <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">                next_state = DONE;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">default</span>: <span class="keyword">begin</span></span><br><span class="line">            next_state = IDLE;</span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">endcase</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//逻辑输出</span></span><br><span class="line"><span class="keyword">always</span> @(<span class="keyword">posedge</span> clk <span class="keyword">or</span> <span class="keyword">posedge</span> rst)</span><br><span class="line">    <span class="keyword">if</span>(rst)</span><br><span class="line">        q_sig4 &lt;= <span class="number">1'b0</span>;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">        <span class="keyword">case</span>(next_state)</span><br><span class="line">            IDLE,</span><br><span class="line">            WAIT: q_sig4 &lt;= <span class="number">1'b0</span>;</span><br><span class="line">            DONE: q_sig4 &lt;= <span class="number">1'b1</span>;</span><br><span class="line">            <span class="keyword">default</span>: q_sig4 &lt;= <span class="number">1'b0</span>;</span><br><span class="line">        <span class="keyword">endcase</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<p>Xilinx</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_3phase_moore_ise_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_3phase_moore_synplify_xilinx_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) ISE Spartan6 RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Spartan6 RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <!----td代表一个单元格----->
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_3phase_moore_ise_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_3phase_moore_synplify_xilinx_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Spartan6 Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<p>Altera</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_3phase_moore_quartus_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_3phase_moore_synplify_altera_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) QuartusII Cyclone IV E RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Cyclone IV E RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <!----td代表一个单元格----->
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_3phase_moore_quartus_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_3phase_moore_synplify_altera_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) QuartusII Cyclone IV E Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Cyclone IV E Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_state.png" width="600">
+</div>
+
+<p>刚才的例子是一个三状态Moore状态机，状态少，也比较简单，区别效果不是很明显，接下来看一个四状态的Moore状态机，状态机之间的跳转也更加复杂。</p>
+<h2 id="一段式状态机"><a href="#一段式状态机" class="headerlink" title="一段式状态机"></a>一段式状态机</h2><p>Code:</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> top_sys (</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>      clk,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>      rst,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>      i1,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>      i2,</span><br><span class="line"></span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>       out</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line"><span class="keyword">reg</span> [<span class="number">2</span>:<span class="number">0</span>] NS; <span class="comment">//NextState</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">parameter</span>  IDLE = <span class="number">3'b000</span>;</span><br><span class="line"><span class="keyword">parameter</span>  S1 = <span class="number">3'b001</span>;</span><br><span class="line"><span class="keyword">parameter</span>  S2 = <span class="number">3'b010</span>;</span><br><span class="line"><span class="keyword">parameter</span>  ERROR = <span class="number">3'b100</span>;</span><br><span class="line"><span class="comment">//1 always block to describe state transition, state output, input condition</span></span><br><span class="line"><span class="keyword">always</span> @ (<span class="keyword">posedge</span> clk <span class="keyword">or</span> <span class="keyword">posedge</span> rst) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">if</span> (rst) <span class="keyword">begin</span></span><br><span class="line">        NS &lt;= IDLE;</span><br><span class="line">        out &lt;= <span class="number">3'b000</span>;</span><br><span class="line">    <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">        <span class="keyword">case</span> (NS)</span><br><span class="line">            IDLE: <span class="keyword">begin</span></span><br><span class="line">                <span class="keyword">if</span> (~i1)         <span class="keyword">begin</span> out&lt;=<span class="number">3'b000</span>;NS &lt;= IDLE; <span class="keyword">end</span></span><br><span class="line">                <span class="keyword">if</span> (i1 &amp;&amp; i2)    <span class="keyword">begin</span> out&lt;=<span class="number">3'b100</span>;NS &lt;= S1;   <span class="keyword">end</span></span><br><span class="line">                <span class="keyword">if</span> (i1 &amp;&amp; ~i2)   <span class="keyword">begin</span> out&lt;=<span class="number">3'b111</span>;NS &lt;= ERROR;<span class="keyword">end</span></span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            S1: <span class="keyword">begin</span></span><br><span class="line">                <span class="keyword">if</span> (~i2)         <span class="keyword">begin</span> out&lt;=<span class="number">3'b100</span>;NS &lt;= S1;   <span class="keyword">end</span></span><br><span class="line">                <span class="keyword">if</span> (i2 &amp;&amp; i1)    <span class="keyword">begin</span> out&lt;=<span class="number">3'b010</span>;NS &lt;= S2;   <span class="keyword">end</span></span><br><span class="line">                <span class="keyword">if</span> (i2 &amp;&amp; (~i1)) <span class="keyword">begin</span> out&lt;=<span class="number">3'b111</span>;NS &lt;= ERROR;<span class="keyword">end</span></span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            S2: <span class="keyword">begin</span></span><br><span class="line">                <span class="keyword">if</span> (i2)          <span class="keyword">begin</span> out&lt;=<span class="number">3'b010</span>;NS &lt;= S2;   <span class="keyword">end</span></span><br><span class="line">                <span class="keyword">if</span> (~i2 &amp;&amp; i1)   <span class="keyword">begin</span> out&lt;=<span class="number">3'b000</span>;NS &lt;= IDLE; <span class="keyword">end</span></span><br><span class="line">                <span class="keyword">if</span> (~i2 &amp;&amp; (~i1))<span class="keyword">begin</span> out&lt;=<span class="number">3'b111</span>;NS &lt;= ERROR;<span class="keyword">end</span></span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            ERROR: <span class="keyword">begin</span></span><br><span class="line">                <span class="keyword">if</span> (i1)          <span class="keyword">begin</span> out&lt;=<span class="number">3'b111</span>;NS &lt;= ERROR;<span class="keyword">end</span></span><br><span class="line">                <span class="keyword">if</span> (~i1)         <span class="keyword">begin</span> out&lt;=<span class="number">3'b000</span>;NS &lt;= IDLE; <span class="keyword">end</span></span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">endcase</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<p>Xilinx</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_1phase_moore_ise_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_1phase_moore_synplify_xilinx_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) ISE Spartan6 RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Spartan6 RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <!----td代表一个单元格----->
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_1phase_moore_ise_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_1phase_moore_synplify_xilinx_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Spartan6 Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<p>Altera</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_1phase_moore_quartus_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_1phase_moore_synplify_altera_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) QuartusII Cyclone IV E RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Cyclone IV E RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <!----td代表一个单元格----->
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_1phase_moore_quartus_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_1phase_moore_synplify_altera_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) QuartusII Cyclone IV E Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Cyclone IV E Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+
+<h2 id="两段式状态机"><a href="#两段式状态机" class="headerlink" title="两段式状态机"></a>两段式状态机</h2><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> top_sys (</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>      clk,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>      rst,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>      i1,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>      i2,</span><br><span class="line"></span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>       out</span><br><span class="line">    );</span><br><span class="line"><span class="keyword">reg</span> [<span class="number">2</span>:<span class="number">0</span>] NS,CS;</span><br><span class="line"><span class="keyword">parameter</span>  IDLE = <span class="number">3'b000</span>;</span><br><span class="line"><span class="keyword">parameter</span>  S1 = <span class="number">3'b001</span>;</span><br><span class="line"><span class="keyword">parameter</span>  S2 = <span class="number">3'b010</span>;</span><br><span class="line"><span class="keyword">parameter</span>  ERROR = <span class="number">3'b100</span>;</span><br><span class="line"><span class="comment">//sequential state transition</span></span><br><span class="line"><span class="keyword">always</span> @ (<span class="keyword">posedge</span> clk <span class="keyword">or</span> <span class="keyword">posedge</span> rst)</span><br><span class="line">    <span class="keyword">if</span> (rst)</span><br><span class="line">        CS &lt;= IDLE;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        CS &lt;=NS;</span><br><span class="line"><span class="comment">//combinational condition judgment</span></span><br><span class="line"><span class="keyword">always</span> @ (*) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">case</span> (CS)</span><br><span class="line">        IDLE: <span class="keyword">begin</span></span><br><span class="line">            <span class="keyword">if</span> (~i1)         <span class="keyword">begin</span> out&lt;=<span class="number">3'b000</span>;NS &lt;= IDLE; <span class="keyword">end</span></span><br><span class="line">            <span class="keyword">if</span> (i1 &amp;&amp; i2)    <span class="keyword">begin</span> out&lt;=<span class="number">3'b100</span>;NS &lt;= S1;   <span class="keyword">end</span></span><br><span class="line">            <span class="keyword">if</span> (i1 &amp;&amp; ~i2)   <span class="keyword">begin</span> out&lt;=<span class="number">3'b111</span>;NS &lt;= ERROR;<span class="keyword">end</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">        S1: <span class="keyword">begin</span></span><br><span class="line">            <span class="keyword">if</span> (~i2)         <span class="keyword">begin</span> out&lt;=<span class="number">3'b100</span>;NS &lt;= S1;   <span class="keyword">end</span></span><br><span class="line">            <span class="keyword">if</span> (i2 &amp;&amp; i1)    <span class="keyword">begin</span> out&lt;=<span class="number">3'b010</span>;NS &lt;= S2;   <span class="keyword">end</span></span><br><span class="line">            <span class="keyword">if</span> (i2 &amp;&amp; (~i1)) <span class="keyword">begin</span> out&lt;=<span class="number">3'b111</span>;NS &lt;= ERROR;<span class="keyword">end</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">        S2: <span class="keyword">begin</span></span><br><span class="line">            <span class="keyword">if</span> (i2)          <span class="keyword">begin</span> out&lt;=<span class="number">3'b010</span>;NS &lt;= S2;   <span class="keyword">end</span></span><br><span class="line">            <span class="keyword">if</span> (~i2 &amp;&amp; i1)   <span class="keyword">begin</span> out&lt;=<span class="number">3'b000</span>;NS &lt;= IDLE; <span class="keyword">end</span></span><br><span class="line">            <span class="keyword">if</span> (~i2 &amp;&amp; (~i1))<span class="keyword">begin</span> out&lt;=<span class="number">3'b111</span>;NS &lt;= ERROR;<span class="keyword">end</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">        ERROR: <span class="keyword">begin</span></span><br><span class="line">            <span class="keyword">if</span> (i1)          <span class="keyword">begin</span> out&lt;=<span class="number">3'b111</span>;NS &lt;= ERROR;<span class="keyword">end</span></span><br><span class="line">            <span class="keyword">if</span> (~i1)         <span class="keyword">begin</span> out&lt;=<span class="number">3'b000</span>;NS &lt;= IDLE; <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">default</span>: <span class="keyword">begin</span></span><br><span class="line">            NS &lt;= CS;</span><br><span class="line">            out &lt;= <span class="number">3'b111</span>;</span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">endcase</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<p>Xilinx</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_2phase_moore_ise_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_2phase_moore_synplify_xilinx_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) ISE Spartan6 RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Spartan6 RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <!----td代表一个单元格----->
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_2phase_moore_ise_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_2phase_moore_synplify_xilinx_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Spartan6 Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<p>Altera</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_2phase_moore_quartus_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_2phase_moore_synplify_altera_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) QuartusII Cyclone IV E RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Cyclone IV E RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <!----td代表一个单元格----->
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_2phase_moore_quartus_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_2phase_moore_synplify_altera_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) QuartusII Cyclone IV E Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Cyclone IV E Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<h2 id="三段式状态机"><a href="#三段式状态机" class="headerlink" title="三段式状态机"></a>三段式状态机</h2><p>Code:</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> top_sys (</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>      clk,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>      rst,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>      i1,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>      i2,</span><br><span class="line"></span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>  [<span class="number">2</span>:<span class="number">0</span>] out</span><br><span class="line">    );</span><br><span class="line"><span class="keyword">reg</span> [<span class="number">2</span>:<span class="number">0</span>] NS,CS;</span><br><span class="line"><span class="comment">//parameter [2:0] //one hot with zero idle</span></span><br><span class="line"><span class="keyword">parameter</span> IDLE = <span class="number">3'b000</span>;</span><br><span class="line"><span class="keyword">parameter</span> S1 = <span class="number">3'b001</span>;</span><br><span class="line"><span class="keyword">parameter</span> S2 = <span class="number">3'b010</span>;</span><br><span class="line"><span class="keyword">parameter</span> ERROR = <span class="number">3'b100</span>;</span><br><span class="line"><span class="comment">//1st always block, sequential state transition</span></span><br><span class="line"><span class="keyword">always</span> @ (<span class="keyword">posedge</span> clk <span class="keyword">or</span> <span class="keyword">posedge</span> rst)</span><br><span class="line">    <span class="keyword">if</span> (rst)</span><br><span class="line">        CS &lt;= IDLE;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        CS &lt;=NS;</span><br><span class="line"><span class="comment">//2nd always block, combinational condition judgment</span></span><br><span class="line"><span class="keyword">always</span> @ (*) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">case</span> (CS)</span><br><span class="line">        IDLE: <span class="keyword">begin</span></span><br><span class="line">            <span class="keyword">if</span> (~i1) NS &lt;= IDLE;</span><br><span class="line">            <span class="keyword">if</span> (i1 &amp;&amp; i2) NS &lt;= S1;</span><br><span class="line">            <span class="keyword">if</span> (i1 &amp;&amp; ~i2) NS &lt;= ERROR;</span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">        S1: <span class="keyword">begin</span></span><br><span class="line">            <span class="keyword">if</span> (~i2) NS &lt;= S1;</span><br><span class="line">            <span class="keyword">if</span> (i2 &amp;&amp; i1) NS &lt;= S2;</span><br><span class="line">            <span class="keyword">if</span> (i2 &amp;&amp; (~i1)) NS &lt;= ERROR;</span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">        S2: <span class="keyword">begin</span></span><br><span class="line">            <span class="keyword">if</span> (i2) NS &lt;= S2;</span><br><span class="line">            <span class="keyword">if</span> (~i2 &amp;&amp; i1) NS &lt;= IDLE;</span><br><span class="line">            <span class="keyword">if</span> (~i2 &amp;&amp; (~i1)) NS &lt;= ERROR;</span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">        ERROR: <span class="keyword">begin</span></span><br><span class="line">            <span class="keyword">if</span> (i1) NS &lt;= ERROR;</span><br><span class="line">            <span class="keyword">if</span> (~i1) NS &lt;= IDLE;</span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            NS &lt;= CS;</span><br><span class="line">    <span class="keyword">endcase</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="comment">//3rd always block, the sequential FSM output</span></span><br><span class="line"><span class="keyword">always</span> @ (<span class="keyword">posedge</span> clk <span class="keyword">or</span> <span class="keyword">posedge</span> rst) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">if</span> (rst) <span class="keyword">begin</span></span><br><span class="line">        out &lt;= <span class="number">3'b000</span>;</span><br><span class="line">    <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">        <span class="keyword">case</span> (NS)</span><br><span class="line">            IDLE: <span class="keyword">begin</span></span><br><span class="line">                <span class="keyword">if</span> (~i1)         out&lt;=<span class="number">3'b000</span>;</span><br><span class="line">                <span class="keyword">if</span> (i1 &amp;&amp; i2)    out&lt;=<span class="number">3'b100</span>;</span><br><span class="line">                <span class="keyword">if</span> (i1 &amp;&amp; ~i2)   out&lt;=<span class="number">3'b111</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            S1: <span class="keyword">begin</span></span><br><span class="line">                <span class="keyword">if</span> (~i2)         out&lt;=<span class="number">3'b100</span>;</span><br><span class="line">                <span class="keyword">if</span> (i2 &amp;&amp; i1)    out&lt;=<span class="number">3'b010</span>;</span><br><span class="line">                <span class="keyword">if</span> (i2 &amp;&amp; (~i1)) out&lt;=<span class="number">3'b111</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            S2: <span class="keyword">begin</span></span><br><span class="line">                <span class="keyword">if</span> (i2)          out&lt;=<span class="number">3'b010</span>;</span><br><span class="line">                <span class="keyword">if</span> (~i2 &amp;&amp; i1)   out&lt;=<span class="number">3'b000</span>;</span><br><span class="line">                <span class="keyword">if</span> (~i2 &amp;&amp; (~i1))out&lt;=<span class="number">3'b111</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            ERROR: <span class="keyword">begin</span></span><br><span class="line">                <span class="keyword">if</span> (i1)          out&lt;=<span class="number">3'b111</span>;</span><br><span class="line">                <span class="keyword">if</span> (~i1)         out&lt;=<span class="number">3'b000</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="keyword">default</span>:</span><br><span class="line">                out&lt;=<span class="number">3'b111</span>;</span><br><span class="line">        <span class="keyword">endcase</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<p>Xilinx</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_3phase_moore_ise_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_3phase_moore_synplify_xilinx_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) ISE Spartan6 RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Spartan6 RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <!----td代表一个单元格----->
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_3phase_moore_ise_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_3phase_moore_synplify_xilinx_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Spartan6 Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<p>Altera</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_3phase_moore_quartus_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_3phase_moore_synplify_altera_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) QuartusII Cyclone IV E RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Cyclone IV E RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <!----td代表一个单元格----->
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_3phase_moore_quartus_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_3phase_moore_synplify_altera_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) QuartusII Cyclone IV E Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Cyclone IV E Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<h2 id="结果分析"><a href="#结果分析" class="headerlink" title="结果分析"></a>结果分析</h2><p>1.三状态Moore状态机综合结果排序：三段式&gt;两段式&gt;一段式。可以看出，相对于一段式状态机，两段式状态机和三段式状态机所需要的硬件资源更少。</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            一段式
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            两段式
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            三段式
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_1phase_moore_ise_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_2phase_moore_ise_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_3phase_moore_ise_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) ISE Spartan6 RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) ISE Spartan6 RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            c) ISE Spartan6 RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_1phase_moore_ise_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_2phase_moore_ise_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_2phase_moore_ise_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            d) ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            e) ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            f) ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_1phase_moore_synplify_xilinx_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_2phase_moore_synplify_xilinx_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_3phase_moore_synplify_xilinx_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            g) Synplify Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            h) Synplify Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            i) Synplify Spartan6 Technological 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_1phase_moore_quartus_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_2phase_moore_quartus_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_3phase_moore_quartus_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            j) Quartus Cyclone IV E RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            k) Quartus Cyclone IV E RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            l) Quartus Cyclone IV E RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_1phase_moore_quartus_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_2phase_moore_quartus_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_3phase_moore_quartus_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            m) Quartus Cyclone IV E Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            n) Quartus Cyclone IV E Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            o) Quartus Cyclone IV E Technological 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_1phase_moore_synplify_altera_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_2phase_moore_synplify_altera_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm3_3phase_moore_synplify_altera_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            p) Synplify Cyclone IV E Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            q) Synplify Cyclone IV E Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            r) Synplify Cyclone IV E Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<p>2.四状态Moore机的综合结果，两段式的资源消耗最少，三段式和一段式的综合结果就不一定了，有的情况是三段式更加节省资源，有的时候居然是一段式更加节省资源。</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            一段式
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            两段式
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            三段式
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_1phase_moore_ise_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_2phase_moore_ise_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_3phase_moore_ise_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) ISE Spartan6 RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) ISE Spartan6 RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            c) ISE Spartan6 RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_1phase_moore_ise_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_2phase_moore_ise_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_2phase_moore_ise_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            d) ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            e) ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            f) ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_1phase_moore_synplify_xilinx_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_2phase_moore_synplify_xilinx_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_3phase_moore_synplify_xilinx_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            g) Synplify Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            h) Synplify Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            i) Synplify Spartan6 Technological 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_1phase_moore_quartus_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_2phase_moore_quartus_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_3phase_moore_quartus_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            j) Quartus Cyclone IV E RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            k) Quartus Cyclone IV E RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            l) Quartus Cyclone IV E RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_1phase_moore_quartus_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_2phase_moore_quartus_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_3phase_moore_quartus_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            m) Quartus Cyclone IV E Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            n) Quartus Cyclone IV E Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            o) Quartus Cyclone IV E Technological 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_1phase_moore_synplify_altera_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_2phase_moore_synplify_altera_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/sm4_3phase_moore_synplify_altera_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            p) Synplify Cyclone IV E Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            q) Synplify Cyclone IV E Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            r) Synplify Cyclone IV E Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<p>3.时序对比，预估时钟频率一段式和两段式的最高，三段式的频率反而最低。</p>
+<table>
+<tr><th></th><th>一段式/MHz</th><th>两段式/MHz</th><th>三段式/MHz</th></tr>
+<tr><td>3SM_Moore_Xilinx</td><td>678.6</td><td>678.6</td><td>675</td></tr>
+<tr><td>3SM_Moore_Altera</td><td>907.9</td><td>907.9</td><td>907.9</td></tr>
+<tr><td>4SM_Moore_Xilinx</td><td>682.2</td><td>682.2</td><td>670.3</td></tr>
+<tr><td>4SM_Moore_Altera</td><td>919.6</td><td>919.6</td><td>907.3</td></tr>
+</table>
+
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/statecomp1.jpg" width="600">
+</div>
+
+<p>4.网上找到的三种描述状态机方法的比较</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fsm-style/statecomp2.png" width="600">
+</div>
+
+<p>5.小插曲<br>在进行综合的过程中遇到了一个有意思的问题：Synplify没有识别状态机。<br>综合结果只在一段式状态机中提取出了状态机，在两段式和三段式写法中居然没有提取出来。这不科学！要知道Synplify对FSM有专门的处理的，没道理提取不出来。后来发现原因是这样的：两段式和三段式状态机中状态转移部分是组合逻辑电路，一定要补全默认分支，否则就会被综合成锁存器，同时也就不会自动提取状态机信息了，这点要特别注意。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><pre><code>这篇笔记参考网上众多资料实验并整理而成，如果涉及侵权烦请请告知，我将第一时间处理。</code></pre><ol>
+<li><a href="http://xilinx.eetrend.com/d6-xilinx/article/2018-06/13025.html" target="_blank" rel="noopener">基于FPGA的有限状态机浅析</a></li>
+<li><a href="http://blog.sina.com.cn/s/blog_6f0eeb330101djzu.html" target="_blank" rel="noopener">Verilog有限状态机三段式描述方法</a></li>
+<li><a href="https://blog.csdn.net/u014395662/article/details/79355074" target="_blank" rel="noopener">Verilog学习笔记（四） 有限状态机</a></li>
+<li><a href="https://blog.csdn.net/wordwarwordwar/article/details/78509480" target="_blank" rel="noopener">FPGA三段式状态机的思维陷阱</a></li>
+<li><a href="http://blog.csdn.net/dengshuai_super/article/details/52571372" target="_blank" rel="noopener">Verilog语法_3(同步有限状态机)</a></li>
+<li><a href="https://www.jianshu.com/p/5eee434ab24d" target="_blank" rel="noopener">三段式状态机设计</a></li>
+<li><a href="http://www.cnblogs.com/airbird/p/FPGA_FSM_study_3.html" target="_blank" rel="noopener">有限状态机FSM学习笔记</a></li>
+<li><a href="http://www.51hei.com/bbs/dpj-46935-1.html" target="_blank" rel="noopener">Verilog三段式状态机描述及模版</a></li>
+<li><a href="https://www.jianshu.com/p/4ad886a552ad" target="_blank" rel="noopener">FPGA状态机</a></li>
+<li><a href="https://wenku.baidu.com/view/0b3e1266caaedd3383c4d3b8.html" target="_blank" rel="noopener">如何写好状态机</a></li>
+</ol>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2019-07-16/fsm-style/">状态机一段式、二段式和三段式写法的实际效果</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">黑山老喵</a></p>
+        <p><span>发布时间:</span>2019-07-16, 19:15:18</p>
+        <p><span>最后更新:</span>2019-07-17, 17:10:30</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2019-07-16/fsm-style/" title="状态机一段式、二段式和三段式写法的实际效果">https://catonblack.cn/2019-07-16/fsm-style/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://catonblack.cn/2019-07-16/fsm-style/　　作者: 黑山老喵" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target="_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2019-07-16/moore-mealy/">
+                    摩尔状态机和米勒状态机特性对比
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2019-07-16/multisignal-cdc/">
+                    跨时钟传递多个时钟信号
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#好的状态机标准"><span class="toc-number">1.</span> <span class="toc-text">好的状态机标准</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#一段式状态机-不推荐"><span class="toc-number">2.</span> <span class="toc-text">一段式状态机 不推荐</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#两段式状态机-推荐使用"><span class="toc-number">3.</span> <span class="toc-text">两段式状态机 推荐使用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#三段式状态机-推荐使用"><span class="toc-number">4.</span> <span class="toc-text">三段式状态机 推荐使用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#一段式状态机"><span class="toc-number">5.</span> <span class="toc-text">一段式状态机</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#两段式状态机"><span class="toc-number">6.</span> <span class="toc-text">两段式状态机</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#三段式状态机"><span class="toc-number">7.</span> <span class="toc-text">三段式状态机</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#结果分析"><span class="toc-number">8.</span> <span class="toc-text">结果分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">9.</span> <span class="toc-text">参考资料</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录" title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"状态机一段式、二段式和三段式写法的实际效果　| 黑山老喵小窝　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+        <section id="comments" style="margin: 2em; padding: 2em; background: rgba(255, 255, 255, 0.5)">
+    <div id="vcomment" class="comment"></div>
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src="//unpkg.com/valine@1.2.0-beta1/dist/Valine.min.js"></script>
+    <script>
+      new Valine({
+        el: '#vcomment',
+        notify: 'true',
+        verify: 'true',
+        app_id: "0tk0hycE3Yips8Txim7EBtm5-gzGzoHsz",
+        app_key: "nW716Qi1t7lY4m6zXI9MSYJs",
+        placeholder: "Just go go!",
+        avatar: "mp"
+      });
+    </script>
+</section>
+
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2019-07-16/moore-mealy/" title="上一篇: 摩尔状态机和米勒状态机特性对比">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2019-07-16/multisignal-cdc/" title="下一篇: 跨时钟传递多个时钟信号">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/moore-mealy/">摩尔状态机和米勒状态机特性对比</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/fsm-style/">状态机一段式、二段式和三段式写法的实际效果</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/multisignal-cdc/">跨时钟传递多个时钟信号</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/async-clock-sync/">异步时钟信号同步化及其综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-07-17/folder-manage/">工程存档文件夹命名</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-07-17/file-manage/">file-manage</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-07-16/use-git/">Git管理工程的方法</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2019 黑山老喵
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style="display:none">
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style="display:none">
+                        <span id="page-visit" title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 5;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>

@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<meta name="author" content="黑山老喵">
+
+
+
+<meta name="description" content="此文是对Clifford E. Cummings 大神的 paper：《Synthesis and Scripting Techniques for Designing Multi-Asynchronous Clock Designs》的部分节选与翻译。本人翻译水平有限，还望大家轻拍。以后如果在实际场景中遇到相同或类似的问题，到时候再会补充的。">
+<meta name="keywords" content="异步时钟,多信号同步">
+<meta property="og:type" content="article">
+<meta property="og:title" content="跨时钟传递多个时钟信号">
+<meta property="og:url" content="https://catonblack.cn/2019-07-16/multisignal-cdc/index.html">
+<meta property="og:site_name" content="黑山老喵小窝">
+<meta property="og:description" content="此文是对Clifford E. Cummings 大神的 paper：《Synthesis and Scripting Techniques for Designing Multi-Asynchronous Clock Designs》的部分节选与翻译。本人翻译水平有限，还望大家轻拍。以后如果在实际场景中遇到相同或类似的问题，到时候再会补充的。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_multisignal-cdc/Q1.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_multisignal-cdc/S1.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_multisignal-cdc/Q2.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_multisignal-cdc/S2.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_multisignal-cdc/Q3.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_multisignal-cdc/S31.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_multisignal-cdc/S32.png">
+<meta property="og:updated_time" content="2019-07-16T14:02:27.977Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="跨时钟传递多个时钟信号">
+<meta name="twitter:description" content="此文是对Clifford E. Cummings 大神的 paper：《Synthesis and Scripting Techniques for Designing Multi-Asynchronous Clock Designs》的部分节选与翻译。本人翻译水平有限，还望大家轻拍。以后如果在实际场景中遇到相同或类似的问题，到时候再会补充的。">
+<meta name="twitter:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_multisignal-cdc/Q1.png">
+
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="黑山老喵小窝" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/favicon.png">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>跨时钟传递多个时钟信号 | 黑山老喵小窝</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "//hm.baidu.com/hm.js?9871d0915604e1e9dc64974db7659410";
+            var s = document.getElementsByTagName("script")[0]; 
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+</head></html>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/avatar.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">黑山老喵</a></h1>
+        </hgroup>
+
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="true">
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class="no-result">No results found <i class="fa fa-spinner fa-pulse"></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/categories/">分类</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto:catonblack@live.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" href="http://github.com/catonblack" title="GitHub"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Git/">Git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/GitHub/">GitHub</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/GitServer/">GitServer</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Gitlab/">Gitlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Mealy/">Mealy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Moore/">Moore</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NAS/">NAS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/云盘/">云盘</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/多信号同步/">多信号同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/多段式状态机/">多段式状态机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/工程存档/">工程存档</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/异步时钟/">异步时钟</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/扁平化命名/">扁平化命名</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/文件管理/">文件管理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/有限状态机/">有限状态机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/状态机转换/">状态机转换</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/电平同步/">电平同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/综合/">综合</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/脉冲同步/">脉冲同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/边沿检测同步/">边沿检测同步</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/">MOxFIVE</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://catonblack.cn">Github</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://console.cloud.tencent.com/domain">腾讯云</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://tongji.baidu.com/web/28226238/overview/index?siteId=13598139">百度统计</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://www.livere.com/city-demo/insight">来必力</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://portal.qiniu.com/create">七牛云</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://valine.js.org/quickstart.html">Valine</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.coding.me/yelee/">Yelee</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">来自老和山职业技术学院的非典型理工男。专注于硬件、嵌入式、FPGA设计，涉足领域包括科学仪器、医疗仪器和可穿戴设备，在相关领域有6年一线实战经验。喜欢尝试新鲜事物，对物理、化学、医学、心理学等学科有一定的了解。</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">黑山老喵</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/avatar.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">黑山老喵</a></h1>
+            </hgroup>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/categories/">分类</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto:catonblack@live.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="http://github.com/catonblack" title="GitHub"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我">
+</nav>
+      <div class="body-wrap"><article id="post-multisignal-cdc" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019-07-16/multisignal-cdc/" class="article-date">
+      <time datetime="2019-07-16T06:54:26.000Z" itemprop="datePublished">2019-07-16</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      跨时钟传递多个时钟信号
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/FPGA血泪史/">FPGA血泪史</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/多信号同步/">多信号同步</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/异步时钟/">异步时钟</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>此文是对Clifford E. Cummings 大神的 paper：《Synthesis and Scripting Techniques for Designing Multi-Asynchronous Clock Designs》的部分节选与翻译。本人翻译水平有限，还望大家轻拍。以后如果在实际场景中遇到相同或类似的问题，到时候再会补充的。</p>
+<a id="more"></a>
+
+<h4 id="原文"><a href="#原文" class="headerlink" title="原文"></a>原文</h4><p>A frequent mistake made by engineers when working on multi-clock designs is passing multiple control signals from one clock domain to another and overlooking the importance of the sequencing of the control signals. Simply using synchronizers on all control signals is not always good enough as will be shown in the following examples. If the order or alignment of the control signals is significant, care must be taken to correctly pass the signals into the new clock domain. All of the examples shown in this section are overly simplistic but they closely mimic situations that often arise in real designs.</p>
+<h4 id="译文"><a href="#译文" class="headerlink" title="译文"></a>译文</h4><p>对于工程师而言，在处理跨时钟域问题的过程中一个常犯的错误就是在将多个信号从一个时钟域传送到另一个时钟域的过程中忽略控制信号之间的时序。对所有信号仅使用同步器进行同步对于下面要介绍的应用场景是不够的。如果信号顺序和信号间的对齐很重要，那么在处理的过程中就需要格外小心了。接下来举的例子都是简化过后的案例，但是跟实际情况中经常遇到的问题非常类似。</p>
+<h2 id="问题1：-传递两个同时需要的信号-b-load和b-en"><a href="#问题1：-传递两个同时需要的信号-b-load和b-en" class="headerlink" title="问题1： 传递两个同时需要的信号(b_load和b_en)"></a>问题1： 传递两个同时需要的信号(b_load和b_en)</h2><h4 id="原文-1"><a href="#原文-1" class="headerlink" title="原文"></a>原文</h4><p>In the simple example shown in Figure 8, a register in the new clock domain requires both a load signal and an enable signal in order to load a data value into the register. If both the load and enable signals are being sent from one clock domain, there is a chance that a small skew between the control signals could cause the two signals to be synchronized into different clock cycles within the new clock domain. In this example, this would cause the data to the register to not be loaded.</p>
+<h4 id="译文-1"><a href="#译文-1" class="headerlink" title="译文"></a>译文</h4><p>正如下图案例中介绍的那样，在新时钟域中的这个寄存器需要一个负载信号和一个使能信号以保证寄存器的输入值有效。即使负载信号和使能信号都出自于同一个时钟域，两个信号间依然有概率会产生一个小的抖动，这有可能会使这两个信号在新的时钟域被同步入不同的时钟循环。在这个案例中，这就可能导致数据无法被寄存器正确识别。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_multisignal-cdc/Q1.png" width="600">
+</div>
+
+<div align="center">
+图1 问题：传递两个同时需要的信号
+</div>
+
+<h3 id="解决方法：只传递一个信号-b-lden"><a href="#解决方法：只传递一个信号-b-lden" class="headerlink" title="解决方法：只传递一个信号(b_lden)"></a>解决方法：只传递一个信号(b_lden)</h3><h4 id="原文-2"><a href="#原文-2" class="headerlink" title="原文"></a>原文</h4><p>The solution to the problem in this simple example is easy. As shown in Figure 9, drive both the load and enable register input signals in the new clock domain from just one control signal. This will remove the potential for the control signals arriving shifted in time.</p>
+<h4 id="译文-2"><a href="#译文-2" class="headerlink" title="译文"></a>译文</h4><p>解决这个问题的方法其实哼简单。正如下图介绍的那样，将寄存器的两个驱动信号合并成一个控制信号，然后传送入新的时钟域。这种方法将移除控制信号到达新时钟域后产生错位的可能。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_multisignal-cdc/S1.png" width="600">
+</div>
+
+<div align="center">
+图2 解决方法：只传递一个信号
+</div>
+
+<h2 id="问题2：传递两个前后顺序控制的信号-ben1和ben2"><a href="#问题2：传递两个前后顺序控制的信号-ben1和ben2" class="headerlink" title="问题2：传递两个前后顺序控制的信号(ben1和ben2)"></a>问题2：传递两个前后顺序控制的信号(ben1和ben2)</h2><h4 id="原文-3"><a href="#原文-3" class="headerlink" title="原文"></a>原文</h4><p>The diagram in Figure 10, shows two enable signals, aen1 and aen2, that are used to enable the sequential passing of a data signal through a short pipeline design. The problem is that in the first clock domain, the aen1 control signal might terminate slightly before the aen2 control signal is asserted, and the second clock domain might try to sample the aen1 and aen2 control signals in the middle of this slight time gap, causing a one-cycle gap to form in the enable control-signal chain in the second clock domain. This would cause the a2 output signal to be missed by the second flip-flop.</p>
+<h4 id="译文-3"><a href="#译文-3" class="headerlink" title="译文"></a>译文</h4><p>下图中的两个使能信号aen1和aen2用于在一个流水线结构中顺序地将数据信号进行传送。这里的问题在于：在第一个时钟域，信号aen1可以在信号aen2置位前立刻结束，但是第二个时钟域可能会对aen1与aen2之间的这个极窄的空隙时间进行采样，这就导致在第二个时钟域中的使能控制信号链会产生一个时钟的空缺，这也将导致a2输出信号被第二个触发器错过。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_multisignal-cdc/Q2.png" width="600">
+</div>
+
+<div align="center">
+图3 问题：传递两个前后顺序控制的信号
+</div>
+
+<h3 id="解决方法：只传递一个信号-ben1"><a href="#解决方法：只传递一个信号-ben1" class="headerlink" title="解决方法：只传递一个信号(ben1)"></a>解决方法：只传递一个信号(ben1)</h3><h4 id="原文-4"><a href="#原文-4" class="headerlink" title="原文"></a>原文</h4><p>The solution to the problem, as shown in Figure 11, is to send only one control signal into the new clock domain and generate the second phase-shifted sequential control signal within the new clock domain.</p>
+<h4 id="译文-4"><a href="#译文-4" class="headerlink" title="译文"></a>译文</h4><p>下图显示了解决这个问题的一种方法：将一个时钟信号传递到新的时钟域并在新的时钟域产生第二个相移顺序控制信号。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_multisignal-cdc/S2.png" width="600">
+</div>
+
+<div align="center">
+图4 解决方法：只传递一个信号
+</div>
+
+<h2 id="问题3：传递两个编码控制信号-bdec-0-和bdec-1"><a href="#问题3：传递两个编码控制信号-bdec-0-和bdec-1" class="headerlink" title="问题3：传递两个编码控制信号(bdec[0]和bdec[1])"></a>问题3：传递两个编码控制信号(bdec[0]和bdec[1])</h2><h4 id="原文-5"><a href="#原文-5" class="headerlink" title="原文"></a>原文</h4><p>The diagram in Figure 12 shows two encoded control signals being passed between clock domains. If the two encoded signals are slightly skewed when sampled, an erroneous decoded output could be generated for one clock period in the new clock domain.</p>
+<h4 id="译文-5"><a href="#译文-5" class="headerlink" title="译文"></a>译文</h4><p>下图显示了另外一种常见的问题：两个编码控制信号在时钟域间传递。如果这两个编码控制信号间极窄的抖动被采样到，那么在新的时钟域就会产生一个时钟的编码输出误差。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_multisignal-cdc/Q3.png" width="600">
+</div>
+
+<div align="center">
+图5 问题：传递两个编码控制信号
+</div>
+
+<h3 id="解决方法1：产生一个ready信号-bden-n-来指示数据的有效性"><a href="#解决方法1：产生一个ready信号-bden-n-来指示数据的有效性" class="headerlink" title="解决方法1：产生一个ready信号(bden_n)来指示数据的有效性"></a>解决方法1：产生一个ready信号(bden_n)来指示数据的有效性</h3><h4 id="原文-6"><a href="#原文-6" class="headerlink" title="原文"></a>原文</h4><p>One potential solution to this problem, as shown in Figure 13, is to send a shaped enable signal to act as a “ready flag” in the new clock domain. The sending clock domain must generate and enable signal one clock cycle after asserting the decoder inputs. The sending clock domain must also remove the enable signal one clock cycle before de-asserting the decoder inputs. As described earlier, the enable signal must be asserted for a time period that is longer than the cycle time of the receiving clock domain.</p>
+<h4 id="译文-6"><a href="#译文-6" class="headerlink" title="译文"></a>译文</h4><p>第一种解决方法是发送一个经过整形的使能信号，这个信号在新时钟域中的作用就是一个“准备妥当标志位”。在编码输入信号置位后发送时钟域必须生成和使能一个时钟的信号。发送时钟域必须在输入信号复位前一个时钟移除使能信号。正如之前所提到的那样，使能信号必须置位一个时钟周期，并且这个时钟周期必须小于接收时钟域的一个时钟周期。</p>
+<h4 id="原文-7"><a href="#原文-7" class="headerlink" title="原文"></a>原文</h4><p>Under worst case conditions, the shaped enable signal will either be sampled at the same time as the encoded inputs are sampled into the receiving clock domain, or the shaped enable signal will be de-asserted at the same time as the encoded inputs are de-asserted in the receiving clock domain. Under best case conditions, the shaped enable pulse will be asserted one receiving clock cycle later than the assertion of the encoded inputs and de-asserted one receiving clock cycle before the de-assertion of the encoded inputs. This method insures that the encoded inputs are valid before they are enabled into the receiving clock domain.</p>
+<h4 id="译文-7"><a href="#译文-7" class="headerlink" title="译文"></a>译文</h4><p>在最坏的条件下，整形后的使能信号既不会在编码输入被接收时钟域采样的同时被采样到，也不会在编码输入在接收时钟域复位的同时而复位。在最好的情况下，整形后的使能信号会在编码输入置位的一个时钟后置位，并且在编码输入复位的一个时钟前复位。这种方法可以保证编码输入在接收时钟域使能前就有效了。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_multisignal-cdc/S31.png" width="600">
+</div>
+
+<div align="center">
+图6 解决方法1：产生一个ready信号(bden_n)来指示数据的有效性
+</div>
+
+<h3 id="解决方法2：使用one-hot-key信号结合状态机来处理接收到的信号"><a href="#解决方法2：使用one-hot-key信号结合状态机来处理接收到的信号" class="headerlink" title="解决方法2：使用one-hot key信号结合状态机来处理接收到的信号"></a>解决方法2：使用one-hot key信号结合状态机来处理接收到的信号</h3><h4 id="原文-8"><a href="#原文-8" class="headerlink" title="原文"></a>原文</h4><p>A second potential solution to this problem, as shown in Figure 14, is to decode the signals back in the sending clock domain and then send the decoded outputs (where only one of the outputs is asserted) through synchronizers into the new clock domain. Within the new clock domain, a state machine is used to determine when a new decoded output has been asserted. If there are no decoded outputs, it means that one decoded output has been de-asserted and that another decoded output is about to be asserted. If there are two asserted decoded output signals, the last decoded output signal will cause the state machine to change states and the older decoded output signal will turn off on the next rising clock edge in the new clock domain. It is important that the sender insure that the decoded outputs are each asserted for a time period that is longer than the cycle time of the receiving clock domain.</p>
+<h4 id="译文-8"><a href="#译文-8" class="headerlink" title="译文"></a>译文</h4><p>如下图显示，第二种解决这个问题的方法是在发送时钟域将信号进行编码，然后将编码后的信号（独热码）通过同步器发送到接收时钟域。新的时钟域中有一个状态机用来决定编码输出何时被置位。如果此时没有编码输出，这就意味着一个输出已经被复位了而另一个输出正准备置位。如果此时有两个编码输出置位，新的编码输出信号将导致状态机状态改变，而上一个编码输出信号将在新时钟域的下一个时钟上升沿复位。需要特别注意的是，发送端必须保证编码输出一次仅置位一个时钟周期，并且这个时钟周期不会比接收时钟域的一个时钟长。</p>
+<h4 id="原文-9"><a href="#原文-9" class="headerlink" title="原文"></a>原文</h4><p>Any time there are multiple control signals crossing clock boundaries, caution must be taken to insure that the sequencing of the control signals being passed is correct or that any potential mis-sequencing of the control signals will not adversely impact the correct operation of the design.</p>
+<h4 id="译文-9"><a href="#译文-9" class="headerlink" title="译文"></a>译文</h4><p>凡是在有多个控制信号跨越时钟边界的时候，控制信号必须保证时序正确，或者控制信号的任意潜在失序将不会影响这个设计的正确操作。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_multisignal-cdc/S32.png" width="600">
+</div>
+
+<div align="center">
+图6 解决方法2：使用one-hot key信号结合状态机来处理接收到的信号
+</div>
+
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><pre><code>这篇笔记参考网上众多资料实验并整理而成，如果涉及侵权烦请请告知，我将第一时间处理。</code></pre><ol>
+<li><a href="http://www.deepchip.com/downloads/cliffsnug01.pdf" target="_blank" rel="noopener">Synthesis and Scripting Techniques for Designing Multi-Asynchronous Clock Designs</a></li>
+</ol>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2019-07-16/multisignal-cdc/">跨时钟传递多个时钟信号</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">黑山老喵</a></p>
+        <p><span>发布时间:</span>2019-07-16, 14:54:26</p>
+        <p><span>最后更新:</span>2019-07-16, 22:02:27</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2019-07-16/multisignal-cdc/" title="跨时钟传递多个时钟信号">https://catonblack.cn/2019-07-16/multisignal-cdc/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://catonblack.cn/2019-07-16/multisignal-cdc/　　作者: 黑山老喵" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target="_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2019-07-16/fsm-style/">
+                    状态机一段式、二段式和三段式写法的实际效果
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2019-07-16/async-clock-sync/">
+                    异步时钟信号同步化及其综合结果
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#原文"><span class="toc-number">1.</span> <span class="toc-text">原文</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#译文"><span class="toc-number">2.</span> <span class="toc-text">译文</span></a></li></ol><li class="toc-item toc-level-2"><a class="toc-link" href="#问题1：-传递两个同时需要的信号-b-load和b-en"><span class="toc-number"></span> <span class="toc-text">问题1： 传递两个同时需要的信号(b_load和b_en)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#原文-1"><span class="toc-number">1.</span> <span class="toc-text">原文</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#译文-1"><span class="toc-number">2.</span> <span class="toc-text">译文</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#解决方法：只传递一个信号-b-lden"><span class="toc-number"></span> <span class="toc-text">解决方法：只传递一个信号(b_lden)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#原文-2"><span class="toc-number">1.</span> <span class="toc-text">原文</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#译文-2"><span class="toc-number">2.</span> <span class="toc-text">译文</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#问题2：传递两个前后顺序控制的信号-ben1和ben2"><span class="toc-number"></span> <span class="toc-text">问题2：传递两个前后顺序控制的信号(ben1和ben2)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#原文-3"><span class="toc-number">1.</span> <span class="toc-text">原文</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#译文-3"><span class="toc-number">2.</span> <span class="toc-text">译文</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#解决方法：只传递一个信号-ben1"><span class="toc-number"></span> <span class="toc-text">解决方法：只传递一个信号(ben1)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#原文-4"><span class="toc-number">1.</span> <span class="toc-text">原文</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#译文-4"><span class="toc-number">2.</span> <span class="toc-text">译文</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#问题3：传递两个编码控制信号-bdec-0-和bdec-1"><span class="toc-number"></span> <span class="toc-text">问题3：传递两个编码控制信号(bdec[0]和bdec[1])</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#原文-5"><span class="toc-number">1.</span> <span class="toc-text">原文</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#译文-5"><span class="toc-number">2.</span> <span class="toc-text">译文</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#解决方法1：产生一个ready信号-bden-n-来指示数据的有效性"><span class="toc-number"></span> <span class="toc-text">解决方法1：产生一个ready信号(bden_n)来指示数据的有效性</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#原文-6"><span class="toc-number">1.</span> <span class="toc-text">原文</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#译文-6"><span class="toc-number">2.</span> <span class="toc-text">译文</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#原文-7"><span class="toc-number">3.</span> <span class="toc-text">原文</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#译文-7"><span class="toc-number">4.</span> <span class="toc-text">译文</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#解决方法2：使用one-hot-key信号结合状态机来处理接收到的信号"><span class="toc-number"></span> <span class="toc-text">解决方法2：使用one-hot key信号结合状态机来处理接收到的信号</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#原文-8"><span class="toc-number">1.</span> <span class="toc-text">原文</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#译文-8"><span class="toc-number">2.</span> <span class="toc-text">译文</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#原文-9"><span class="toc-number">3.</span> <span class="toc-text">原文</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#译文-9"><span class="toc-number">4.</span> <span class="toc-text">译文</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number"></span> <span class="toc-text">参考资料</span></a>
+        
+    </li></div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录" title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"跨时钟传递多个时钟信号　| 黑山老喵小窝　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+        <section id="comments" style="margin: 2em; padding: 2em; background: rgba(255, 255, 255, 0.5)">
+    <div id="vcomment" class="comment"></div>
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src="//unpkg.com/valine@1.2.0-beta1/dist/Valine.min.js"></script>
+    <script>
+      new Valine({
+        el: '#vcomment',
+        notify: 'true',
+        verify: 'true',
+        app_id: "0tk0hycE3Yips8Txim7EBtm5-gzGzoHsz",
+        app_key: "nW716Qi1t7lY4m6zXI9MSYJs",
+        placeholder: "Just go go!",
+        avatar: "mp"
+      });
+    </script>
+</section>
+
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2019-07-16/fsm-style/" title="上一篇: 状态机一段式、二段式和三段式写法的实际效果">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2019-07-16/async-clock-sync/" title="下一篇: 异步时钟信号同步化及其综合结果">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/moore-mealy/">摩尔状态机和米勒状态机特性对比</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/fsm-style/">状态机一段式、二段式和三段式写法的实际效果</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/multisignal-cdc/">跨时钟传递多个时钟信号</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/async-clock-sync/">异步时钟信号同步化及其综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-07-17/folder-manage/">工程存档文件夹命名</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-07-17/file-manage/">file-manage</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-07-16/use-git/">Git管理工程的方法</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2019 黑山老喵
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style="display:none">
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style="display:none">
+                        <span id="page-visit" title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 5;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>

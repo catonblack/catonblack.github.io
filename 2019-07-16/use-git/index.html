@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<meta name="author" content="黑山老喵">
+
+
+
+<meta name="description" content="Git是当下最流行的工程管理方法，作为一个硬件工程师，也得要跟上时代的脚步，努力学习其他行业的技术优点。在了解了Git之后，发现它是当之无愧的神器，用Git就是爽，一直Git一直爽！">
+<meta name="keywords" content="Git,Gitlab,GitHub,GitServer">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Git管理工程的方法">
+<meta property="og:url" content="https://catonblack.cn/2019-07-16/use-git/index.html">
+<meta property="og:site_name" content="黑山老喵小窝">
+<meta property="og:description" content="Git是当下最流行的工程管理方法，作为一个硬件工程师，也得要跟上时代的脚步，努力学习其他行业的技术优点。在了解了Git之后，发现它是当之无愧的神器，用Git就是爽，一直Git一直爽！">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_use-git/gitlogo.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_use-git/nogit.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_use-git/usegit.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_use-git/rsa.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_use-git/sshfolder.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_use-git/sshkeys.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_use-git/rsapub.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_use-git/showok.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_use-git/sourcetreeset.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_use-git/gitbashpin.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_use-git/gitlabrepos.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_use-git/sourcetreesetrepos.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_use-git/sshurl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_use-git/synologynogitserver.png">
+<meta property="og:updated_time" content="2019-07-16T12:14:25.940Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Git管理工程的方法">
+<meta name="twitter:description" content="Git是当下最流行的工程管理方法，作为一个硬件工程师，也得要跟上时代的脚步，努力学习其他行业的技术优点。在了解了Git之后，发现它是当之无愧的神器，用Git就是爽，一直Git一直爽！">
+<meta name="twitter:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_use-git/gitlogo.png">
+
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="黑山老喵小窝" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/favicon.png">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>Git管理工程的方法 | 黑山老喵小窝</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "//hm.baidu.com/hm.js?9871d0915604e1e9dc64974db7659410";
+            var s = document.getElementsByTagName("script")[0]; 
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+</head></html>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/avatar.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">黑山老喵</a></h1>
+        </hgroup>
+
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="true">
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class="no-result">No results found <i class="fa fa-spinner fa-pulse"></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/categories/">分类</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto:catonblack@live.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" href="http://github.com/catonblack" title="GitHub"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Git/">Git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/GitHub/">GitHub</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/GitServer/">GitServer</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Gitlab/">Gitlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/多信号同步/">多信号同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/多段式状态机/">多段式状态机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/异步时钟/">异步时钟</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/有限状态机/">有限状态机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/电平同步/">电平同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/综合/">综合</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/脉冲同步/">脉冲同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/边沿检测同步/">边沿检测同步</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/">MOxFIVE</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://catonblack.cn">Github</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://console.cloud.tencent.com/domain">腾讯云</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://tongji.baidu.com/web/28226238/overview/index?siteId=13598139">百度统计</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://www.livere.com/city-demo/insight">来必力</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://portal.qiniu.com/create">七牛云</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://valine.js.org/quickstart.html">Valine</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.coding.me/yelee/">Yelee</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">来自老和山职业技术学院的非典型理工男。专注于硬件、嵌入式、FPGA设计，涉足领域包括科学仪器、医疗仪器和可穿戴设备，在相关领域有6年一线实战经验。喜欢尝试新鲜事物，对物理、化学、医学、心理学等学科有一定的了解。</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">黑山老喵</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/avatar.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">黑山老喵</a></h1>
+            </hgroup>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/categories/">分类</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto:catonblack@live.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="http://github.com/catonblack" title="GitHub"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我">
+</nav>
+      <div class="body-wrap"><article id="post-use-git" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019-07-16/use-git/" class="article-date">
+      <time datetime="2019-07-16T07:19:51.000Z" itemprop="datePublished">2019-07-16</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Git管理工程的方法
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/工具使用技巧/">工具使用技巧</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Git/">Git</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/GitHub/">GitHub</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/GitServer/">GitServer</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Gitlab/">Gitlab</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_use-git/gitlogo.png" width="600">
+</div>
+Git是当下最流行的工程管理方法，作为一个硬件工程师，也得要跟上时代的脚步，努力学习其他行业的技术优点。在了解了Git之后，发现它是当之无愧的神器，用Git就是爽，一直Git一直爽！
+<a id="more"></a>
+
+<h2 id="首先讲一下为啥要用Git"><a href="#首先讲一下为啥要用Git" class="headerlink" title="首先讲一下为啥要用Git"></a>首先讲一下为啥要用Git</h2><!----table代表一个表格----->
+<table>
+    <!----tr代表一行----->
+    <tr>
+        <!----td代表一个单元格----->
+        <td>不使用Git</td>
+        <td>使用Git</td>
+    </tr>
+    <tr>
+        <!----td代表一个单元格----->
+        <td valign="top">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_use-git/nogit.png" width="300">
+        </td>
+        <td valign="top">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_use-git/usegit.png" width="300">
+        </td>
+    </tr>
+</table>
+Git特别适合代码这种试错成本低，迭代快速，带有尝试性质的场合。
+
+<h2 id="简单讲一下Git，-Github，SVN之间的联系与区别"><a href="#简单讲一下Git，-Github，SVN之间的联系与区别" class="headerlink" title="简单讲一下Git， Github，SVN之间的联系与区别"></a>简单讲一下Git， Github，SVN之间的联系与区别</h2><p>Git和SVN都是一种文件管理方式：Git是基于分布式库管理设计的，在本机上会有一个仓库，同时，也可以在云端有一个仓库，所以没有服务器端其实也可以提交和版本备注；SVN是集中式管理的，仓库直接上传到服务器端，没有服务器端就基本上用不了。<br>GitHub是众多基于Git技术的管理服务器端之一，他们做的基于Git的客户端工具叫做GitHub-Desktop。此外，还有Sourcetree，GitKraken等。</p>
+<p>所以，正确的层次结构应该是这样的：</p>
+<table>
+    <tr><th>项目管理技术</th><th>服务器</th><th>客户端</th></tr>
+    <tr><td>Git</td><td>GitHub</td><td>GitHub-Desktop</td></tr>
+    <tr><td></td><td>Atlassian</td><td>SourceTree</td></tr>
+    <tr><td></td><td>GitKraken</td><td>GitKraken</td></tr>
+    <tr><td></td><td>GitLab</td><td>无</td></tr>
+    <tr><td></td><td>无</td><td>TortoiseGit</td></tr>
+    <tr><td></td><td>无</td><td>Git（Git原生的客户端）</td></tr>
+    <tr><td>SVN</td><td>没了解过</td><td>没了解过</td></tr>
+</table>
+
+<p>PS：</p>
+<pre><code>1. 以前免费版的GitHub账户只能创建公开仓库，自从巨硬收购了GitHub后，现在免费版账户也能创建私有账户了。
+2. Git的项目文件夹可以用上述任何一款客户端打开和编辑，他们是标准格式，不会有冲突。
+3. 虽然有些Git客户端会自带Git控制台，但是不建议把这种Git控制台用作全局使用，因为他们的路径名称中有软件自己的名字和版本号，更新几次后会导致路径名失效。</code></pre><p><em>实验室用群晖搭建了GitLab，接下来就让咱们来试用一下吧</em></p>
+<h2 id="准备工作："><a href="#准备工作：" class="headerlink" title="准备工作："></a>准备工作：</h2><h3 id="1-git客户端"><a href="#1-git客户端" class="headerlink" title="1.git客户端"></a>1.git客户端</h3><p>1.产生gitlab服务端和本地git相互传输时所需要校验的私钥和公钥</p>
+<p>2.直接在Idea中使用git提交和push代码，当然也可以用sourcetree提交代码</p>
+<h3 id="2-sourcetree客户端"><a href="#2-sourcetree客户端" class="headerlink" title="2.sourcetree客户端"></a>2.sourcetree客户端</h3><p>1.拉取远端服务器代码到本地</p>
+<p>2.push本地代码到远端</p>
+<p>3.创建分支，解决提交代码中的冲突</p>
+<h3 id="3-gitlab账号（一般公司配置，用自己的邮箱）"><a href="#3-gitlab账号（一般公司配置，用自己的邮箱）" class="headerlink" title="3.gitlab账号（一般公司配置，用自己的邮箱）"></a>3.gitlab账号（一般公司配置，用自己的邮箱）</h3><p>1.建立远端分支，可追踪</p>
+<p>2.本地和远端代码的修改活动详细显示</p>
+<p>3.云储存库，储存代码</p>
+<p>一句话就是gitlab中存储着远端的代码，git是本地代码和远端代码沟通的桥梁，不过是用命令行的形式，sourcetree是将git变为可见的客户端。</p>
+<h2 id="软件安装（以SourceTree为例，其他软件类似）："><a href="#软件安装（以SourceTree为例，其他软件类似）：" class="headerlink" title="软件安装（以SourceTree为例，其他软件类似）："></a>软件安装（以SourceTree为例，其他软件类似）：</h2><h3 id="1-安装git客户端（Git-2-14-0-64-bit-exe）"><a href="#1-安装git客户端（Git-2-14-0-64-bit-exe）" class="headerlink" title="1.安装git客户端（Git-2.14.0-64-bit.exe）"></a>1.安装git客户端（Git-2.14.0-64-bit.exe）</h3><p>一路Next，但是最后一步有一个是否允许符号链接的勾，按照个人需要选择。不管你选没选，我反正是选了。</p>
+<h3 id="2-安装SourceTree（SourceTreeSetup-2-1-2-5-exe）"><a href="#2-安装SourceTree（SourceTreeSetup-2-1-2-5-exe）" class="headerlink" title="2.安装SourceTree（SourceTreeSetup-2.1.2.5.exe）"></a>2.安装SourceTree（SourceTreeSetup-2.1.2.5.exe）</h3><ol>
+<li><p>需要申请一个账户（反正也免费，申就申吧），一路Next。假如GitHub上已经有库的话就可以在这个时候同步下来，没有的话也没关系，反正之后要再建的。当问及是否要创建SSH的时候选否吧，反正之后要手动创建的。</p>
+</li>
+<li><p>在windows下安装时，当需要使用内置的git，hg时，需要从atlassian.com网站下载。不知道什么原因，总是下载失败。使用Chrome是能够自己下载这两个文件的。使用代理也不好用。所以只有自己下载之后，放在这个目录下，才会好用。</p>
+</li>
+<li><p>c:\users\YOURUSERNAME\AppData\Local\Atlassian\SourceTree, 把下载好的压缩包解压缩到这个目录下。Git对应git_local,HG对应hg_local。这样就可以在SourceTree中设置使用内置的git和hg了。</p>
+<p> 另外，需要下载的压缩文件的URL可以在这个目录下的sourcetree.log中找到。下载失败之后会在这里纪录URL。</p>
+</li>
+</ol>
+<h3 id="3-至此软件安装完毕"><a href="#3-至此软件安装完毕" class="headerlink" title="3.至此软件安装完毕"></a>3.至此软件安装完毕</h3><h2 id="使用SSH链接GitLab："><a href="#使用SSH链接GitLab：" class="headerlink" title="使用SSH链接GitLab："></a>使用SSH链接GitLab：</h2><h3 id="1-利用git-bash生成公钥和私钥"><a href="#1-利用git-bash生成公钥和私钥" class="headerlink" title="1.利用git bash生成公钥和私钥"></a>1.利用git bash生成公钥和私钥</h3><p>（使用git  bash命令生成gitlab服务端和本地git相互传输时所需要校验的私钥和公钥，公钥用于配置gitlab，私钥用户配置sourcetree。）</p>
+<p>打开git  bash,输入以下命令：</p>
+<h4 id="（1）设置git的user-name和email："><a href="#（1）设置git的user-name和email：" class="headerlink" title="（1）设置git的user name和email："></a>（1）设置git的user name和email：</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> git config --global user.name "test"</span><br><span class="line"><span class="meta">$</span> git config --global user.email "test@gmail.com"</span><br></pre></td></tr></table></figure>
+
+<h4 id="（2）生成SSH密钥过程："><a href="#（2）生成SSH密钥过程：" class="headerlink" title="（2）生成SSH密钥过程："></a>（2）生成SSH密钥过程：</h4><p>1.查看是否已经有了ssh密钥：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cd ~/.ssh</span><br></pre></td></tr></table></figure>
+
+<p>如果没有密钥则不会有此文件夹，有则备份删除</p>
+<p>2.生成密钥：（注意ssh与参数之间没有空格！！！）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> ssh-keygen -t rsa -C “邮箱地址”</span><br></pre></td></tr></table></figure>
+
+<p>-C 选项后是备注，可随意。<br>命令执行后会要求输入key存储的文件名和passphrase：</p>
+<pre><code>• 输入一个特有的文件名，否则使用默认的 id_rsa。
+• passphrase。不输入也可以。输入之后，提交的时候要输入这个passphrase</code></pre><p>完成后在 ~/.ssh/ 会生成2个文件。id_rsa 和 id_rsa.pub。前者是私钥，注意保管，后者是公钥。<br>在这里按3个回车，密码为空就可以了。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_use-git/rsa.png" width="600">
+</div>
+此时在.ssh文件夹下回生成下面3个文件，
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_use-git/sshfolder.png" width="600">
+</div>
+
+<h3 id="2-在gitlab中配置公钥"><a href="#2-在gitlab中配置公钥" class="headerlink" title="2.在gitlab中配置公钥"></a>2.在gitlab中配置公钥</h3><p>登录gitlab-&gt;project setting-&gt;SSH,添加即可</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_use-git/sshkeys.png" width="600">
+</div>
+打开id_rsa.pub，把内容复制进去
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_use-git/rsapub.png" width="600">
+</div>
+显示如下就OK了
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_use-git/showok.png" width="600">
+</div>
+### 3.sourceTree配置的私钥，与gitlab公钥对应
+打开sourcetree,点击工具》选项》一般，设置公钥的路径即可。注意客户端选择：OpenSSH
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_use-git/sourcetreeset.png" width="600">
+</div>
+在GitBash中ping一下试试
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_use-git/gitbashpin.png" width="600">
+</div>
+这样就可以配置成功了！！！
+
+<p><em>———————————-华丽丽的分割线———————————-</em></p>
+<h3 id="4-拉取远端代码到本地仓库"><a href="#4-拉取远端代码到本地仓库" class="headerlink" title="4.拉取远端代码到本地仓库"></a>4.拉取远端代码到本地仓库</h3><p>在gitlab中寻找需要拉取的仓库地址，如下：</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_use-git/gitlabrepos.png" width="600">
+</div>
+在sourcetree中，选择克隆/新建仓库，填写远端和本地的仓库路径，添加即可，之后直接pull 仓库即可。
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_use-git/sourcetreesetrepos.png" width="600">
+</div>
+这样以后可以直接在sourcetree拉取代码了。
+这里的URL格式需要修改如下：
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_use-git/sshurl.png" width="600">
+</div>
+注意，这次实验使用的端口是8022，具体出现问题的话可以问问我。
+
+<h2 id="Git管理Keil工程："><a href="#Git管理Keil工程：" class="headerlink" title="Git管理Keil工程："></a>Git管理Keil工程：</h2><p>其实很简单，建立仓库后直接把对应的.gitignore文件和工程文件放到Git仓库中，就可以进行commit和push了。</p>
+<h2 id="Gitserver建立git仓库的方法"><a href="#Gitserver建立git仓库的方法" class="headerlink" title="Gitserver建立git仓库的方法"></a>Gitserver建立git仓库的方法</h2><p>群晖的Gitserver不支持通过SSH来登录，所以最好找一个支持账户密码存储的客户端T_T</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_use-git/synologynogitserver.png" width="600">
+</div>
+
+<p>下面是记录群晖Gitserver创建仓库的方法，以后写个脚本让他自动装机创建吧。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /volume1/git_repos</span><br><span class="line">mkdir xxxx.git</span><br><span class="line"><span class="built_in">cd</span> xxxx.git</span><br><span class="line">git init --bare</span><br><span class="line">sudo -i // 取得root权限</span><br><span class="line"><span class="built_in">cd</span> /volume1/git_repos/</span><br><span class="line">chown catonblack:users . // 将gitReposTest目录的所有者改为管理员账户aulati，目录的所属群组改为users。注意不要忘了[.]</span><br><span class="line">chmod 770 . // 将gitReposTest目录的所有者、所属群组的权限改为 读/写/运行</span><br><span class="line">chown -R git:users xxxx.git // 改变test.git目录及所有包含文件、子目录的所有者</span><br><span class="line">chmod -R 770 xxxx.git // 改变test.git目录及所有包含文件、子目录的权限</span><br><span class="line"></span><br><span class="line">git <span class="built_in">clone</span> ssh://git@192.168.3.5:9022/volume1/git_repos/test.git</span><br></pre></td></tr></table></figure>
+
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><pre><code>这篇笔记参考网上众多资料实验并整理而成，如果涉及侵权烦请请告知，我将第一时间处理。</code></pre><ol>
+<li><a href="https://gxnotes.com/article/15391.html" target="_blank" rel="noopener">漂亮的git分支图</a></li>
+<li><a href="http://stdbit.com/2015/06/05/using-git-for-project-management-with-uvision/" target="_blank" rel="noopener">Keil-MDK 使用 Git 作为项目版本管理工具</a></li>
+<li><a href="http://skywolf.github.io/2015/08/30/stm32/Keil%E5%8D%8F%E5%90%8C%E5%BC%80%E5%8F%91%E9%97%AE%E9%A2%98/" target="_blank" rel="noopener">Keil协同开发存在的问题</a></li>
+<li><a href="http://nottechnology.lofter.com/post/1d468017_75d4341" target="_blank" rel="noopener">Git管理Keil工程实录</a></li>
+<li><a href="http://www.jianshu.com/p/732a5d5fb19e" target="_blank" rel="noopener">解决 需要生成 多个SSH key 的问题</a></li>
+</ol>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2019-07-16/use-git/">Git管理工程的方法</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">黑山老喵</a></p>
+        <p><span>发布时间:</span>2019-07-16, 15:19:51</p>
+        <p><span>最后更新:</span>2019-07-16, 20:14:25</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2019-07-16/use-git/" title="Git管理工程的方法">https://catonblack.cn/2019-07-16/use-git/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://catonblack.cn/2019-07-16/use-git/　　作者: 黑山老喵" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target="_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2019-07-16/fsm-style/">
+                    状态机一段式、二段式和三段式写法的实际效果
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2019-07-16/multisignal-cdc/">
+                    跨时钟传递多个时钟信号
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#首先讲一下为啥要用Git"><span class="toc-number">1.</span> <span class="toc-text">首先讲一下为啥要用Git</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#简单讲一下Git，-Github，SVN之间的联系与区别"><span class="toc-number">2.</span> <span class="toc-text">简单讲一下Git， Github，SVN之间的联系与区别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#准备工作："><span class="toc-number">3.</span> <span class="toc-text">准备工作：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-git客户端"><span class="toc-number">3.1.</span> <span class="toc-text">1.git客户端</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-sourcetree客户端"><span class="toc-number">3.2.</span> <span class="toc-text">2.sourcetree客户端</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-gitlab账号（一般公司配置，用自己的邮箱）"><span class="toc-number">3.3.</span> <span class="toc-text">3.gitlab账号（一般公司配置，用自己的邮箱）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#软件安装（以SourceTree为例，其他软件类似）："><span class="toc-number">4.</span> <span class="toc-text">软件安装（以SourceTree为例，其他软件类似）：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-安装git客户端（Git-2-14-0-64-bit-exe）"><span class="toc-number">4.1.</span> <span class="toc-text">1.安装git客户端（Git-2.14.0-64-bit.exe）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-安装SourceTree（SourceTreeSetup-2-1-2-5-exe）"><span class="toc-number">4.2.</span> <span class="toc-text">2.安装SourceTree（SourceTreeSetup-2.1.2.5.exe）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-至此软件安装完毕"><span class="toc-number">4.3.</span> <span class="toc-text">3.至此软件安装完毕</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用SSH链接GitLab："><span class="toc-number">5.</span> <span class="toc-text">使用SSH链接GitLab：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-利用git-bash生成公钥和私钥"><span class="toc-number">5.1.</span> <span class="toc-text">1.利用git bash生成公钥和私钥</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#（1）设置git的user-name和email："><span class="toc-number">5.1.1.</span> <span class="toc-text">（1）设置git的user name和email：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#（2）生成SSH密钥过程："><span class="toc-number">5.1.2.</span> <span class="toc-text">（2）生成SSH密钥过程：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-在gitlab中配置公钥"><span class="toc-number">5.2.</span> <span class="toc-text">2.在gitlab中配置公钥</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-拉取远端代码到本地仓库"><span class="toc-number">5.3.</span> <span class="toc-text">4.拉取远端代码到本地仓库</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Git管理Keil工程："><span class="toc-number">6.</span> <span class="toc-text">Git管理Keil工程：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Gitserver建立git仓库的方法"><span class="toc-number">7.</span> <span class="toc-text">Gitserver建立git仓库的方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">8.</span> <span class="toc-text">参考资料</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录" title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"Git管理工程的方法　| 黑山老喵小窝　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+        <section id="comments" style="margin: 2em; padding: 2em; background: rgba(255, 255, 255, 0.5)">
+    <div id="vcomment" class="comment"></div>
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src="//unpkg.com/valine@1.2.0-beta1/dist/Valine.min.js"></script>
+    <script>
+      new Valine({
+        el: '#vcomment',
+        notify: 'true',
+        verify: 'true',
+        app_id: "0tk0hycE3Yips8Txim7EBtm5-gzGzoHsz",
+        app_key: "nW716Qi1t7lY4m6zXI9MSYJs",
+        placeholder: "Just go go!",
+        avatar: "mp"
+      });
+    </script>
+</section>
+
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2019-07-16/fsm-style/" title="上一篇: 状态机一段式、二段式和三段式写法的实际效果">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2019-07-16/multisignal-cdc/" title="下一篇: 跨时钟传递多个时钟信号">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/moore-mealy/">moore-mealy</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/fsm-style/">状态机一段式、二段式和三段式写法的实际效果</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/use-git/">Git管理工程的方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/multisignal-cdc/">跨时钟传递多个时钟信号</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/async-clock-sync/">异步时钟信号同步化及其综合结果</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2019 黑山老喵
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style="display:none">
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style="display:none">
+                        <span id="page-visit" title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 5;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>
