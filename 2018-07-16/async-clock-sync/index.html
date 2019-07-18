@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<meta name="author" content="黑山老喵">
+
+
+
+<meta name="description" content="异步时钟处理是每个使用FPGA的工程师都必须要掌握的技巧。可以说，如果你不会处理异步时钟信号，那么我会认为你压根儿就没用过FPGA。这里总结了三种常见的异步时钟处理方法，并且在仿真中验证过。">
+<meta name="keywords" content="综合,异步时钟,电平同步,边沿检测同步,脉冲同步">
+<meta property="og:type" content="article">
+<meta property="og:title" content="异步时钟信号同步化及其综合结果">
+<meta property="og:url" content="https://catonblack.cn/2018-07-16/async-clock-sync/index.html">
+<meta property="og:site_name" content="黑山老喵小窝">
+<meta property="og:description" content="异步时钟处理是每个使用FPGA的工程师都必须要掌握的技巧。可以说，如果你不会处理异步时钟信号，那么我会认为你压根儿就没用过FPGA。这里总结了三种常见的异步时钟处理方法，并且在仿真中验证过。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_async-clock-sync/LVLSYNCschematic.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_async-clock-sync/SYNCschematic.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_async-clock-sync/LVLSYNCschematic.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_async-clock-sync/LVLSYNCpaper.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_async-clock-sync/LVLSYNCRTL.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_async-clock-sync/LVLSYNCSIM.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_async-clock-sync/EDGESYNCschematic.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_async-clock-sync/EDGESYNCRTL.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_async-clock-sync/EDGESYNCSIM.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_async-clock-sync/PULSESYNCschematic.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_async-clock-sync/PULSESYNCRTL.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_async-clock-sync/PULSESYNCSIM.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_async-clock-sync/SYNC_COMP.png">
+<meta property="og:updated_time" content="2019-07-18T11:52:56.221Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="异步时钟信号同步化及其综合结果">
+<meta name="twitter:description" content="异步时钟处理是每个使用FPGA的工程师都必须要掌握的技巧。可以说，如果你不会处理异步时钟信号，那么我会认为你压根儿就没用过FPGA。这里总结了三种常见的异步时钟处理方法，并且在仿真中验证过。">
+<meta name="twitter:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_async-clock-sync/LVLSYNCschematic.png">
+
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="黑山老喵小窝" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/favicon.png">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>异步时钟信号同步化及其综合结果 | 黑山老喵小窝</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "//hm.baidu.com/hm.js?9871d0915604e1e9dc64974db7659410";
+            var s = document.getElementsByTagName("script")[0]; 
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+</head></html>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/avatar.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">黑山老喵</a></h1>
+        </hgroup>
+
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="true">
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class="no-result">No results found <i class="fa fa-spinner fa-pulse"></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/categories/">分类</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto:catonblack@live.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" href="http://github.com/catonblack" title="GitHub"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Git/">Git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/GitHub/">GitHub</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/GitServer/">GitServer</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Gitlab/">Gitlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Mealy/">Mealy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Moore/">Moore</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NAS/">NAS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Negedge-Clock-Edge/">Negedge Clock Edge</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Posedge-Clock-Edge/">Posedge Clock Edge</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reg/">Reg</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Wire/">Wire</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/case/">case</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/if……else/">if……else</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/云盘/">云盘</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/变量定义/">变量定义</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/品鉴/">品鉴</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/器件特性/">器件特性</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/复位/">复位</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/多信号同步/">多信号同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/多段式状态机/">多段式状态机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/实际电路/">实际电路</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/工程存档/">工程存档</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/异步时钟/">异步时钟</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/扁平化命名/">扁平化命名</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/文件管理/">文件管理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/有限状态机/">有限状态机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/模块交互/">模块交互</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/泡面/">泡面</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/状态机转换/">状态机转换</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/电平同步/">电平同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/综合/">综合</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/脉冲同步/">脉冲同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/规范/">规范</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/边沿检测同步/">边沿检测同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进口/">进口</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/项目存档/">项目存档</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/">MOxFIVE</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://catonblack.cn">Github</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://console.cloud.tencent.com/domain">腾讯云</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://tongji.baidu.com/web/28226238/overview/index?siteId=13598139">百度统计</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://www.livere.com/city-demo/insight">来必力</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://portal.qiniu.com/create">七牛云</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://valine.js.org/quickstart.html">Valine</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.coding.me/yelee/">Yelee</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">来自老和山职业技术学院的非典型理工男。专注于硬件、嵌入式、FPGA设计，涉足领域包括科学仪器、医疗仪器和可穿戴设备，在相关领域有6年一线实战经验。喜欢尝试新鲜事物，对物理、化学、医学、心理学等学科有一定的了解。</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">黑山老喵</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/avatar.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">黑山老喵</a></h1>
+            </hgroup>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/categories/">分类</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto:catonblack@live.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="http://github.com/catonblack" title="GitHub"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我">
+</nav>
+      <div class="body-wrap"><article id="post-async-clock-sync" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2018-07-16/async-clock-sync/" class="article-date">
+      <time datetime="2018-07-16T05:39:41.000Z" itemprop="datePublished">2018-07-16</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      异步时钟信号同步化及其综合结果
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/FPGA血泪史/">FPGA血泪史</a><a class="article-category-link" href="/categories/FPGA进阶款/">FPGA进阶款</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/异步时钟/">异步时钟</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/电平同步/">电平同步</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/综合/">综合</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/脉冲同步/">脉冲同步</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/边沿检测同步/">边沿检测同步</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_async-clock-sync/LVLSYNCschematic.png" width="600">
+</div>
+
+<p>异步时钟处理是每个使用FPGA的工程师都必须要掌握的技巧。可以说，如果你不会处理异步时钟信号，那么我会认为你压根儿就没用过FPGA。这里总结了三种常见的异步时钟处理方法，并且在仿真中验证过。</p>
+<a id="more"></a>
+
+<p>通常使用 MTBF (Mean Time Between Failures) 来描述 flip-flop 亚稳态指标，MTBF 越大，表示出现故障的间隔越大，表示设计越可靠。以一个典型的 0.25 us 工艺的 ASIC 库中的 flip-flop 的参数计算可以得到 MTBF = 2.01 d，即两天就会出现一次亚稳态。显然这是不能接受的，但是如果将两个 flip-flop 级联在一起，计算结果则变成了 9.57×10^9 years，显然这个概率基本就可以忽略不计，可以看作是消除了亚稳态。</p>
+<p>理论上，亚稳态是不可能完全消除的，一般级联多少个 flip-flop，由实际指标要求和设计者的强迫症习惯决定，对于普通的应用来说，2 级 flip-flop 级联已经足够了。</p>
+<p>如图所示：</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_async-clock-sync/SYNCschematic.png" width="600">
+</div>
+
+<div align="center">
+图1 同步器结构
+</div>
+
+<p>通常，同步器由两个 flip-flop 串联而成，它们中间没有其他的组合电路。第一个 flip-flop 有很大的可能性会产生亚稳态，但是当第二个 flip-flop 获得前一个 flip-flop 的输出时，前一个 flip-flop 已经退出了亚稳态，并且输出稳定，这样就避免了第一级 flip-flop 的亚稳态对下一级逻辑造成的影响。</p>
+<p>为了让同步器正常工作，从某个时钟域传递过来的信号应该先通过原时钟域的一个 flip-flop，然后不经过两个时钟域间的任何组合逻辑，直接进入同步器。之所以这样要求，是因为同步器的第一级 flip-flop 对组合逻辑产生的毛刺非常敏感，如果一个足够长的信号毛刺正好满足 setup/hold time 的要求，那么它就会通过同步器，给新时钟域后续逻辑一个虚假的信号。</p>
+<p>同步器有很多设计方法，因为一种方法不能满足所有的应用需求。同步器的类型基本上分为 3 种：</p>
+<pre><code>1. 电平同步器
+2. 边沿检测同步器
+3. 脉冲同步器</code></pre><p>下面分别讨论：</p>
+<h2 id="电平同步器"><a href="#电平同步器" class="headerlink" title="电平同步器"></a>电平同步器</h2><h3 id="Schematic"><a href="#Schematic" class="headerlink" title="Schematic:"></a>Schematic:</h3><div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_async-clock-sync/LVLSYNCschematic.png" width="600">
+</div>
+
+<div align="center">
+图2 电平同步器结构
+</div>
+
+<p>电平同步器的结构图就是前面的图，在 Clifford E. Cummings 的 paper 中有更详细的图解说明：</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_async-clock-sync/LVLSYNCpaper.png" width="600">
+</div>
+
+<div align="center">
+图3 电平同步器详细介绍
+</div>
+
+<h3 id="Code"><a href="#Code" class="headerlink" title="Code:"></a>Code:</h3><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> LVLSYNC(</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> clk_src,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> rst_src,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> dat_src,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> clk_dst,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> rst_dst,</span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>  dat_dst</span><br><span class="line">    );</span><br><span class="line"><span class="comment">// source time domain</span></span><br><span class="line"><span class="keyword">reg</span> dat;</span><br><span class="line"><span class="keyword">always</span> @(<span class="keyword">posedge</span> clk_src) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">if</span> (rst_src) <span class="keyword">begin</span></span><br><span class="line">        dat &lt;= <span class="number">1'b0</span>;</span><br><span class="line">    <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">        dat &lt;= dat_src;</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="comment">// destination time domain</span></span><br><span class="line"><span class="keyword">reg</span> dat_r;</span><br><span class="line"><span class="comment">// using two level DFF to synchronize the din_q</span></span><br><span class="line"><span class="keyword">always</span> @(<span class="keyword">posedge</span> clk_dst) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">if</span> (rst_dst) <span class="keyword">begin</span></span><br><span class="line">        dat_r   &lt;= <span class="number">1'b0</span>;</span><br><span class="line">        dat_dst &lt;= <span class="number">1'b0</span>;</span><br><span class="line">    <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">        dat_r   &lt;= dat;</span><br><span class="line">        dat_dst &lt;= dat_r;</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="RTL"><a href="#RTL" class="headerlink" title="RTL:"></a>RTL:</h3><div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_async-clock-sync/LVLSYNCRTL.png" width="600">
+</div>
+
+<div align="center">
+图4 电平同步器RTL图
+</div>
+
+<h3 id="SIM"><a href="#SIM" class="headerlink" title="SIM:"></a>SIM:</h3><div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_async-clock-sync/LVLSYNCSIM.png" width="600">
+</div>
+
+<div align="center">
+图5 电平同步器仿真图
+</div>
+
+<h3 id="Restriction"><a href="#Restriction" class="headerlink" title="Restriction:"></a>Restriction:</h3><p>使用电平同步器的要求是：</p>
+<pre><code>1. 源时钟域的信号应先通过源时钟域的一个 DFF 后输出，然后直接进入目的时钟域的同步器的第一级 DFF。这么做到原因是：同步器的第一级 DFF 对组合逻辑产生的毛刺（glitch）非常敏感。如果一个足够长的毛刺刚好满足了 setup/hold time，那么同步器会将其放行，产生一个虚假的信号。
+
+2. 跨域时钟域的这个信号持续时间 &gt;= 2 个新时钟域时钟周期。虽然 Crossing the abyss: asynchronous signals in a synchronous world 中是这么写的，但是我觉得这个条件应该是保险条件，而不是最低条件。
+电平同步器的最低条件应该和边沿检测同步器相同：
+输入信号的宽度 &gt;= 目标时钟域周期 + 第一个 flip-flop 的 hold time。
+
+首先，待同步到信号宽度 &gt; 源时钟周期，这样它才能被源时钟域的 DFF 采样到，然后输出；
+其次，源时钟域采样输出端信号的宽度当然是源时钟周期的整数倍，它的宽度 &gt; 目标时钟域周期 + 第一个 flip-flop 的 hold time，这样它才能被目的时钟域的时钟采样到，然后进行同步。
+所以，保险一点的条件是：待同步到信号有效时间至少是目的时钟周期的 2 倍。</code></pre><p><em>电平同步器是其他两种同步器的基础：</em></p>
+<h2 id="边沿检测同步器"><a href="#边沿检测同步器" class="headerlink" title="边沿检测同步器"></a>边沿检测同步器</h2><p>边沿检测同步器 是在电平同步器的输出端增加了一个 flip-flop，如下图所示。这个电路的功能是实现上升沿检测，产生一个和时钟周期等宽，高电平有效的脉冲；如果将与门的两个输入端交换，则会完成下降沿检测。如果改为非门，则可以得到一个低电平脉冲有效的电路。</p>
+<h3 id="Schematic-1"><a href="#Schematic-1" class="headerlink" title="Schematic:"></a>Schematic:</h3><div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_async-clock-sync/EDGESYNCschematic.png" width="600">
+</div>
+
+<div align="center">
+图6 边沿检测同步器结构
+</div>
+
+<h3 id="Code-1"><a href="#Code-1" class="headerlink" title="Code:"></a>Code:</h3><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> EDGESYNC(</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> clk_src,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> rst_src,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> dat_src,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> clk_dst,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> rst_dst,</span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">wire</span> dat_dst</span><br><span class="line">    );</span><br><span class="line"><span class="comment">// source time domain</span></span><br><span class="line"><span class="keyword">reg</span>     dat;</span><br><span class="line"><span class="keyword">always</span> @(<span class="keyword">posedge</span> clk_src) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">if</span> (rst_src) <span class="keyword">begin</span></span><br><span class="line">        dat &lt;= <span class="number">1'b0</span>;</span><br><span class="line">    <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">        dat &lt;= dat_src;</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="comment">// destination time domain</span></span><br><span class="line"><span class="keyword">reg</span>     [<span class="number">2</span>:<span class="number">0</span>]   sync_reg;</span><br><span class="line"><span class="keyword">always</span> @(<span class="keyword">posedge</span> clk_dst) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">if</span> (rst_dst) <span class="keyword">begin</span></span><br><span class="line">        sync_reg &lt;= <span class="number">3'b0</span>;</span><br><span class="line">    <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">        sync_reg &lt;= &#123;sync_reg[<span class="number">1</span>:<span class="number">0</span>], dat&#125;;</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="comment">// AND to get the output</span></span><br><span class="line"><span class="keyword">assign</span> dat_dst = sync_reg[<span class="number">1</span>] &amp;&amp; (~sync_reg[<span class="number">2</span>]);</span><br><span class="line"></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="RTL-1"><a href="#RTL-1" class="headerlink" title="RTL:"></a>RTL:</h3><div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_async-clock-sync/EDGESYNCRTL.png" width="600">
+</div>
+
+<div align="center">
+图7 边沿检测同步器RTL图
+</div>
+
+<p>###SIM:</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_async-clock-sync/EDGESYNCSIM.png" width="600">
+</div>
+
+<div align="center">
+图8 边沿检测同步器仿真图
+</div>
+
+<h3 id="Restriction-1"><a href="#Restriction-1" class="headerlink" title="Restriction:"></a>Restriction:</h3><p>使用边沿检测同步器的要求是：</p>
+<pre><code>1. 输入信号的宽度 &gt;= 目标时钟域周期 + 第一个 flip-flop 的 hold time。最保险的脉冲宽度是同步周期的两倍。实际上，因为在源时钟域，要先用 DFF 寄存一下再输出，所以源时钟域输出的信号的宽度是其时钟周期的整数倍，它肯定是 &gt; 目标时钟周期的，因为边沿检测同步器只能工作在慢时钟域到快时钟域的情况下。</code></pre><p><em>边沿检测同步器在将一个慢时钟域的信号同步到一个较快时钟域时可以正常工作，它会产生一个脉冲表示输入信号的上升沿或者下降沿。但是反过来，将一个快时钟域的信号同步到慢时钟域时，并不能正常工作，这时候需要使用脉冲同步器。</em></p>
+<h2 id="脉冲同步器"><a href="#脉冲同步器" class="headerlink" title="脉冲同步器"></a>脉冲同步器</h2><p>脉冲同步器的基本功能是从某个时钟域中取出一个单时钟宽度的脉冲，然后在新的时钟域中建立另外一个单时钟宽度的脉冲。<br>源时钟域的单时钟宽度的脉冲不是直接输出的，而是先经过一个源时钟域的翻转电路。这个翻转电路在每次输入一个脉冲时，它的输出会在高、低电平之间翻转。<br>而在目的时钟域，翻转电路的输出先通过一个电平同步器，其输出到达异或门的一个输入端，而这个输出再经过一个 DFF，延时一个时钟周期后进入异或门的另外一个输入端。最后异或门的输出即最终的同步结果：<br>源时钟域每有一个单时钟脉冲（源时钟），同步器的输出端产生一个单时钟宽度（目的时钟）的脉冲。</p>
+<h3 id="Schematic-2"><a href="#Schematic-2" class="headerlink" title="Schematic:"></a>Schematic:</h3><div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_async-clock-sync/PULSESYNCschematic.png" width="600">
+</div>
+
+<div align="center">
+图9 脉冲同步器结构图
+</div>
+
+<h3 id="Code-2"><a href="#Code-2" class="headerlink" title="Code:"></a>Code:</h3><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> EDGESYNC(</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> clk_src,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> rst_src,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> dat_src,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> clk_dst,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> rst_dst,</span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">wire</span> dat_dst</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line"><span class="comment">// source time domain</span></span><br><span class="line"><span class="keyword">reg</span> toggle_reg;</span><br><span class="line"><span class="keyword">always</span> @(<span class="keyword">posedge</span> clk_src <span class="keyword">or</span> <span class="keyword">posedge</span> rst_src) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">if</span> (rst_src) <span class="keyword">begin</span></span><br><span class="line">        toggle_reg &lt;= <span class="number">1'b0</span>;</span><br><span class="line">    <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">        <span class="keyword">if</span> (dat_src) <span class="keyword">begin</span></span><br><span class="line">            toggle_reg &lt;= ~toggle_reg;</span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// destination time domain</span></span><br><span class="line"><span class="keyword">reg</span> [<span class="number">2</span>:<span class="number">0</span>] sync_reg;</span><br><span class="line"><span class="keyword">always</span> @(<span class="keyword">posedge</span> clk_dst) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">if</span> (rst_dst) <span class="keyword">begin</span></span><br><span class="line">        sync_reg &lt;= <span class="number">3'b0</span>;</span><br><span class="line">    <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">        sync_reg &lt;= &#123;sync_reg[<span class="number">1</span>:<span class="number">0</span>], toggle_reg&#125;;</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="comment">// XOR to generate the pusle_dst</span></span><br><span class="line"><span class="keyword">assign</span> dat_dst = sync_reg[<span class="number">1</span>] ^ sync_reg[<span class="number">2</span>];</span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="RTL-2"><a href="#RTL-2" class="headerlink" title="RTL:"></a>RTL:</h3><div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_async-clock-sync/PULSESYNCRTL.png" width="600">
+</div>
+
+<div align="center">
+图10 脉冲同步器RTL图
+</div>
+
+<h3 id="SIM："><a href="#SIM：" class="headerlink" title="SIM："></a>SIM：</h3><div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_async-clock-sync/PULSESYNCSIM.png" width="600">
+</div>
+
+<div align="center">
+图11 脉冲同步器仿真图
+</div>
+
+<h3 id="Restriction-2"><a href="#Restriction-2" class="headerlink" title="Restriction:"></a>Restriction:</h3><p>使用脉冲同步器的要求是：</p>
+<pre><code>1. 输入脉冲之间的最小间隔 &gt;= 2 个同步时钟周期。如果两个输入脉冲相互过近，则新时钟域的输出脉冲也会紧密相邻，形成一个比单时钟周期宽的输出脉冲。
+
+实际上，在一些情况下，少于 2 个时钟周期（&gt; 1 个时钟周期）也是可以同步上的。只要同步器的两个 DFF 的值不一样即可同步上，也就是说异步信号在连续的两个目的时钟采样的值不同即可，由于异步信号和时钟的相位关系不确定，所以在没有对齐的情况下，大于 1 个时钟时也能满足两个采样值不同的条件。
+
+一般为了保险起见，要求其保持至少两个时钟宽度。</code></pre><h2 id="时钟消耗"><a href="#时钟消耗" class="headerlink" title="时钟消耗"></a>时钟消耗</h2><p>同步器需要花费 1～2 个时钟周期来完成同步，所以粗略的估计可以认为同步器会造成目的时钟域的 2 个周期的延迟，我们在设计时需要考虑同步器对时序产生的影响。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>总结3种同步器的特点，有下表：</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_async-clock-sync/SYNC_COMP.png" width="600">
+</div>
+
+<div align="center">
+图12 三种同步器的优缺点比较
+</div>
+
+<p>虽然还有其他类型的同步器，但是这 3 种基本上就可以解决设计中遇到的多数问题了。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><pre><code>这篇笔记参考网上众多资料实验并整理而成，如果涉及侵权烦请请告知，我将第一时间处理。</code></pre><ol>
+<li><a href="http://archive.ednchina.com/bbs.ednchina.com/BLOG_ARTICLE_175526.HTM" target="_blank" rel="noopener">跨越鸿沟：同步世界中的异步信号</a></li>
+<li><a href="http://bbs.eeworld.com.cn/thread-44839-1-1.html" target="_blank" rel="noopener">cpu与fpga跨时钟域数据交换的实现问题</a></li>
+<li><a href="http://guqian110.github.io/pages/2014/10/09/the_clock_design_in_fpga_3_multiasynchronous_clock_design.html" target="_blank" rel="noopener">FPGA 时钟设计 3 —— 跨时钟域设计</a></li>
+<li><a href="http://blog.eetop.cn/blog-840234-28943.html" target="_blank" rel="noopener">跨时钟域设计的一点总结</a></li>
+<li><a href="http://www.deepchip.com/downloads/cliffsnug01.pdf" target="_blank" rel="noopener">Synthesis and Scripting Techniques for Designing Multi-Asynchronous Clock Designs</a></li>
+</ol>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2018-07-16/async-clock-sync/">异步时钟信号同步化及其综合结果</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">黑山老喵</a></p>
+        <p><span>发布时间:</span>2018-07-16, 13:39:41</p>
+        <p><span>最后更新:</span>2019-07-18, 19:52:56</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2018-07-16/async-clock-sync/" title="异步时钟信号同步化及其综合结果">https://catonblack.cn/2018-07-16/async-clock-sync/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://catonblack.cn/2018-07-16/async-clock-sync/　　作者: 黑山老喵" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target="_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2018-07-18/fpga-reset/">
+                    FPGA 复位研究
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2018-05-04/wire-reg/">
+                    Wire and Reg等定义的综合结果
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#电平同步器"><span class="toc-number">1.</span> <span class="toc-text">电平同步器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Schematic"><span class="toc-number">1.1.</span> <span class="toc-text">Schematic:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Code"><span class="toc-number">1.2.</span> <span class="toc-text">Code:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RTL"><span class="toc-number">1.3.</span> <span class="toc-text">RTL:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SIM"><span class="toc-number">1.4.</span> <span class="toc-text">SIM:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Restriction"><span class="toc-number">1.5.</span> <span class="toc-text">Restriction:</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#边沿检测同步器"><span class="toc-number">2.</span> <span class="toc-text">边沿检测同步器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Schematic-1"><span class="toc-number">2.1.</span> <span class="toc-text">Schematic:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Code-1"><span class="toc-number">2.2.</span> <span class="toc-text">Code:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RTL-1"><span class="toc-number">2.3.</span> <span class="toc-text">RTL:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Restriction-1"><span class="toc-number">2.4.</span> <span class="toc-text">Restriction:</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#脉冲同步器"><span class="toc-number">3.</span> <span class="toc-text">脉冲同步器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Schematic-2"><span class="toc-number">3.1.</span> <span class="toc-text">Schematic:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Code-2"><span class="toc-number">3.2.</span> <span class="toc-text">Code:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RTL-2"><span class="toc-number">3.3.</span> <span class="toc-text">RTL:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SIM："><span class="toc-number">3.4.</span> <span class="toc-text">SIM：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Restriction-2"><span class="toc-number">3.5.</span> <span class="toc-text">Restriction:</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#时钟消耗"><span class="toc-number">4.</span> <span class="toc-text">时钟消耗</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">6.</span> <span class="toc-text">参考资料</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录" title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"异步时钟信号同步化及其综合结果　| 黑山老喵小窝　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+        <section id="comments" style="margin: 2em; padding: 2em; background: rgba(255, 255, 255, 0.5)">
+    <div id="vcomment" class="comment"></div>
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src="//unpkg.com/valine@1.2.0-beta1/dist/Valine.min.js"></script>
+    <script>
+      new Valine({
+        el: '#vcomment',
+        notify: 'true',
+        verify: 'true',
+        app_id: "0tk0hycE3Yips8Txim7EBtm5-gzGzoHsz",
+        app_key: "nW716Qi1t7lY4m6zXI9MSYJs",
+        placeholder: "Just go go!",
+        avatar: "mp"
+      });
+    </script>
+</section>
+
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2018-07-18/fpga-reset/" title="上一篇: FPGA 复位研究">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2018-05-04/wire-reg/" title="下一篇: Wire and Reg等定义的综合结果">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019-07-17/if-else/">if……else 和 case 的综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/fsm-style/">状态机一段式、二段式和三段式写法的实际效果</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/multisignal-cdc/">跨时钟传递多个时钟信号</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-03-17/hdl-prjsetting/">Verilog 项目配置</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-01-16/moore-mealy/">摩尔状态机和米勒状态机特性对比</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-08-18/up-down-edge/">上下边沿触发</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-18/model-interface/">常见的模块间交互的方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-18/fpga-reset/">FPGA 复位研究</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-16/async-clock-sync/">异步时钟信号同步化及其综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-05-04/wire-reg/">Wire and Reg等定义的综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-13/folder-manage/">工程存档文件夹命名</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-07/use-git/">Git管理工程的方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-03/file-manage/">基于中心库的NAS,云盘和Git的文件管理方式</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-03-01/instant-noodles/">泡面鉴赏</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2019 黑山老喵
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style="display:none">
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style="display:none">
+                        <span id="page-visit" title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 5;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>

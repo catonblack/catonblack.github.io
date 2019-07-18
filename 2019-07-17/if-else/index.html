@@ -1,0 +1,2766 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<meta name="author" content="黑山老喵">
+
+
+
+<meta name="description" content="在某些资料中关于if else和case的综合结果有着不同的结论，有的资料表明虽然RTL原理图综合结果差别比较大但是最后的technology map确实一样的；而有的资料里又说if else这种结构会产生先后顺序，这样就意味着和case语句生成的结果应该不一样。网上的资料各有各的理论依据和实际结果，到底哪个是正确的谁也没个结果。为了一探究竟，我专门做了这个实验。">
+<meta name="keywords" content="综合,if……else,case">
+<meta property="og:type" content="article">
+<meta property="og:title" content="if……else 和 case 的综合结果">
+<meta property="og:url" content="https://catonblack.cn/2019-07-17/if-else/index.html">
+<meta property="og:site_name" content="黑山老喵小窝">
+<meta property="og:description" content="在某些资料中关于if else和case的综合结果有着不同的结论，有的资料表明虽然RTL原理图综合结果差别比较大但是最后的technology map确实一样的；而有的资料里又说if else这种结构会产生先后顺序，这样就意味着和case语句生成的结果应该不一样。网上的资料各有各的理论依据和实际结果，到底哪个是正确的谁也没个结果。为了一探究竟，我专门做了这个实验。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/cover.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex1_ise_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex1_syn_xilinx_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex1_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex1_syn_xilinx_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex1_quartus_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex1_syn_altera_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex1_quartus_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex1_syn_altera_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex2_ise_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex2_syn_xilinx_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex2_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex2_syn_xilinx_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex2_quartus_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex2_syn_altera_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex2_quartus_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex2_syn_altera_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex3_ise_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex3_syn_xilinx_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex3_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex3_syn_xilinx_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex3_quartus_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex3_syn_altera_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex3_quartus_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex3_syn_altera_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex4_ise_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex4_syn_xilinx_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex4_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex4_syn_xilinx_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex4_quartus_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex4_syn_altera_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex4_quartus_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex4_syn_altera_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex5_ise_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex5_syn_xilinx_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex5_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex5_syn_xilinx_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex5_quartus_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex5_syn_altera_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex5_quartus_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex5_syn_altera_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex6_ise_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex6_syn_xilinx_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex6_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex6_syn_xilinx_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex6_quartus_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex6_syn_altera_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex6_quartus_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex6_syn_altera_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex7_ise_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex7_syn_xilinx_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex7_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex7_syn_xilinx_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex7_quartus_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex7_syn_altera_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex7_quartus_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex7_syn_altera_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex8_ise_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex8_syn_xilinx_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex8_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex8_syn_xilinx_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex8_quartus_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex8_syn_altera_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex8_quartus_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex8_syn_altera_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex9_ise_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex9_syn_xilinx_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex9_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex9_syn_xilinx_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex9_quartus_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex9_syn_altera_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex9_quartus_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex9_syn_altera_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex10_ise_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex10_syn_xilinx_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex10_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex10_syn_xilinx_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex10_quartus_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex10_syn_altera_rtl.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex10_quartus_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex10_syn_altera_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_2.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_3.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_4.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_5.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_6.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_7.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_8.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_9.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_10.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_1.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex1_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex2_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex3_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex4_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex5_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex6_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex7_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex8_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex5_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex9_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex7_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex10_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex1_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex3_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex1_vivado_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex3_vivado_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex1_syn_xilinx_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex3_syn_xilinx_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex1_quartus_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex3_quartus_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex1_syn_altera_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex3_syn_altera_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex5_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex7_ise_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex5_vivado_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex7_vivado_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex5_syn_xilinx_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex7_syn_xilinx_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex5_quartus_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex7_quartus_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex5_syn_altera_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex7_syn_altera_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_1.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_2.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_3.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_4.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_5.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_6.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_2.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_7.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_8.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_9.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_10.png">
+<meta property="og:updated_time" content="2019-07-18T11:53:10.571Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="if……else 和 case 的综合结果">
+<meta name="twitter:description" content="在某些资料中关于if else和case的综合结果有着不同的结论，有的资料表明虽然RTL原理图综合结果差别比较大但是最后的technology map确实一样的；而有的资料里又说if else这种结构会产生先后顺序，这样就意味着和case语句生成的结果应该不一样。网上的资料各有各的理论依据和实际结果，到底哪个是正确的谁也没个结果。为了一探究竟，我专门做了这个实验。">
+<meta name="twitter:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/cover.jpg">
+
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="黑山老喵小窝" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/favicon.png">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>if……else 和 case 的综合结果 | 黑山老喵小窝</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "//hm.baidu.com/hm.js?9871d0915604e1e9dc64974db7659410";
+            var s = document.getElementsByTagName("script")[0]; 
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+</head></html>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/avatar.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">黑山老喵</a></h1>
+        </hgroup>
+
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="true">
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class="no-result">No results found <i class="fa fa-spinner fa-pulse"></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/categories/">分类</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto:catonblack@live.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" href="http://github.com/catonblack" title="GitHub"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Git/">Git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/GitHub/">GitHub</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/GitServer/">GitServer</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Gitlab/">Gitlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Mealy/">Mealy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Moore/">Moore</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NAS/">NAS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Negedge-Clock-Edge/">Negedge Clock Edge</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Posedge-Clock-Edge/">Posedge Clock Edge</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reg/">Reg</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Wire/">Wire</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/case/">case</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/if……else/">if……else</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/云盘/">云盘</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/变量定义/">变量定义</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/品鉴/">品鉴</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/器件特性/">器件特性</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/复位/">复位</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/多信号同步/">多信号同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/多段式状态机/">多段式状态机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/实际电路/">实际电路</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/工程存档/">工程存档</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/异步时钟/">异步时钟</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/扁平化命名/">扁平化命名</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/文件管理/">文件管理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/有限状态机/">有限状态机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/模块交互/">模块交互</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/泡面/">泡面</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/状态机转换/">状态机转换</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/电平同步/">电平同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/综合/">综合</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/脉冲同步/">脉冲同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/规范/">规范</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/边沿检测同步/">边沿检测同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进口/">进口</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/项目存档/">项目存档</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/">MOxFIVE</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://catonblack.cn">Github</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://console.cloud.tencent.com/domain">腾讯云</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://tongji.baidu.com/web/28226238/overview/index?siteId=13598139">百度统计</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://www.livere.com/city-demo/insight">来必力</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://portal.qiniu.com/create">七牛云</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://valine.js.org/quickstart.html">Valine</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.coding.me/yelee/">Yelee</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">来自老和山职业技术学院的非典型理工男。专注于硬件、嵌入式、FPGA设计，涉足领域包括科学仪器、医疗仪器和可穿戴设备，在相关领域有6年一线实战经验。喜欢尝试新鲜事物，对物理、化学、医学、心理学等学科有一定的了解。</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">黑山老喵</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/avatar.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">黑山老喵</a></h1>
+            </hgroup>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/categories/">分类</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto:catonblack@live.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="http://github.com/catonblack" title="GitHub"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我">
+</nav>
+      <div class="body-wrap"><article id="post-if-else" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019-07-17/if-else/" class="article-date">
+      <time datetime="2019-07-17T12:00:41.000Z" itemprop="datePublished">2019-07-17</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      if……else 和 case 的综合结果
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/FPGA血泪史/">FPGA血泪史</a><a class="article-category-link" href="/categories/FPGA进阶款/">FPGA进阶款</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/case/">case</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/if……else/">if……else</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/综合/">综合</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/cover.jpg" width="500">
+</div>
+
+<p>在某些资料中关于if else和case的综合结果有着不同的结论，有的资料表明虽然RTL原理图综合结果差别比较大但是最后的technology map确实一样的；而有的资料里又说if else这种结构会产生先后顺序，这样就意味着和case语句生成的结果应该不一样。网上的资料各有各的理论依据和实际结果，到底哪个是正确的谁也没个结果。为了一探究竟，我专门做了这个实验。</p>
+<a id="more"></a>
+
+<h2 id="实验目的"><a href="#实验目的" class="headerlink" title="实验目的"></a>实验目的</h2><p>探究如下内容：</p>
+<p>[√] 1. if else 和 case 在不同的综合器中的综合结果是咋样的？</p>
+<p>[√] 2. 硬件上的先后顺序到底是怎么实现的？</p>
+<p>[√] 3. 针对组合逻辑电路和时序逻辑电路的综合结果是否有区别？</p>
+<p>[√] 4. If else有先后顺序和无先后顺序是怎么实现的？</p>
+<p>[√] 5. 不同综合器的综合结果对整体结果的影响？</p>
+<p>[√] 6. 组合逻辑电路中如果else为空会怎么样？</p>
+<p>如果你懒得看下面的过程，请点击传送门：<a href="#结论">实验结论</a></p>
+<h2 id="实验内容"><a href="#实验内容" class="headerlink" title="实验内容"></a>实验内容</h2><h3 id="实验一"><a href="#实验一" class="headerlink" title="实验一"></a>实验一</h3><p>Code：</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> test_ifelse(</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> clk,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> rst,</span><br><span class="line"></span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> [<span class="number">1</span>:<span class="number">0</span>] addr,</span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>  [<span class="number">1</span>:<span class="number">0</span>] data</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line"><span class="keyword">always</span>@(<span class="keyword">posedge</span> clk) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">if</span> (rst) <span class="keyword">begin</span></span><br><span class="line">        data &lt;= <span class="number">2'b00</span>;</span><br><span class="line">    <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">        <span class="keyword">if</span> (addr == <span class="number">2'b00</span>)</span><br><span class="line">            data &lt;= <span class="number">2'b11</span>;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (addr == <span class="number">2'b11</span>)</span><br><span class="line">            data &lt;= <span class="number">2'b00</span>;</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<p>Xilinx</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex1_ise_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex1_syn_xilinx_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) ISE Spartan6 RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Spartan6 RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex1_ise_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex1_syn_xilinx_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Spartan6 Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<p>Altera</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex1_quartus_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex1_syn_altera_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) QuartusII Cyclone IV E RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Cyclone IV E RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex1_quartus_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex1_syn_altera_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) QuartusII Cyclone IV E Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Cyclone IV E Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<h3 id="实验二"><a href="#实验二" class="headerlink" title="实验二"></a>实验二</h3><p>Code：</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> test_ifelse(</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> clk,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> rst,</span><br><span class="line"></span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> [<span class="number">1</span>:<span class="number">0</span>] addr,</span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>  [<span class="number">1</span>:<span class="number">0</span>] data</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line"><span class="keyword">always</span>@(<span class="keyword">posedge</span> clk) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">if</span> (rst) <span class="keyword">begin</span></span><br><span class="line">        data &lt;= <span class="number">2'b00</span>;</span><br><span class="line">    <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">        <span class="keyword">if</span> (addr == <span class="number">2'b00</span>)</span><br><span class="line">            data &lt;= <span class="number">2'b11</span>;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (addr == <span class="number">2'b00</span>)</span><br><span class="line">            data &lt;= <span class="number">2'b00</span>;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">            </span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<p>Xilinx</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex2_ise_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex2_syn_xilinx_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) ISE Spartan6 RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Spartan6 RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex2_ise_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex2_syn_xilinx_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Spartan6 Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<p>Altera</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex2_quartus_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex2_syn_altera_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) QuartusII Cyclone IV E RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Cyclone IV E RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex2_quartus_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex2_syn_altera_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) QuartusII Cyclone IV E Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Cyclone IV E Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<h3 id="实验三"><a href="#实验三" class="headerlink" title="实验三"></a>实验三</h3><p>Code：</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> test_ifelse(</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> clk,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> rst,</span><br><span class="line"></span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> [<span class="number">1</span>:<span class="number">0</span>] addr,</span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>  [<span class="number">1</span>:<span class="number">0</span>] data</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line"><span class="keyword">always</span>@(<span class="keyword">posedge</span> clk) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">if</span> (rst) <span class="keyword">begin</span></span><br><span class="line">        data &lt;= <span class="number">2'b00</span>;</span><br><span class="line">    <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">        <span class="keyword">case</span>(addr)</span><br><span class="line">        <span class="number">2'b00</span>: data &lt;= <span class="number">2'b11</span>;</span><br><span class="line">        <span class="number">2'b11</span>: data &lt;= <span class="number">2'b00</span>;</span><br><span class="line">        <span class="keyword">endcase</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<p>Xilinx</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex3_ise_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex3_syn_xilinx_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) ISE Spartan6 RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Spartan6 RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex3_ise_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex3_syn_xilinx_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Spartan6 Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<p>Altera</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex3_quartus_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex3_syn_altera_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) QuartusII Cyclone IV E RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Cyclone IV E RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex3_quartus_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex3_syn_altera_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) QuartusII Cyclone IV E Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Cyclone IV E Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<h3 id="实验四"><a href="#实验四" class="headerlink" title="实验四"></a>实验四</h3><p>Code：</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> test_ifelse(</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> clk,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> rst,</span><br><span class="line"></span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> [<span class="number">1</span>:<span class="number">0</span>] addr,</span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>  [<span class="number">1</span>:<span class="number">0</span>] data</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line"><span class="keyword">always</span>@(<span class="keyword">posedge</span> clk) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">if</span> (rst) <span class="keyword">begin</span></span><br><span class="line">        data &lt;= <span class="number">2'b00</span>;</span><br><span class="line">    <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">        <span class="keyword">case</span>(addr)</span><br><span class="line">        <span class="number">2'b00</span>: data &lt;= <span class="number">2'b11</span>;</span><br><span class="line">        <span class="number">2'b11</span>: data &lt;= <span class="number">2'b00</span>;</span><br><span class="line">        <span class="keyword">default</span>;</span><br><span class="line">        <span class="keyword">endcase</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<p>Xilinx</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex4_ise_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex4_syn_xilinx_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) ISE Spartan6 RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Spartan6 RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex4_ise_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex4_syn_xilinx_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Spartan6 Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<p>Altera</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex4_quartus_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex4_syn_altera_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) QuartusII Cyclone IV E RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Cyclone IV E RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex4_quartus_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex4_syn_altera_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) QuartusII Cyclone IV E Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Cyclone IV E Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<h3 id="实验五"><a href="#实验五" class="headerlink" title="实验五"></a>实验五</h3><p>Code：</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> test_ifelse(</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> clk,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> rst,</span><br><span class="line"></span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> [<span class="number">1</span>:<span class="number">0</span>] addr,</span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>  [<span class="number">1</span>:<span class="number">0</span>] data</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line"><span class="keyword">always</span>@(*) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">if</span> (addr == <span class="number">2'b00</span>)</span><br><span class="line">        data &lt;= <span class="number">2'b11</span>;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (addr == <span class="number">2'b11</span>)</span><br><span class="line">        data &lt;= <span class="number">2'b00</span>;</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<p>Xilinx</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex5_ise_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex5_syn_xilinx_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) ISE Spartan6 RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Spartan6 RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex5_ise_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex5_syn_xilinx_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Spartan6 Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<p>Altera</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex5_quartus_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex5_syn_altera_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) QuartusII Cyclone IV E RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Cyclone IV E RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex5_quartus_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex5_syn_altera_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) QuartusII Cyclone IV E Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Cyclone IV E Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<h3 id="实验六"><a href="#实验六" class="headerlink" title="实验六"></a>实验六</h3><p>Code：</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> test_ifelse(</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> clk,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> rst,</span><br><span class="line"></span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> [<span class="number">1</span>:<span class="number">0</span>] addr,</span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>  [<span class="number">1</span>:<span class="number">0</span>] data</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line"><span class="keyword">always</span>@(*) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">if</span> (addr == <span class="number">2'b00</span>)</span><br><span class="line">        data &lt;= <span class="number">2'b11</span>;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (addr == <span class="number">2'b11</span>)</span><br><span class="line">        data &lt;= <span class="number">2'b00</span>;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">        </span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<p>Xilinx</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex6_ise_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex6_syn_xilinx_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) ISE Spartan6 RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Spartan6 RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex6_ise_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex6_syn_xilinx_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Spartan6 Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<p>Altera</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex6_quartus_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex6_syn_altera_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) QuartusII Cyclone IV E RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Cyclone IV E RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex6_quartus_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex6_syn_altera_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) QuartusII Cyclone IV E Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Cyclone IV E Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<h3 id="实验七"><a href="#实验七" class="headerlink" title="实验七"></a>实验七</h3><p>Code:</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> test_ifelse(</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> clk,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> rst,</span><br><span class="line"></span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> [<span class="number">1</span>:<span class="number">0</span>] addr,</span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>  [<span class="number">1</span>:<span class="number">0</span>] data</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line"><span class="keyword">always</span>@(*) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">case</span>(addr)</span><br><span class="line">    <span class="number">2'b00</span>: data &lt;= <span class="number">2'b11</span>;</span><br><span class="line">    <span class="number">2'b11</span>: data &lt;= <span class="number">2'b00</span>;</span><br><span class="line">    <span class="keyword">endcase</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<p>Xilinx</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex7_ise_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex7_syn_xilinx_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) ISE Spartan6 RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Spartan6 RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex7_ise_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex7_syn_xilinx_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Spartan6 Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<p>Altera</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex7_quartus_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex7_syn_altera_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) QuartusII Cyclone IV E RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Cyclone IV E RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex7_quartus_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex7_syn_altera_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) QuartusII Cyclone IV E Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Cyclone IV E Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<h3 id="实验八"><a href="#实验八" class="headerlink" title="实验八"></a>实验八</h3><p>Code：</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> test_ifelse(</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> clk,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> rst,</span><br><span class="line"></span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> [<span class="number">1</span>:<span class="number">0</span>] addr,</span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>  [<span class="number">1</span>:<span class="number">0</span>] data</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line"><span class="keyword">always</span>@(*) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">case</span>(addr)</span><br><span class="line">    <span class="number">2'b00</span>: data &lt;= <span class="number">2'b11</span>;</span><br><span class="line">    <span class="number">2'b11</span>: data &lt;= <span class="number">2'b00</span>;</span><br><span class="line">    <span class="keyword">default</span>;</span><br><span class="line">    <span class="keyword">endcase</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<p>Xilinx</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex8_ise_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex8_syn_xilinx_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) ISE Spartan6 RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Spartan6 RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex8_ise_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex8_syn_xilinx_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Spartan6 Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<p>Altera</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex8_quartus_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex8_syn_altera_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) QuartusII Cyclone IV E RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Cyclone IV E RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex8_quartus_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex8_syn_altera_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) QuartusII Cyclone IV E Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Cyclone IV E Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<h3 id="实验九"><a href="#实验九" class="headerlink" title="实验九"></a>实验九</h3><p>Code：</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> test_ifelse(</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> clk,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> rst,</span><br><span class="line"></span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> [<span class="number">1</span>:<span class="number">0</span>] addr,</span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>  [<span class="number">1</span>:<span class="number">0</span>] data</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line"><span class="keyword">always</span>@(*) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">if</span> (addr == <span class="number">2'b00</span>)</span><br><span class="line">        data &lt;= <span class="number">2'b11</span>;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (addr == <span class="number">2'b11</span>)</span><br><span class="line">        data &lt;= <span class="number">2'b00</span>;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        data &lt;= <span class="number">2'b10</span>;</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<p>Xilinx</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex9_ise_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex9_syn_xilinx_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) ISE Spartan6 RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Spartan6 RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex9_ise_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex9_syn_xilinx_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Spartan6 Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<p>Altera</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex9_quartus_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex9_syn_altera_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) QuartusII Cyclone IV E RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Cyclone IV E RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex9_quartus_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex9_syn_altera_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) QuartusII Cyclone IV E Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Cyclone IV E Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<h3 id="实验十"><a href="#实验十" class="headerlink" title="实验十"></a>实验十</h3><p>Code：</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> test_ifelse(</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> clk,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> rst,</span><br><span class="line"></span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> [<span class="number">1</span>:<span class="number">0</span>] addr,</span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>  [<span class="number">1</span>:<span class="number">0</span>] data</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line"><span class="keyword">always</span>@(*) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">case</span>(addr)</span><br><span class="line">    <span class="number">2'b00</span>: data &lt;= <span class="number">2'b11</span>;</span><br><span class="line">    <span class="number">2'b11</span>: data &lt;= <span class="number">2'b00</span>;</span><br><span class="line">    <span class="keyword">default</span>: data &lt;= <span class="number">2'b10</span>;</span><br><span class="line">    <span class="keyword">endcase</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<p>Xilinx</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex10_ise_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex10_syn_xilinx_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) ISE Spartan6 RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Spartan6 RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex10_ise_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex10_syn_xilinx_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Spartan6 Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<p>Altera</p>
+<table>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex10_quartus_rtl.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex10_syn_altera_rtl.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) QuartusII Cyclone IV E RTL 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) Synplify Cyclone IV E RTL 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex10_quartus_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex10_syn_altera_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) QuartusII Cyclone IV E Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) Synplify Cyclone IV E Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<h3 id="实验十一"><a href="#实验十一" class="headerlink" title="实验十一"></a>实验十一</h3><table>
+    <tr>
+        <td>
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    Z = A[<span class="hljs-number">4</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">0</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span> ) Z = A[<span class="hljs-number">0</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">1</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>)  Z = A[<span class="hljs-number">1</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">2</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>)  Z = A[<span class="hljs-number">2</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">3</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>)  Z = A[<span class="hljs-number">3</span>];
+<span class="hljs-keyword">end</span></code></pre>
+        </td>
+        <td valign="top">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_2.png" height="150">
+        </td>
+    </tr>
+    <tr>
+        <td>
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">0</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">0</span>];
+    <span class="hljs-keyword">else</span>  Z = A[<span class="hljs-number">4</span>];  //可以放在此位置
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">1</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">1</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">2</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">2</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">3</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">3</span>];
+<span class="hljs-keyword">end</span></code></pre>
+        </td>
+        <td valign="top">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_3.png" height="150">
+        </td>
+    </tr>
+    <tr>
+        <td>
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">0</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">0</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">1</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">1</span>];
+    <span class="hljs-keyword">else</span>  Z = A[<span class="hljs-number">4</span>];  //可以放在此位置
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">2</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">2</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">3</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">3</span>];
+<span class="hljs-keyword">end</span></code></pre>
+        </td>
+        <td valign="top">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_4.png" height="150">
+        </td>
+    </tr>
+    <tr>
+        <td>
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">0</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">0</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">1</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">1</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">2</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">2</span>];
+    <span class="hljs-keyword">else</span> Z = A[<span class="hljs-number">4</span>]; //放在此处，上面的<span class="hljs-keyword">if</span>被阻塞
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">3</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">3</span>];
+<span class="hljs-keyword">end</span></code></pre>
+        </td>
+        <td valign="top">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_5.png" height="150">
+        </td>
+    </tr>
+    <tr>
+        <td>
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">0</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">0</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">1</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">1</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">2</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">2</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">3</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">3</span>];
+    <span class="hljs-keyword">else</span> Z = A[<span class="hljs-number">4</span>]; //放在此处，上面的<span class="hljs-keyword">if</span>被阻塞
+<span class="hljs-keyword">end</span></code></pre>
+        </td>
+        <td valign="top">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_6.png" height="150">
+        </td>
+    </tr>
+    <tr>
+        <td>
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">0</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">0</span>];
+    Z = A[<span class="hljs-number">4</span>]; //放在此处，上面的<span class="hljs-keyword">if</span>被阻塞
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">1</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">1</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">2</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">2</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">3</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">3</span>];
+<span class="hljs-keyword">end</span></code></pre>
+        </td>
+        <td valign="top">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_7.png" height="150">
+        </td>
+    </tr>
+    <tr>
+        <td>
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">0</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">0</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">1</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">1</span>];
+    Z = A[<span class="hljs-number">4</span>]; //放在此处，上面的<span class="hljs-keyword">if</span>被阻塞
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">2</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">2</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">3</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">3</span>];
+<span class="hljs-keyword">end</span></code></pre>
+        </td>
+        <td valign="top">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_8.png" height="150">
+        </td>
+    </tr>
+    <tr>
+        <td>
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">0</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">0</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">1</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">1</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">2</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">2</span>];
+    Z = A[<span class="hljs-number">4</span>]; //放在此处，上面的<span class="hljs-keyword">if</span>被阻塞
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">3</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">3</span>];
+<span class="hljs-keyword">end</span></code></pre>
+        </td>
+        <td valign="top">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_9.png" height="150">
+        </td>
+    </tr>
+    <tr>
+        <td>
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">0</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">0</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">1</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">1</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">2</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">2</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">3</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">3</span>];
+    Z = A[<span class="hljs-number">4</span>]; //放在此处，上面的<span class="hljs-keyword">if</span>被阻塞
+<span class="hljs-keyword">end</span></code></pre>
+        </td>
+        <td valign="top">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_10.png" height="150">
+        </td>
+    </tr>
+    <tr>
+        <td>
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">0</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span> )      Z = A[<span class="hljs-number">0</span>];
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (C[<span class="hljs-number">1</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>)  Z = A[<span class="hljs-number">1</span>];
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (C[<span class="hljs-number">2</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>)  Z = A[<span class="hljs-number">2</span>];
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (C[<span class="hljs-number">3</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>)  Z = A[<span class="hljs-number">3</span>];
+    <span class="hljs-keyword">else</span>                    Z = A[<span class="hljs-number">4</span>];
+<span class="hljs-keyword">end</span></code></pre>
+        </td>
+        <td valign="top">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_1.png" height="150">
+        </td>
+    </tr>
+</table>
+
+<h2 id="结果分析"><a href="#结果分析" class="headerlink" title="结果分析"></a>结果分析</h2><ol>
+<li>对比实验一和二，三和四，以Xilinx为例，可以得出：在时序逻辑电路中，if..else写不写else都会综合成正确的结果，case有没有default也都会综合成正确的结果；</li>
+</ol>
+<table>
+    <tr>
+        <td>
+            <div align="left">
+<pre class="hljs"><code>always@(posedge clk) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">if</span> (rst) <span class="hljs-keyword">begin</span>
+        data &lt;= <span class="hljs-number">2</span><span class="hljs-symbol">'b00</span>;
+    <span class="hljs-keyword">end</span> <span class="hljs-keyword">else</span> <span class="hljs-keyword">begin</span>
+        <span class="hljs-keyword">if</span> (addr == <span class="hljs-number">2</span><span class="hljs-symbol">'b00</span>)
+            data &lt;= <span class="hljs-number">2</span><span class="hljs-symbol">'b11</span>;
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (addr == <span class="hljs-number">2</span><span class="hljs-symbol">'b11</span>)
+            data &lt;= <span class="hljs-number">2</span><span class="hljs-symbol">'b00</span>;
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre>
+            </div>
+        </td>
+        <td>
+            <div align="left">
+<pre class="hljs"><code>always@(posedge clk) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">if</span> (rst) <span class="hljs-keyword">begin</span>
+        data &lt;= <span class="hljs-number">2</span><span class="hljs-symbol">'b00</span>;
+    <span class="hljs-keyword">end</span> <span class="hljs-keyword">else</span> <span class="hljs-keyword">begin</span>
+        <span class="hljs-keyword">if</span> (addr == <span class="hljs-number">2</span><span class="hljs-symbol">'b00</span>)
+            data &lt;= <span class="hljs-number">2</span><span class="hljs-symbol">'b11</span>;
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (addr == <span class="hljs-number">2</span><span class="hljs-symbol">'b00</span>)
+            data &lt;= <span class="hljs-number">2</span><span class="hljs-symbol">'b00</span>;
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">begin</span>
+        <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex1_ise_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex2_ise_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) 实验一 ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) 实验二 ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="left">
+<pre class="hljs"><code>always@(posedge clk) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">if</span> (rst) <span class="hljs-keyword">begin</span>
+        data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b00</span>;
+    <span class="hljs-keyword">end</span> <span class="hljs-keyword">else</span> <span class="hljs-keyword">begin</span>
+        <span class="hljs-keyword">case</span>(addr)
+        <span class="hljs-number">2</span><span class="hljs-attribute">'b00</span>: data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b11</span>;
+        <span class="hljs-number">2</span><span class="hljs-attribute">'b11</span>: data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b00</span>;
+        endcase
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre>
+            </div>
+        </td>
+        <td>
+            <div align="left">
+<pre class="hljs"><code>always@(posedge clk) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">if</span> (rst) <span class="hljs-keyword">begin</span>
+        data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b00</span>;
+    <span class="hljs-keyword">end</span> <span class="hljs-keyword">else</span> <span class="hljs-keyword">begin</span>
+        <span class="hljs-keyword">case</span>(addr)
+        <span class="hljs-number">2</span><span class="hljs-attribute">'b00</span>: data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b11</span>;
+        <span class="hljs-number">2</span><span class="hljs-attribute">'b11</span>: data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b00</span>;
+        <span class="hljs-keyword">default</span>;
+        endcase
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex3_ise_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex4_ise_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) 实验三 ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) 实验四 ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<ol start="2">
+<li>对比实验一和二，三和四，五和六，七和八，可以得出：无论是组合逻辑电路还是时序逻辑电路，如果else或default的内容为空，那么其综合结果与这部分不写是一样的，这点跟软件完全不一样，这点要注意；</li>
+</ol>
+<table>
+    <tr>
+        <td>
+            <div align="left">
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">if</span> (addr == <span class="hljs-number">2</span><span class="hljs-attribute">'b00</span>)
+        data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b11</span>;
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (addr == <span class="hljs-number">2</span><span class="hljs-attribute">'b11</span>)
+        data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b00</span>;
+<span class="hljs-keyword">end</span></code></pre>
+            </div>
+        </td>
+        <td>
+            <div align="left">
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">if</span> (addr == <span class="hljs-number">2</span><span class="hljs-attribute">'b00</span>)
+        data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b11</span>;
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (addr == <span class="hljs-number">2</span><span class="hljs-attribute">'b11</span>)
+        data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b00</span>;
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex5_ise_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex6_ise_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) 实验五 ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) 实验六 ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="left">
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">case</span>(addr)
+    <span class="hljs-number">2</span><span class="hljs-attribute">'b00</span>: data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b11</span>;
+    <span class="hljs-number">2</span><span class="hljs-attribute">'b11</span>: data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b00</span>;
+    endcase
+<span class="hljs-keyword">end</span></code></pre>
+            </div>
+        </td>
+        <td>
+            <div align="left">
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">case</span>(addr)
+    <span class="hljs-number">2</span><span class="hljs-attribute">'b00</span>: data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b11</span>;
+    <span class="hljs-number">2</span><span class="hljs-attribute">'b11</span>: data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b00</span>;
+    <span class="hljs-keyword">default</span>;
+    endcase
+<span class="hljs-keyword">end</span></code></pre>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex7_ise_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex8_ise_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) 实验七 ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) 实验八 ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<ol start="3">
+<li>但是对比实验五和九，七和十，可以得出：组合逻辑电路中，if…else如果省略else，就会综合成锁存器，包含else就不会综合出锁存器，这点在case语句中也一样；</li>
+</ol>
+<table>
+    <tr>
+        <td>
+            <div align="left">
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">if</span> (addr == <span class="hljs-number">2</span><span class="hljs-attribute">'b00</span>)
+        data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b11</span>;
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (addr == <span class="hljs-number">2</span><span class="hljs-attribute">'b11</span>)
+        data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b00</span>;
+<span class="hljs-keyword">end</span></code></pre>
+            </div>
+        </td>
+        <td>
+            <div align="left">
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">if</span> (addr == <span class="hljs-number">2</span><span class="hljs-attribute">'b00</span>)
+        data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b11</span>;
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (addr == <span class="hljs-number">2</span><span class="hljs-attribute">'b11</span>)
+        data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b00</span>;
+    <span class="hljs-keyword">else</span>
+        data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b10</span>;
+<span class="hljs-keyword">end</span></code></pre>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex5_ise_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex9_ise_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) 实验五 ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) 实验九 ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="left">
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">case</span>(addr)
+    <span class="hljs-number">2</span><span class="hljs-attribute">'b00</span>: data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b11</span>;
+    <span class="hljs-number">2</span><span class="hljs-attribute">'b11</span>: data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b00</span>;
+    endcase
+<span class="hljs-keyword">end</span></code></pre>
+            </div>
+        </td>
+        <td>
+            <div align="left">
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">case</span>(addr)
+    <span class="hljs-number">2</span><span class="hljs-attribute">'b00</span>: data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b11</span>;
+    <span class="hljs-number">2</span><span class="hljs-attribute">'b11</span>: data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b00</span>;
+    <span class="hljs-keyword">default</span>: data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b10</span>;
+    endcase
+<span class="hljs-keyword">end</span></code></pre>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex7_ise_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex10_ise_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) 实验七 ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) 实验十 ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+    </tr>
+</table>
+
+<ol start="4">
+<li>对比实验一和三，可以得出：对于时序逻辑电路，ISE中if…else的综合结果与相同条件下case的综合结果不相同，quartusii与synplify中，这两种情况的综合结果是相同的。ISE的综合结果中，case要少用一个lut和fdr，总的来说case的综合结果应该是更好一点的；现在看来ise的性能的确不怎么地。。。Vivado中两者的综合结果已经很接近了，但是case的综合结果依然会少一根线，看样子还是case胜出。</li>
+</ol>
+<table>
+    <tr>
+        <td>
+            <div align="left">
+<pre class="hljs"><code>always@(posedge clk) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">if</span> (rst) <span class="hljs-keyword">begin</span>
+        data &lt;= <span class="hljs-number">2</span><span class="hljs-symbol">'b00</span>;
+    <span class="hljs-keyword">end</span> <span class="hljs-keyword">else</span> <span class="hljs-keyword">begin</span>
+        <span class="hljs-keyword">if</span> (addr == <span class="hljs-number">2</span><span class="hljs-symbol">'b00</span>)
+            data &lt;= <span class="hljs-number">2</span><span class="hljs-symbol">'b11</span>;
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (addr == <span class="hljs-number">2</span><span class="hljs-symbol">'b11</span>)
+            data &lt;= <span class="hljs-number">2</span><span class="hljs-symbol">'b00</span>;
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre>
+            </div>
+        </td>
+        <td>
+            <div align="left">
+<pre class="hljs"><code>always@(posedge clk) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">if</span> (rst) <span class="hljs-keyword">begin</span>
+        data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b00</span>;
+    <span class="hljs-keyword">end</span> <span class="hljs-keyword">else</span> <span class="hljs-keyword">begin</span>
+        <span class="hljs-keyword">case</span>(addr)
+        <span class="hljs-number">2</span><span class="hljs-attribute">'b00</span>: data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b11</span>;
+        <span class="hljs-number">2</span><span class="hljs-attribute">'b11</span>: data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b00</span>;
+        endcase
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex1_ise_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex3_ise_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) 实验一 ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) 实验三 ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex1_vivado_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex3_vivado_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) 实验一 VIVADO ZYNQ7 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) 实验三 VIVADO ZYNQ7 Technological 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex1_syn_xilinx_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex3_syn_xilinx_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            e) 实验一 Synplify Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            f) 实验三 Synplify Spartan6 Technological 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex1_quartus_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex3_quartus_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            g) 实验一 Quartus Cyclone IV E Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            h) 实验三 Quartus Cyclone IV E Technological 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex1_syn_altera_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex3_syn_altera_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            i) 实验一 Synplify Cyclone IV E Technological 原理
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            j) 实验三 Synplify Cyclone IV E Technological 原理
+            </div>
+        </td>
+    </tr>
+</table>
+
+<ol start="5">
+<li>对比实验五和七，可以得出：对于组合逻辑电路，if…else和case在ISE中的综合结果不相同，case的结果要更加节省资源一点；if…else和case在Quartus中的综合结果也不相同，case的结果使用的资源更少一点；而在Synplify中，if…else和case的综合结果是完全一致的；vivado中case的综合结果更加符合预期，少用一根线。总的来说还是case的综合结果更好一点。</li>
+</ol>
+<table>
+    <tr>
+        <td>
+            <div align="left">
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">if</span> (addr == <span class="hljs-number">2</span><span class="hljs-attribute">'b00</span>)
+        data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b11</span>;
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (addr == <span class="hljs-number">2</span><span class="hljs-attribute">'b11</span>)
+        data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b00</span>;
+<span class="hljs-keyword">end</span></code></pre>
+            </div>
+        </td>
+        <td>
+            <div align="left">
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">case</span>(addr)
+    <span class="hljs-number">2</span><span class="hljs-attribute">'b00</span>: data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b11</span>;
+    <span class="hljs-number">2</span><span class="hljs-attribute">'b11</span>: data &lt;= <span class="hljs-number">2</span><span class="hljs-attribute">'b00</span>;
+    endcase
+<span class="hljs-keyword">end</span></code></pre>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex5_ise_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex7_ise_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            a) 实验五 ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            b) 实验七 ISE Spartan6 Technological 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex5_vivado_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex7_vivado_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            c) 实验五 VIVADO ZYNQ7 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            d) 实验七 VIVADO ZYNQ7 Technological 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex5_syn_xilinx_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex7_syn_xilinx_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            e) 实验五 Synplify Spartan6 Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            f) 实验七 Synplify Spartan6 Technological 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex5_quartus_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex7_quartus_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            g) 实验五 Quartus Cyclone IV E Technological 原理图
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            h) 实验七 Quartus Cyclone IV E Technological 原理图
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex5_syn_altera_tech.png" width="500">
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex7_syn_altera_tech.png" width="500">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div align="center">
+            i) 实验五 Synplify Cyclone IV E Technological 原理
+            </div>
+        </td>
+        <td>
+            <div align="center">
+            j) 实验七 Synplify Cyclone IV E Technological 原理
+            </div>
+        </td>
+    </tr>
+</table>
+
+<ol start="6">
+<li><p>接上条，对比的过程中发现Quartus的综合器会将锁存器的输出与其中一个输入相连，形成闭环，推测Quartus综合器在综合的过程中会自动将条件补全并输出当前值。</p>
+</li>
+<li><p>由于Quartus生成的RTL视图可读性比较好，所以这些实验使用Quartus来综合。else放在最开始就相当于给之后的所有if添加默认输出；</p>
+</li>
+</ol>
+<table>
+    <tr>
+        <td>
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">0</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span> )      Z = A[<span class="hljs-number">0</span>];
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (C[<span class="hljs-number">1</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>)  Z = A[<span class="hljs-number">1</span>];
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (C[<span class="hljs-number">2</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>)  Z = A[<span class="hljs-number">2</span>];
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (C[<span class="hljs-number">3</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>)  Z = A[<span class="hljs-number">3</span>];
+    <span class="hljs-keyword">else</span>                    Z = A[<span class="hljs-number">4</span>];
+<span class="hljs-keyword">end</span></code></pre>
+        </td>
+        <td valign="top">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_1.png" height="150">
+        </td>
+    </tr>
+    <tr>
+        <td>
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    Z = A[<span class="hljs-number">4</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">0</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span> ) Z = A[<span class="hljs-number">0</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">1</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>)  Z = A[<span class="hljs-number">1</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">2</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>)  Z = A[<span class="hljs-number">2</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">3</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>)  Z = A[<span class="hljs-number">3</span>];
+<span class="hljs-keyword">end</span></code></pre>
+        </td>
+        <td valign="top">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_2.png" height="150">
+        </td>
+    </tr>
+</table>
+
+
+<ol start="8">
+<li>放在其他位置时，else会阻塞前面的if语句，假如<strong>放在第4个if后面的else 里面，那么前面3个if就被阻塞了</strong>，因为第4个的else中已经包含了前三个if语句的条件，要时刻记住always块中的阻塞赋值生成的组合逻辑电路是按照顺利执行的。 既然是按照顺序，那第4个if的else里面已经包含了前面的if条件，那么前面条件就没有意义，而综合软件在进行综合时，就将前面3个if语句优化掉，即不会生成对应的电路。同样道理，放在第一个if后面的else中是可以的。</li>
+</ol>
+<table>
+    <tr>
+        <td>
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">0</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">0</span>];
+    <span class="hljs-keyword">else</span>  Z = A[<span class="hljs-number">4</span>];  //可以放在此位置
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">1</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">1</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">2</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">2</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">3</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">3</span>];
+<span class="hljs-keyword">end</span></code></pre>
+        </td>
+        <td valign="top">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_3.png" height="150">
+        </td>
+    </tr>
+    <tr>
+        <td>
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">0</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">0</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">1</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">1</span>];
+    <span class="hljs-keyword">else</span>  Z = A[<span class="hljs-number">4</span>];  //可以放在此位置
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">2</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">2</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">3</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">3</span>];
+<span class="hljs-keyword">end</span></code></pre>
+        </td>
+        <td valign="top">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_4.png" height="150">
+        </td>
+    </tr>
+    <tr>
+        <td>
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">0</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">0</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">1</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">1</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">2</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">2</span>];
+    <span class="hljs-keyword">else</span> Z = A[<span class="hljs-number">4</span>]; //放在此处，上面的<span class="hljs-keyword">if</span>被阻塞
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">3</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">3</span>];
+<span class="hljs-keyword">end</span></code></pre>
+        </td>
+        <td valign="top">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_5.png" height="150">
+        </td>
+    </tr>
+    <tr>
+        <td>
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">0</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">0</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">1</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">1</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">2</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">2</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">3</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">3</span>];
+    <span class="hljs-keyword">else</span> Z = A[<span class="hljs-number">4</span>]; //放在此处，上面的<span class="hljs-keyword">if</span>被阻塞
+<span class="hljs-keyword">end</span></code></pre>
+        </td>
+        <td valign="top">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_6.png" height="150">
+        </td>
+    </tr>
+</table>
+
+<ol start="9">
+<li>没有else也会有阻塞产生，只不过会比有else的多阻塞一下。</li>
+</ol>
+<table>
+    <tr>
+        <td>
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    Z = A[<span class="hljs-number">4</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">0</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span> ) Z = A[<span class="hljs-number">0</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">1</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>)  Z = A[<span class="hljs-number">1</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">2</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>)  Z = A[<span class="hljs-number">2</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">3</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>)  Z = A[<span class="hljs-number">3</span>];
+<span class="hljs-keyword">end</span></code></pre>
+        </td>
+        <td valign="top">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_2.png" height="150">
+        </td>
+    </tr>
+    <tr>
+        <td>
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">0</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">0</span>];
+    Z = A[<span class="hljs-number">4</span>]; //放在此处，上面的<span class="hljs-keyword">if</span>被阻塞
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">1</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">1</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">2</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">2</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">3</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">3</span>];
+<span class="hljs-keyword">end</span></code></pre>
+        </td>
+        <td valign="top">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_7.png" height="150">
+        </td>
+    </tr>
+    <tr>
+        <td>
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">0</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">0</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">1</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">1</span>];
+    Z = A[<span class="hljs-number">4</span>]; //放在此处，上面的<span class="hljs-keyword">if</span>被阻塞
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">2</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">2</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">3</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">3</span>];
+<span class="hljs-keyword">end</span></code></pre>
+        </td>
+        <td valign="top">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_8.png" height="150">
+        </td>
+    </tr>
+    <tr>
+        <td>
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">0</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">0</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">1</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">1</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">2</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">2</span>];
+    Z = A[<span class="hljs-number">4</span>]; //放在此处，上面的<span class="hljs-keyword">if</span>被阻塞
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">3</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">3</span>];
+<span class="hljs-keyword">end</span></code></pre>
+        </td>
+        <td valign="top">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_9.png" height="150">
+        </td>
+    </tr>
+    <tr>
+        <td>
+<pre class="hljs"><code>always@(*) <span class="hljs-keyword">begin</span>
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">0</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">0</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">1</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">1</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">2</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">2</span>];
+    <span class="hljs-keyword">if</span> (C[<span class="hljs-number">3</span>] == <span class="hljs-number">1</span><span class="hljs-attribute">'b1</span>) Z = A[<span class="hljs-number">3</span>];
+    Z = A[<span class="hljs-number">4</span>]; //放在此处，上面的<span class="hljs-keyword">if</span>被阻塞
+<span class="hljs-keyword">end</span></code></pre>
+        </td>
+        <td valign="top">
+            <img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_if-else/ex11_quartus_rtl_10.png" height="150">
+        </td>
+    </tr>
+</table>
+
+<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><ol>
+<li><p>时序逻辑电路中if…else无论有没有else，case无论有没有default，都可以综合成正确的电路；但是在组合逻辑电路中，if如果没有else（包括else内容为空或保持输出）/ case如果没有default（包括default内容为空或保持输出），就会综合出锁存器，如果补全了else选项就会综合出相应的组合逻辑电路；</p>
+</li>
+<li><p>不同综合器对于if…else和case的综合结果不尽相同，总的来说还是case的综合结果更好；</p>
+</li>
+<li><p>对比if…else和case的综合结果，对于时序逻辑电路，Synplify=Quartusii&gt;Vivado&gt;ISE；对于组合逻辑电路，Synplify&gt;Quartusii&gt;Vivado&gt;ISE，Synplify的优点主要是更加智能；</p>
+</li>
+<li><p>对于像Synplify和Quartusii这样的综合器，其实if…else和case的综合结果是几乎一样的，这说明综合器越来越聪明，但是考虑到代码的可移植性，还是用case更好一点；</p>
+</li>
+<li><p>在组合逻辑电路中，目前已知只有实验中的Quartus会自动将条件补全并输出当前值，但是综合器依然会生成锁存器；</p>
+</li>
+<li><p>如果有多个if，第一个else会默认成为之后所有if的默认值；</p>
+</li>
+<li><p>else如果放在其他位置，会阻塞前面的所有if语句，所以放在不同的位置也就会产生不同的综合结果，所以这里的编码原则就是尽可能让代码没有歧义；</p>
+</li>
+<li><p>其实硬件电路本身是没有优先级之分的，对于if这样的语法，最好是可以实现条件互斥，如果条件本身不能互斥，那么综合器会扩展这些条件，然后根据扩展后的真值表进行结果判断。</p>
+</li>
+</ol>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><pre><code>这篇笔记参考网上众多资料实验并整理而成，如果涉及侵权烦请请告知，我将第一时间处理。</code></pre><ol>
+<li><a href="https://blog.csdn.net/leo_luo1/article/details/72848764" target="_blank" rel="noopener">Verilog中if..else和case语句分析</a></li>
+<li><a href="https://www.amobbs.com/thread-3919563-1-1.html" target="_blank" rel="noopener">关于FPGA中是用if-else还是select-case</a></li>
+<li><a href="https://blog.csdn.net/dongdongnihao_/article/details/81254686" target="_blank" rel="noopener">Verilog——if语句的优先级问题</a></li>
+<li><a href="https://blog.csdn.net/wordwarwordwar/article/details/78509521" target="_blank" rel="noopener">状态机跑飞的例子</a></li>
+<li><a href="http://www.cnblogs.com/oomusou/archive/2010/09/05/verilog_mux2.html" target="_blank" rel="noopener">多路选择器</a></li>
+</ol>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2019-07-17/if-else/">if……else 和 case 的综合结果</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">黑山老喵</a></p>
+        <p><span>发布时间:</span>2019-07-17, 20:00:41</p>
+        <p><span>最后更新:</span>2019-07-18, 19:53:10</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2019-07-17/if-else/" title="if……else 和 case 的综合结果">https://catonblack.cn/2019-07-17/if-else/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://catonblack.cn/2019-07-17/if-else/　　作者: 黑山老喵" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target="_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2019-07-16/fsm-style/">
+                    状态机一段式、二段式和三段式写法的实际效果
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#实验目的"><span class="toc-number">1.</span> <span class="toc-text">实验目的</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#实验内容"><span class="toc-number">2.</span> <span class="toc-text">实验内容</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#实验一"><span class="toc-number">2.1.</span> <span class="toc-text">实验一</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#实验二"><span class="toc-number">2.2.</span> <span class="toc-text">实验二</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#实验三"><span class="toc-number">2.3.</span> <span class="toc-text">实验三</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#实验四"><span class="toc-number">2.4.</span> <span class="toc-text">实验四</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#实验五"><span class="toc-number">2.5.</span> <span class="toc-text">实验五</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#实验六"><span class="toc-number">2.6.</span> <span class="toc-text">实验六</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#实验七"><span class="toc-number">2.7.</span> <span class="toc-text">实验七</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#实验八"><span class="toc-number">2.8.</span> <span class="toc-text">实验八</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#实验九"><span class="toc-number">2.9.</span> <span class="toc-text">实验九</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#实验十"><span class="toc-number">2.10.</span> <span class="toc-text">实验十</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#实验十一"><span class="toc-number">2.11.</span> <span class="toc-text">实验十一</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#结果分析"><span class="toc-number">3.</span> <span class="toc-text">结果分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#结论"><span class="toc-number">4.</span> <span class="toc-text">结论</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">5.</span> <span class="toc-text">参考资料</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录" title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"if……else 和 case 的综合结果　| 黑山老喵小窝　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+        <section id="comments" style="margin: 2em; padding: 2em; background: rgba(255, 255, 255, 0.5)">
+    <div id="vcomment" class="comment"></div>
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src="//unpkg.com/valine@1.2.0-beta1/dist/Valine.min.js"></script>
+    <script>
+      new Valine({
+        el: '#vcomment',
+        notify: 'true',
+        verify: 'true',
+        app_id: "0tk0hycE3Yips8Txim7EBtm5-gzGzoHsz",
+        app_key: "nW716Qi1t7lY4m6zXI9MSYJs",
+        placeholder: "Just go go!",
+        avatar: "mp"
+      });
+    </script>
+</section>
+
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/" title="回到主页"><i class="fa fa-home"></i></a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2019-07-16/fsm-style/" title="下一篇: 状态机一段式、二段式和三段式写法的实际效果">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019-07-17/if-else/">if……else 和 case 的综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/fsm-style/">状态机一段式、二段式和三段式写法的实际效果</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/multisignal-cdc/">跨时钟传递多个时钟信号</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-03-17/hdl-prjsetting/">Verilog 项目配置</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-01-16/moore-mealy/">摩尔状态机和米勒状态机特性对比</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-08-18/up-down-edge/">上下边沿触发</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-18/model-interface/">常见的模块间交互的方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-18/fpga-reset/">FPGA 复位研究</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-16/async-clock-sync/">异步时钟信号同步化及其综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-05-04/wire-reg/">Wire and Reg等定义的综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-13/folder-manage/">工程存档文件夹命名</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-07/use-git/">Git管理工程的方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-03/file-manage/">基于中心库的NAS,云盘和Git的文件管理方式</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-03-01/instant-noodles/">泡面鉴赏</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2019 黑山老喵
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style="display:none">
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style="display:none">
+                        <span id="page-visit" title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 5;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>

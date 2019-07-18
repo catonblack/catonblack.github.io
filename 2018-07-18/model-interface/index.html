@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<meta name="author" content="黑山老喵">
+
+
+
+<meta name="description" content="对系统的模块进行划分之后需要考虑的就是模块之间的信息交互，以下是我整理和总结的常见结构，在这些结构的基础上再根据实际情况进行调整。这篇笔记中的交互方法是针对同步时钟模块进行介绍的，异步时钟模块的使用需要略微调整。">
+<meta name="keywords" content="异步时钟,模块交互">
+<meta property="og:type" content="article">
+<meta property="og:title" content="常见的模块间交互的方法">
+<meta property="og:url" content="https://catonblack.cn/2018-07-18/model-interface/index.html">
+<meta property="og:site_name" content="黑山老喵小窝">
+<meta property="og:description" content="对系统的模块进行划分之后需要考虑的就是模块之间的信息交互，以下是我整理和总结的常见结构，在这些结构的基础上再根据实际情况进行调整。这篇笔记中的交互方法是针对同步时钟模块进行介绍的，异步时钟模块的使用需要略微调整。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/cover.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/direct.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/direct_exp.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/rdy_nobuf.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/rdy_buf.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/ack.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/ack_full.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/ack_full_sim.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/ack_part1.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/ack_part1_sim.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/ack_part2.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/ack_part2_sim.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/ack_full.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/asyack_full.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/ack_part1.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/asyack_part1.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/ack_part2.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/asyack_part2.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/comp.png">
+<meta property="og:updated_time" content="2019-07-18T11:50:50.508Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="常见的模块间交互的方法">
+<meta name="twitter:description" content="对系统的模块进行划分之后需要考虑的就是模块之间的信息交互，以下是我整理和总结的常见结构，在这些结构的基础上再根据实际情况进行调整。这篇笔记中的交互方法是针对同步时钟模块进行介绍的，异步时钟模块的使用需要略微调整。">
+<meta name="twitter:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/cover.png">
+
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="黑山老喵小窝" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/favicon.png">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>常见的模块间交互的方法 | 黑山老喵小窝</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "//hm.baidu.com/hm.js?9871d0915604e1e9dc64974db7659410";
+            var s = document.getElementsByTagName("script")[0]; 
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+</head></html>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/avatar.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">黑山老喵</a></h1>
+        </hgroup>
+
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="true">
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class="no-result">No results found <i class="fa fa-spinner fa-pulse"></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/categories/">分类</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto:catonblack@live.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" href="http://github.com/catonblack" title="GitHub"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Git/">Git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/GitHub/">GitHub</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/GitServer/">GitServer</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Gitlab/">Gitlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Mealy/">Mealy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Moore/">Moore</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NAS/">NAS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Negedge-Clock-Edge/">Negedge Clock Edge</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Posedge-Clock-Edge/">Posedge Clock Edge</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reg/">Reg</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Wire/">Wire</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/case/">case</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/if……else/">if……else</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/云盘/">云盘</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/变量定义/">变量定义</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/品鉴/">品鉴</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/器件特性/">器件特性</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/复位/">复位</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/多信号同步/">多信号同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/多段式状态机/">多段式状态机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/实际电路/">实际电路</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/工程存档/">工程存档</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/异步时钟/">异步时钟</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/扁平化命名/">扁平化命名</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/文件管理/">文件管理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/有限状态机/">有限状态机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/模块交互/">模块交互</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/泡面/">泡面</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/状态机转换/">状态机转换</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/电平同步/">电平同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/综合/">综合</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/脉冲同步/">脉冲同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/规范/">规范</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/边沿检测同步/">边沿检测同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进口/">进口</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/项目存档/">项目存档</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/">MOxFIVE</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://catonblack.cn">Github</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://console.cloud.tencent.com/domain">腾讯云</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://tongji.baidu.com/web/28226238/overview/index?siteId=13598139">百度统计</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://www.livere.com/city-demo/insight">来必力</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://portal.qiniu.com/create">七牛云</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://valine.js.org/quickstart.html">Valine</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.coding.me/yelee/">Yelee</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">来自老和山职业技术学院的非典型理工男。专注于硬件、嵌入式、FPGA设计，涉足领域包括科学仪器、医疗仪器和可穿戴设备，在相关领域有6年一线实战经验。喜欢尝试新鲜事物，对物理、化学、医学、心理学等学科有一定的了解。</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">黑山老喵</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/avatar.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">黑山老喵</a></h1>
+            </hgroup>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/categories/">分类</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto:catonblack@live.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="http://github.com/catonblack" title="GitHub"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我">
+</nav>
+      <div class="body-wrap"><article id="post-model-interface" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2018-07-18/model-interface/" class="article-date">
+      <time datetime="2018-07-18T11:07:50.000Z" itemprop="datePublished">2018-07-18</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      常见的模块间交互的方法
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/FPGA入门款/">FPGA入门款</a><a class="article-category-link" href="/categories/FPGA血泪史/">FPGA血泪史</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/异步时钟/">异步时钟</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/模块交互/">模块交互</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/cover.png" width="500">
+</div>
+
+<p>对系统的模块进行划分之后需要考虑的就是模块之间的信息交互，以下是我整理和总结的常见结构，在这些结构的基础上再根据实际情况进行调整。<br>这篇笔记中的交互方法是针对同步时钟模块进行介绍的，异步时钟模块的使用需要略微调整。</p>
+<a id="more"></a>
+
+<h2 id="直接交互"><a href="#直接交互" class="headerlink" title="直接交互"></a>直接交互</h2><p>直接交互不需要接收端反馈，发送端直接发送数据，一般用于下游模块的处理速度快于上游模块的数据发送速度。框图如下图：</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/direct.png" width="600">
+</div>
+
+<p>典型案例举例：<br>包文汇聚模块，系统框图如下：</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/direct_exp.png" width="600">
+</div>
+
+
+<p>此项目中网口A的时钟是40MHz，网口B的时钟是20MHz，网口C的时钟是10MHz，下游模块的工作时钟是80MHz。由于下游模块的处理速度高于上游模块的总发送速录，所以即使三个网口同时发送数据，下游模块任可以完成对所有数据的处理。</p>
+<p>因此，下游模块不需要通过反馈信号控制上游模块数据的发送，即采用直接交互架构即可。</p>
+<h2 id="rdy交互"><a href="#rdy交互" class="headerlink" title="rdy交互"></a>rdy交互</h2><h3 id="无缓存rdy交互"><a href="#无缓存rdy交互" class="headerlink" title="无缓存rdy交互"></a>无缓存rdy交互</h3><p>当rdy为高电平时，表示模块B可以接受模块A的读写命令，开始传输数据，模块A每发送一个数据，模块B就处理，处理完后再发送下一个数据。一般应用于上游模块速率高，下游模块速率低，并且上游模块有缓存的场景。框图如下图。 </p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/rdy_nobuf.png" width="600">
+</div>
+
+<h3 id="有缓存rdy交互"><a href="#有缓存rdy交互" class="headerlink" title="有缓存rdy交互"></a>有缓存rdy交互</h3><p>收到读写命令后，模块A开始传输数据，数据先输入模块B的FIFO，然后模块A和模块B按照各自时钟进行读写FIFO的数据，可以解决读写速率不匹配的问题。一般应用于上下游模块都有缓存的场景。优点是控制简单，对时序要求不太严格。框图如下图。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/rdy_buf.png" width="600">
+</div>
+
+<h2 id="应答交互"><a href="#应答交互" class="headerlink" title="应答交互"></a>应答交互</h2><p>模块A请求发送，模块B收到应答后就可以传输数据。一般应用于上游模块等待响应后才能连续发送一段数据的场景。框图如下图:</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/ack.png" width="600">
+</div>
+
+<h3 id="全握手"><a href="#全握手" class="headerlink" title="全握手"></a>全握手</h3><p>全握手协议中，双方电路在声明或中止各自的握手信号前都要等待对方的相应。首先，发送方电路A声明它的请求信号，然后接收方电路B检测到该请求有效后，声明它的效应信号；当电路A检测到响应信号有效之后，中止自己的请求信号；最后，当电路B检测到请求无效之后，中止自己的相应信号。这样，算是完成了一次通信。除非A检测到无效的响应信号，否则它不会再声明新的请求信号。这种机制要求请求电路A必须延迟它的下一个请求，直到它检测到无效的响应信号（意味着上次请求已完成）。</p>
+<p>全握手鲁棒性很好，因为通过检测请求和响应信号，每个电路都清楚地知道对方的状态，这种方式的不足之处是完成整个过程要花费很多时钟周期。<br>时序图如下：</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/ack_full.jpg" width="600">
+</div>
+
+<p>Code:</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> top_sys (</span><br><span class="line">    <span class="keyword">input</span>   <span class="keyword">wire</span> clk,</span><br><span class="line">    <span class="keyword">input</span>   <span class="keyword">wire</span> rst,</span><br><span class="line">    <span class="keyword">input</span>   <span class="keyword">wire</span> trig</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line"><span class="keyword">reg</span> req;</span><br><span class="line"><span class="keyword">reg</span> ack;</span><br><span class="line"><span class="keyword">reg</span> data;</span><br><span class="line"><span class="keyword">reg</span> [<span class="number">3</span>:<span class="number">0</span>] req_idx;</span><br><span class="line"><span class="keyword">reg</span> [<span class="number">3</span>:<span class="number">0</span>] ack_idx;</span><br><span class="line"></span><br><span class="line"><span class="keyword">always</span> @(<span class="keyword">posedge</span> clk <span class="keyword">or</span> <span class="keyword">posedge</span> rst) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">if</span> (rst) <span class="keyword">begin</span></span><br><span class="line">        req_idx &lt;= <span class="number">4'd0</span>;</span><br><span class="line">        req &lt;= <span class="number">1'b0</span>;</span><br><span class="line">    <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">        <span class="keyword">case</span> (req_idx)</span><br><span class="line">            <span class="number">4'd0</span>: <span class="keyword">begin</span></span><br><span class="line">                <span class="keyword">if</span> (trig == <span class="number">1'b1</span>) <span class="keyword">begin</span></span><br><span class="line">                    req &lt;= <span class="number">1'b1</span>;</span><br><span class="line">                    req_idx &lt;= <span class="number">4'd1</span>;</span><br><span class="line">                <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">                    req &lt;= <span class="number">1'b0</span>;</span><br><span class="line">                    req_idx &lt;= <span class="number">4'd0</span>;</span><br><span class="line">                <span class="keyword">end</span></span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="number">4'd1</span>: <span class="keyword">begin</span></span><br><span class="line">                <span class="keyword">if</span> (ack == <span class="number">1'b1</span>)</span><br><span class="line">                    req_idx &lt;= <span class="number">4'd2</span>;</span><br><span class="line">                <span class="keyword">else</span></span><br><span class="line">                    req_idx &lt;= <span class="number">4'd1</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="number">4'd2</span>: <span class="keyword">begin</span></span><br><span class="line">                    req &lt;= <span class="number">1'b0</span>;</span><br><span class="line">                    req_idx &lt;= <span class="number">4'd3</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="number">4'd3</span>: <span class="keyword">begin</span></span><br><span class="line">                <span class="keyword">if</span> (ack == <span class="number">1'b0</span>) <span class="keyword">begin</span></span><br><span class="line">                    req &lt;= <span class="number">1'b0</span>;</span><br><span class="line">                    req_idx &lt;= <span class="number">4'd4</span>;</span><br><span class="line">                <span class="keyword">end</span> <span class="keyword">else</span></span><br><span class="line">                    req_idx &lt;= <span class="number">4'd3</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="number">4'd4</span>: <span class="keyword">begin</span></span><br><span class="line">                    req_idx &lt;= <span class="number">4'd4</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">endcase</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">always</span> @(<span class="keyword">posedge</span> clk <span class="keyword">or</span> <span class="keyword">posedge</span> rst) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">if</span> (rst) <span class="keyword">begin</span></span><br><span class="line">        ack &lt;= <span class="number">1'b0</span>;</span><br><span class="line">        ack_idx &lt;= <span class="number">4'd0</span>;</span><br><span class="line">    <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">        <span class="keyword">case</span> (ack_idx)</span><br><span class="line">            <span class="number">4'd0</span>: <span class="keyword">begin</span></span><br><span class="line">                <span class="keyword">if</span> (req == <span class="number">1'b1</span>) <span class="keyword">begin</span></span><br><span class="line">                    ack &lt;= <span class="number">1'b1</span>;</span><br><span class="line">                    ack_idx &lt;= <span class="number">4'd1</span>;</span><br><span class="line">                <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">                    ack &lt;= <span class="number">1'b0</span>;</span><br><span class="line">                    ack_idx &lt;= <span class="number">4'd0</span>;</span><br><span class="line">                <span class="keyword">end</span></span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="number">4'd1</span>: <span class="keyword">begin</span></span><br><span class="line">                <span class="keyword">if</span> (req == <span class="number">1'b0</span>) <span class="keyword">begin</span></span><br><span class="line">                    ack &lt;= <span class="number">1'b0</span>;</span><br><span class="line">                    ack_idx &lt;= <span class="number">4'd2</span>;</span><br><span class="line">                <span class="keyword">end</span> <span class="keyword">else</span></span><br><span class="line">                    ack_idx &lt;= <span class="number">4'd1</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="number">4'd2</span>: <span class="keyword">begin</span></span><br><span class="line">                    ack_idx &lt;= <span class="number">4'd2</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">endcase</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/ack_full_sim.png" width="600">
+</div>
+
+<h4 id="PS："><a href="#PS：" class="headerlink" title="PS："></a>PS：</h4><p>这里留个记号，仿真中明明4个时钟就可以了，为什么资料中显示这里需要5个时钟呢？</p>
+<h3 id="部分握手1"><a href="#部分握手1" class="headerlink" title="部分握手1"></a>部分握手1</h3><p>部分握手的双方不用等对方的响应就中止各自的信号，并继续执行握手命令序列。在第一种握手方法中，电路A以有效电平声明其请求信号，电路B以一个单时钟宽度脉冲作为响应。此时，电路B并不关心电路A何时中止它的请求。省去了完整握手流程里面的最后一步，也就是ack信号自动会把自己复位，而不是要等检测到req信号复位之后了。<br>时序图如下：</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/ack_part1.jpg" width="600">
+</div>
+
+<p>部分握手比全握手在健壮性方面稍弱，因为握手信号并不指示各自电路的状态，每一电路都必须保存状态信息（在全握手里这个信息被送出去），但是，由于无需等待对方的响应，完整的时间序列花费较少的时间。</p>
+<p>Code:</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> top_sys (</span><br><span class="line">    <span class="keyword">input</span>   <span class="keyword">wire</span> clk,</span><br><span class="line">    <span class="keyword">input</span>   <span class="keyword">wire</span> rst,</span><br><span class="line">    <span class="keyword">input</span>   <span class="keyword">wire</span> trig</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line"><span class="keyword">reg</span> req;</span><br><span class="line"><span class="keyword">reg</span> ack;</span><br><span class="line"><span class="keyword">reg</span> data;</span><br><span class="line"><span class="keyword">reg</span> [<span class="number">3</span>:<span class="number">0</span>] req_idx;</span><br><span class="line"><span class="keyword">reg</span> [<span class="number">3</span>:<span class="number">0</span>] ack_idx;</span><br><span class="line"></span><br><span class="line"><span class="keyword">always</span> @(<span class="keyword">posedge</span> clk <span class="keyword">or</span> <span class="keyword">posedge</span> rst) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">if</span> (rst) <span class="keyword">begin</span></span><br><span class="line">        req_idx &lt;= <span class="number">4'd0</span>;</span><br><span class="line">        req &lt;= <span class="number">1'b0</span>;</span><br><span class="line">    <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">        <span class="keyword">case</span> (req_idx)</span><br><span class="line">            <span class="number">4'd0</span>: <span class="keyword">begin</span></span><br><span class="line">                <span class="keyword">if</span> (trig == <span class="number">1'b1</span>) <span class="keyword">begin</span></span><br><span class="line">                    req &lt;= <span class="number">1'b1</span>;</span><br><span class="line">                    req_idx &lt;= <span class="number">4'd1</span>;</span><br><span class="line">                <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">                    req &lt;= <span class="number">1'b0</span>;</span><br><span class="line">                    req_idx &lt;= <span class="number">4'd0</span>;</span><br><span class="line">                <span class="keyword">end</span></span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="number">4'd1</span>: <span class="keyword">begin</span></span><br><span class="line">                <span class="keyword">if</span> (ack == <span class="number">1'b1</span>) <span class="keyword">begin</span></span><br><span class="line">                    req_idx &lt;= <span class="number">4'd2</span>;</span><br><span class="line">                <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">                    req_idx &lt;= <span class="number">4'd1</span>;</span><br><span class="line">                <span class="keyword">end</span></span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="number">4'd2</span>: <span class="keyword">begin</span></span><br><span class="line">                    req &lt;= <span class="number">1'b0</span>;</span><br><span class="line">                    req_idx &lt;= <span class="number">4'd2</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">endcase</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">always</span> @(<span class="keyword">posedge</span> clk <span class="keyword">or</span> <span class="keyword">posedge</span> rst) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">if</span> (rst) <span class="keyword">begin</span></span><br><span class="line">        ack &lt;= <span class="number">1'b0</span>;</span><br><span class="line">        ack_idx &lt;= <span class="number">4'd0</span>;</span><br><span class="line">    <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">        <span class="keyword">case</span> (ack_idx)</span><br><span class="line">            <span class="number">4'd0</span>: <span class="keyword">begin</span></span><br><span class="line">                <span class="keyword">if</span> (req == <span class="number">1'b1</span>) <span class="keyword">begin</span></span><br><span class="line">                    ack &lt;= <span class="number">1'b1</span>;</span><br><span class="line">                    ack_idx &lt;= <span class="number">4'd1</span>;</span><br><span class="line">                <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">                    ack &lt;= <span class="number">1'b0</span>;</span><br><span class="line">                    ack_idx &lt;= <span class="number">4'd0</span>;</span><br><span class="line">                <span class="keyword">end</span></span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="number">4'd1</span>: <span class="keyword">begin</span></span><br><span class="line">                    ack &lt;= <span class="number">1'b0</span>;</span><br><span class="line">                    ack_idx &lt;= <span class="number">4'd2</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="number">4'd2</span>: <span class="keyword">begin</span></span><br><span class="line">                    ack_idx &lt;= <span class="number">4'd2</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">endcase</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/ack_part1_sim.png" width="600">
+</div>
+
+<p>部分握手1仿真总共占用3个时钟。</p>
+<h3 id="部分握手2"><a href="#部分握手2" class="headerlink" title="部分握手2"></a>部分握手2</h3><p>电路A使用一个单时钟宽度脉冲发出它的请求，电路B也以一个单时钟宽度脉冲响应这个请求。这种情况下，两个电路都需要保存状态，以指示请求正待处理。省去了完整握手流程里面的最后两步，两个信号在置位保持一段时间以后都是自动复位，不在相互检测。<br>时序图如下：</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/ack_part2.jpg" width="600">
+</div>
+
+<p>Code：</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> top_sys (</span><br><span class="line">    <span class="keyword">input</span>   <span class="keyword">wire</span> clk,</span><br><span class="line">    <span class="keyword">input</span>   <span class="keyword">wire</span> rst,</span><br><span class="line">    <span class="keyword">input</span>   <span class="keyword">wire</span> trig</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line"><span class="keyword">reg</span> req;</span><br><span class="line"><span class="keyword">reg</span> ack;</span><br><span class="line"><span class="keyword">reg</span> data;</span><br><span class="line"><span class="keyword">reg</span> [<span class="number">3</span>:<span class="number">0</span>] req_idx;</span><br><span class="line"><span class="keyword">reg</span> [<span class="number">3</span>:<span class="number">0</span>] ack_idx;</span><br><span class="line"></span><br><span class="line"><span class="keyword">always</span> @(<span class="keyword">posedge</span> clk <span class="keyword">or</span> <span class="keyword">posedge</span> rst) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">if</span> (rst) <span class="keyword">begin</span></span><br><span class="line">        req_idx &lt;= <span class="number">4'd0</span>;</span><br><span class="line">        req &lt;= <span class="number">1'b0</span>;</span><br><span class="line">    <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">        <span class="keyword">case</span> (req_idx)</span><br><span class="line">            <span class="number">4'd0</span>: <span class="keyword">begin</span></span><br><span class="line">                <span class="keyword">if</span> (trig == <span class="number">1'b1</span>) <span class="keyword">begin</span></span><br><span class="line">                    req &lt;= <span class="number">1'b1</span>;</span><br><span class="line">                    req_idx &lt;= <span class="number">4'd1</span>;</span><br><span class="line">                <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">                    req &lt;= <span class="number">1'b0</span>;</span><br><span class="line">                    req_idx &lt;= <span class="number">4'd0</span>;</span><br><span class="line">                <span class="keyword">end</span></span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="number">4'd1</span>: <span class="keyword">begin</span></span><br><span class="line">                    req &lt;= <span class="number">1'b0</span>;</span><br><span class="line">                    req_idx &lt;= <span class="number">4'd1</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">endcase</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">always</span> @(<span class="keyword">posedge</span> clk <span class="keyword">or</span> <span class="keyword">posedge</span> rst) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">if</span> (rst) <span class="keyword">begin</span></span><br><span class="line">        ack &lt;= <span class="number">1'b0</span>;</span><br><span class="line">        ack_idx &lt;= <span class="number">4'd0</span>;</span><br><span class="line">    <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">        <span class="keyword">case</span> (ack_idx)</span><br><span class="line">            <span class="number">4'd0</span>: <span class="keyword">begin</span></span><br><span class="line">                <span class="keyword">if</span> (req == <span class="number">1'b1</span>) <span class="keyword">begin</span></span><br><span class="line">                    ack &lt;= <span class="number">1'b1</span>;</span><br><span class="line">                    ack_idx &lt;= <span class="number">4'd1</span>;</span><br><span class="line">                <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">                    ack &lt;= <span class="number">1'b0</span>;</span><br><span class="line">                    ack_idx &lt;= <span class="number">4'd0</span>;</span><br><span class="line">                <span class="keyword">end</span></span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="number">4'd1</span>: <span class="keyword">begin</span></span><br><span class="line">                    ack &lt;= <span class="number">1'b0</span>;</span><br><span class="line">                    ack_idx &lt;= <span class="number">4'd2</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="number">4'd2</span>: <span class="keyword">begin</span></span><br><span class="line">                    ack_idx &lt;= <span class="number">4'd2</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">endcase</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/ack_part2_sim.png" width="600">
+</div>
+
+<p>部分握手2仿真总共占用2个时钟</p>
+<h2 id="异步时钟特别篇"><a href="#异步时钟特别篇" class="headerlink" title="异步时钟特别篇"></a>异步时钟特别篇</h2><h3 id="异步全握手"><a href="#异步全握手" class="headerlink" title="异步全握手"></a>异步全握手</h3><p>时序图：</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/ack_full.jpg" width="600">
+</div>
+
+<p>握手图解：</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/asyack_full.png" width="600">
+</div>
+
+<p>这种类型的握手使用了电平同步器。可以根据两点来粗略估计这个协议的时序：信号跨域一个时钟域需要花费 2 个时钟周期，信号在跨域时钟域之前被电路寄存花费 1 个时钟周期。所以，发送端A需要 5 个周期，接收端B需要 6 个周期。</p>
+<h3 id="异步部分握手1"><a href="#异步部分握手1" class="headerlink" title="异步部分握手1"></a>异步部分握手1</h3><p>时序图：</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/ack_part1.jpg" width="600">
+</div>
+
+<p>握手图解：</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/asyack_part1.png" width="600">
+</div>
+
+<p>为了让这种部分握手1方法成立，电路A中止请求信号至少要 1 个时钟周期长度，否则，电路B就不能区别前一个和后一个新的请求。<br>在这种握手方式下，电路B为请求信号使用一个电平同步器；电路A为响应信号使用一个脉冲同步器。只有当电路B检测到请求信号时才发出响应脉冲，这样电路A控制请求信号的时序，就能控制自己同步器接收到的脉冲间隔。<br>同样，使用前面的方法可以估算出这种握手协议的时序：发送端电路A需要花费 3 个时钟周期，接收端B需要花费 5 个时钟周期。</p>
+<h3 id="异步部分握手2"><a href="#异步部分握手2" class="headerlink" title="异步部分握手2"></a>异步部分握手2</h3><p>时序图：</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/ack_part2.jpg" width="600">
+</div>
+
+<p>握手图解：</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/asyack_part2.png" width="600">
+</div>
+
+<p>这种握手使用的是脉冲同步器。完整的时序是：电路A需要花费 2 个时钟周期，电路B需要花费 3 个时钟周期。</p>
+<h3 id="异步时钟握手总结"><a href="#异步时钟握手总结" class="headerlink" title="异步时钟握手总结"></a>异步时钟握手总结</h3><div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_model-interface/comp.png" width="600">
+</div>
+
+<p>因为握手内部采用了同步器，所以可以解决异步信号导致的亚稳态现象。根据实际要求，选择不同的同步器和握手信号，就有了前面介绍的 3 种不同的握手方式：</p>
+<ol>
+<li><p>全握手是最健壮的，因为在这种机制下，两部分电路都在等待收到对方的确认信号之后才发送新的握手信号，两部分电路是相互都知道对方目前所处于的状态，而且用了两组握手信号（request/acknowledge，de-request/de-acknowledge），相当于完成了两次握手。但是，最健壮的代价就是花费的时间最长，而且要求信号在收到对方的回复之前要保持不变，这就限制了发送信号的速率和节奏。</p>
+</li>
+<li><p>部分握手是对全握手的精简，动机就是减少握手所花费的时间，从减少花费时间的方法上，就有了两种不同的部分握手。</p>
+</li>
+<li><p>部分握手1精简了 1 个握手信号 de-acknowledge，剩下了 3 个握手信号，相当于完成了1次半的握手。而且修改了全握手中电平握手的方式，接收电路 B 发送的不再是电平信号，而是一个单时钟宽度的脉冲，所以电路A则必须使用脉冲同步器来检测来自 B 的握手信号。通过减少一个握手信号和改进一方的同步器，部分握手1就比全握手方式节约了很多时间。</p>
+</li>
+<li><p>部分握手2则更进一步，在部分握手1的基础上又精简掉一个握手信号，只剩下 2 个握手信号，只完成1次握手。而且两部分电路的同步器同时修改为脉冲方式。这样子进一步减少了握手花费的时间。</p>
+</li>
+<li><p>部分握手和全握手的本质区别不在于同步器的类型和握手信号的多少，而在于握手的方式。 部分握手不用再等待对方的回答，就继续进行自己的下一步操作，而全握手必须等到对方的回复才进行下一步的操作，所以从某种意义上，全握手方式才是真正的“握手”，而部分握手并不符合 “握手” 的意思，毕竟根本不管对方的反应，自顾自地挥手叫哪门子的握手。</p>
+</li>
+</ol>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><pre><code>这篇笔记参考网上众多资料实验并整理而成，如果涉及侵权烦请请告知，我将第一时间处理。</code></pre><ol>
+<li><a href="http://archive.ednchina.com/bbs.ednchina.com/BLOG_ARTICLE_175526.HTM" target="_blank" rel="noopener">跨越鸿沟：同步世界中的异步信号</a></li>
+<li><a href="http://bbs.eeworld.com.cn/thread-44839-1-1.html" target="_blank" rel="noopener">cpu与fpga跨时钟域数据交换的实现问题</a></li>
+<li><a href="http://guqian110.github.io/pages/2014/10/09/the_clock_design_in_fpga_3_multiasynchronous_clock_design.html" target="_blank" rel="noopener">FPGA 时钟设计 3 —— 跨时钟域设计</a></li>
+<li><a href="http://blog.eetop.cn/blog-840234-28943.html" target="_blank" rel="noopener">跨时钟域设计的一点总结</a></li>
+<li><a href="http://www.deepchip.com/downloads/cliffsnug01.pdf" target="_blank" rel="noopener">Synthesis and Scripting Techniques for Designing Multi-Asynchronous Clock Designs</a></li>
+</ol>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2018-07-18/model-interface/">常见的模块间交互的方法</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">黑山老喵</a></p>
+        <p><span>发布时间:</span>2018-07-18, 19:07:50</p>
+        <p><span>最后更新:</span>2019-07-18, 19:50:50</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2018-07-18/model-interface/" title="常见的模块间交互的方法">https://catonblack.cn/2018-07-18/model-interface/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://catonblack.cn/2018-07-18/model-interface/　　作者: 黑山老喵" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target="_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2018-08-18/up-down-edge/">
+                    上下边沿触发
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2018-07-18/fpga-reset/">
+                    FPGA 复位研究
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#直接交互"><span class="toc-number">1.</span> <span class="toc-text">直接交互</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#rdy交互"><span class="toc-number">2.</span> <span class="toc-text">rdy交互</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#无缓存rdy交互"><span class="toc-number">2.1.</span> <span class="toc-text">无缓存rdy交互</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#有缓存rdy交互"><span class="toc-number">2.2.</span> <span class="toc-text">有缓存rdy交互</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#应答交互"><span class="toc-number">3.</span> <span class="toc-text">应答交互</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#全握手"><span class="toc-number">3.1.</span> <span class="toc-text">全握手</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#PS："><span class="toc-number">3.1.1.</span> <span class="toc-text">PS：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#部分握手1"><span class="toc-number">3.2.</span> <span class="toc-text">部分握手1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#部分握手2"><span class="toc-number">3.3.</span> <span class="toc-text">部分握手2</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#异步时钟特别篇"><span class="toc-number">4.</span> <span class="toc-text">异步时钟特别篇</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#异步全握手"><span class="toc-number">4.1.</span> <span class="toc-text">异步全握手</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#异步部分握手1"><span class="toc-number">4.2.</span> <span class="toc-text">异步部分握手1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#异步部分握手2"><span class="toc-number">4.3.</span> <span class="toc-text">异步部分握手2</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#异步时钟握手总结"><span class="toc-number">4.4.</span> <span class="toc-text">异步时钟握手总结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">5.</span> <span class="toc-text">参考资料</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录" title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"常见的模块间交互的方法　| 黑山老喵小窝　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+        <section id="comments" style="margin: 2em; padding: 2em; background: rgba(255, 255, 255, 0.5)">
+    <div id="vcomment" class="comment"></div>
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src="//unpkg.com/valine@1.2.0-beta1/dist/Valine.min.js"></script>
+    <script>
+      new Valine({
+        el: '#vcomment',
+        notify: 'true',
+        verify: 'true',
+        app_id: "0tk0hycE3Yips8Txim7EBtm5-gzGzoHsz",
+        app_key: "nW716Qi1t7lY4m6zXI9MSYJs",
+        placeholder: "Just go go!",
+        avatar: "mp"
+      });
+    </script>
+</section>
+
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2018-08-18/up-down-edge/" title="上一篇: 上下边沿触发">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2018-07-18/fpga-reset/" title="下一篇: FPGA 复位研究">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019-07-17/if-else/">if……else 和 case 的综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/fsm-style/">状态机一段式、二段式和三段式写法的实际效果</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/multisignal-cdc/">跨时钟传递多个时钟信号</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-03-17/hdl-prjsetting/">Verilog 项目配置</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-01-16/moore-mealy/">摩尔状态机和米勒状态机特性对比</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-08-18/up-down-edge/">上下边沿触发</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-18/model-interface/">常见的模块间交互的方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-18/fpga-reset/">FPGA 复位研究</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-16/async-clock-sync/">异步时钟信号同步化及其综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-05-04/wire-reg/">Wire and Reg等定义的综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-13/folder-manage/">工程存档文件夹命名</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-07/use-git/">Git管理工程的方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-03/file-manage/">基于中心库的NAS,云盘和Git的文件管理方式</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-03-01/instant-noodles/">泡面鉴赏</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2019 黑山老喵
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style="display:none">
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style="display:none">
+                        <span id="page-visit" title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 5;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>
