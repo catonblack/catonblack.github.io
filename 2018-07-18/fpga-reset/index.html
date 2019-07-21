@@ -2,7 +2,7 @@
 <html lang="zh-Hans">
 <head><meta name="generator" content="Hexo 3.8.0">
 
-    <!--[if lt IE 9]>
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><!--[if lt IE 9]>
         <style>body {display: none; background: none !important} </style>
         <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
     <![endif]-->
@@ -23,7 +23,7 @@
 <meta property="og:site_name" content="黑山老喵小窝">
 <meta property="og:description" content="初学FPGA的时候对FPGA的理解最多停留在always@阶段，后来有次跟同事讨论FPGA的复位问题，她在一次DEBUG的过程中怀疑FPGA复位不完全，我对此表示不理解，原因是我对FPGA复位的理解不一样：FPGA的复位不像MCU的，它本身是没有复位这种功能的，在FPGA中reset是电路，也就是说你按下reset的按键也只是触发程序中的if(rst)这部分。在这里我打算总结一下复位相关的">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fpga-reset/cover.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fpga-reset/cover.jpg">
 <meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fpga-reset/x_reset_sync_rst_n_rtl.png">
 <meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fpga-reset/x_reset_sync_rst_n_tech.png">
 <meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fpga-reset/a_reset_sync_rst_rtl.png">
@@ -52,11 +52,11 @@
 <meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fpga-reset/reset_typical.jpg">
 <meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fpga-reset/reset_sequenced.png">
 <meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fpga-reset/reset_glitch_filtering.png">
-<meta property="og:updated_time" content="2019-07-18T11:53:00.813Z">
+<meta property="og:updated_time" content="2019-07-21T10:51:32.202Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="FPGA 复位研究">
 <meta name="twitter:description" content="初学FPGA的时候对FPGA的理解最多停留在always@阶段，后来有次跟同事讨论FPGA的复位问题，她在一次DEBUG的过程中怀疑FPGA复位不完全，我对此表示不理解，原因是我对FPGA复位的理解不一样：FPGA的复位不像MCU的，它本身是没有复位这种功能的，在FPGA中reset是电路，也就是说你按下reset的按键也只是触发程序中的if(rst)这部分。在这里我打算总结一下复位相关的">
-<meta name="twitter:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fpga-reset/cover.png">
+<meta name="twitter:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fpga-reset/cover.jpg">
 
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
@@ -127,12 +127,12 @@
             var s = document.getElementsByTagName("script")[0]; 
             s.parentNode.insertBefore(hm, s);
         })();
-    </script>
+    </script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
 
 
 </head></html>
 <body>
-  <div id="container">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="container">
     <div class="left-col">
     <div class="overlay"></div>
 <div class="intrude-less">
@@ -362,7 +362,7 @@
       
           
         <div align="center">
-<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fpga-reset/cover.png" width="600">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_fpga-reset/cover.jpg" width="600">
 </div>
 
 <p>初学FPGA的时候对FPGA的理解最多停留在always@阶段，后来有次跟同事讨论FPGA的复位问题，她在一次DEBUG的过程中怀疑FPGA复位不完全，我对此表示不理解，原因是我对FPGA复位的理解不一样：FPGA的复位不像MCU的，它本身是没有复位这种功能的，在FPGA中reset是电路，也就是说你按下reset的按键也只是触发程序中的if(rst)这部分。在这里我打算总结一下复位相关的内容。</p>
@@ -745,7 +745,7 @@
         <p><span>本文标题:</span><a href="/2018-07-18/fpga-reset/">FPGA 复位研究</a></p>
         <p><span>文章作者:</span><a href="/" title="回到主页">黑山老喵</a></p>
         <p><span>发布时间:</span>2018-07-18, 10:47:17</p>
-        <p><span>最后更新:</span>2019-07-18, 19:53:00</p>
+        <p><span>最后更新:</span>2019-07-21, 18:51:32</p>
         <p>
             <span>原始链接:</span><a class="post-url" href="/2018-07-18/fpga-reset/" title="FPGA 复位研究">https://catonblack.cn/2018-07-18/fpga-reset/</a>
             <span class="copy-path" data-clipboard-text="原文: https://catonblack.cn/2018-07-18/fpga-reset/　　作者: 黑山老喵" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
@@ -869,7 +869,7 @@
         
     </div>
 
-    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019-07-17/if-else/">if……else 和 case 的综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/fsm-style/">状态机一段式、二段式和三段式写法的实际效果</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/multisignal-cdc/">跨时钟传递多个时钟信号</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-03-17/hdl-prjsetting/">Verilog 项目配置</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-01-16/moore-mealy/">摩尔状态机和米勒状态机特性对比</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-08-18/up-down-edge/">上下边沿触发</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-18/model-interface/">常见的模块间交互的方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-18/fpga-reset/">FPGA 复位研究</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-16/async-clock-sync/">异步时钟信号同步化及其综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-05-04/wire-reg/">Wire and Reg等定义的综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-13/folder-manage/">工程存档文件夹命名</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-07/use-git/">Git管理工程的方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-03/file-manage/">基于中心库的NAS,云盘和Git的文件管理方式</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-03-01/instant-noodles/">泡面鉴赏</a></li></ul>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019-07-21/race-competition/">race-competition</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-21/setup-hold-time/">setup-hold-time</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-21/latch-vs-flipflop/">latch-vs-flipflop</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-21/metastability/">metastability</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-17/if-else/">if……else 和 case 的综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/fsm-style/">状态机一段式、二段式和三段式写法的实际效果</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/multisignal-cdc/">跨时钟传递多个时钟信号</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-03-17/hdl-prjsetting/">Verilog 项目配置</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-01-18/mealy2moore/">Moore 与 Mealy 状态机的互相转换</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-01-16/moore-mealy/">摩尔状态机和米勒状态机特性对比</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-08-18/up-down-edge/">上下边沿触发</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-18/model-interface/">常见的模块间交互的方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-18/fpga-reset/">FPGA 复位研究</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-16/async-clock-sync/">异步时钟信号同步化及其综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-05-04/wire-reg/">Wire and Reg等定义的综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-13/folder-manage/">工程存档文件夹命名</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-07/use-git/">Git管理工程的方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-03/file-manage/">基于中心库的NAS,云盘和Git的文件管理方式</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-03-01/instant-noodles/">泡面鉴赏</a></li></ul>
 
 
 
@@ -985,6 +985,6 @@ MathJax.Hub.Queue(function() {
 
 <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
 </script>
-  </div>
+  </div><!-- hexo-inject:begin --><!-- hexo-inject:end -->
 </body>
 </html>

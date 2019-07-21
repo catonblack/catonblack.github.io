@@ -2,7 +2,7 @@
 <html lang="zh-Hans">
 <head><meta name="generator" content="Hexo 3.8.0">
 
-    <!--[if lt IE 9]>
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><!--[if lt IE 9]>
         <style>body {display: none; background: none !important} </style>
         <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
     <![endif]-->
@@ -16,7 +16,7 @@
 
 
 <meta name="description" content="之前对比过一段式，两段式和三段式状态机综合结果，在这个过程中发现大家对Moore状态机和Mealy状态机特别容易混淆。所以在这里专门写了这篇博文来详细介绍这些内容。">
-<meta name="keywords" content="综合,有限状态机,Moore,Mealy,状态机转换">
+<meta name="keywords" content="有限状态机,Moore,Mealy,状态机转换,综合">
 <meta property="og:type" content="article">
 <meta property="og:title" content="摩尔状态机和米勒状态机特性对比">
 <meta property="og:url" content="https://catonblack.cn/2019-01-16/moore-mealy/index.html">
@@ -30,23 +30,13 @@
 <meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_moore-mealy/code_mealy.jpg">
 <meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_moore-mealy/fsm_moore.png">
 <meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_moore-mealy/fsm_mealy.png">
-<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_moore-mealy/mealy2mooreS0.jpg">
-<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_moore-mealy/mealy2mooreS1.jpg">
-<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_moore-mealy/mealy2mooreS2.jpg">
-<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_moore-mealy/mealy2mooreS3.jpg">
-<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_moore-mealy/mealy2mooreS4.jpg">
-<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_moore-mealy/mealy2mooreS5.jpg">
-<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_moore-mealy/fsm_mealy2moore.png">
-<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_moore-mealy/moore2mealyS0.jpg">
-<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_moore-mealy/moore2mealyS1.jpg">
-<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_moore-mealy/moore2mealyS2.jpg">
 <meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_moore-mealy/mealy_rtl.png">
 <meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_moore-mealy/mealy_tech.png">
 <meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_moore-mealy/moore_rtl.png">
 <meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_moore-mealy/moore_tech.png">
 <meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_moore-mealy/fsm_mealy.png">
 <meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_moore-mealy/fsm_moore.png">
-<meta property="og:updated_time" content="2019-07-18T11:52:28.315Z">
+<meta property="og:updated_time" content="2019-07-21T10:49:19.513Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="摩尔状态机和米勒状态机特性对比">
 <meta name="twitter:description" content="之前对比过一段式，两段式和三段式状态机综合结果，在这个过程中发现大家对Moore状态机和Mealy状态机特别容易混淆。所以在这里专门写了这篇博文来详细介绍这些内容。">
@@ -121,12 +111,12 @@
             var s = document.getElementsByTagName("script")[0]; 
             s.parentNode.insertBefore(hm, s);
         })();
-    </script>
+    </script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
 
 
 </head></html>
 <body>
-  <div id="container">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="container">
     <div class="left-col">
     <div class="overlay"></div>
 <div class="intrude-less">
@@ -396,61 +386,7 @@
 
 <pre><code>Moore 状态机是时序逻辑输出只取决于当前状态的这一类状态机，其输出表达式为输出信号 = G(当前状态)。
 
-Mealy 状态机是时序逻辑输出不但取决于状态，还取决于输入的一类状态机，其状态机输出表达式为输出信号 = G(当前状态，输入信号)。</code></pre><h2 id="Moore-与-Mealy-状态机的互相转换"><a href="#Moore-与-Mealy-状态机的互相转换" class="headerlink" title="Moore 与 Mealy 状态机的互相转换"></a>Moore 与 Mealy 状态机的互相转换</h2><p>根据哲学原理，讲完世界观就得讲方法论，讲完区别就得意识到事物之间是有普遍联系的，他们可以在一定条件下进行转化。状态机之间也不例外。</p>
-<h3 id="先讲Mealy-gt-Moore的过程"><a href="#先讲Mealy-gt-Moore的过程" class="headerlink" title="先讲Mealy-&gt;Moore的过程"></a>先讲Mealy-&gt;Moore的过程</h3><p>首先请出这次举例所需要的Mealy状态机，如下图：</p>
-<div align="center">
-<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_moore-mealy/mealy2mooreS0.jpg" width="300">
-</div>
-
-<p>这个状态机有三个状态：S0，S1和S2，仔细观察后不难发现指向S1的箭头有两种输出： 0和 1，指向S2的箭头也有两种输出：0和1，也就是说对于S1状态来说，状态机的输出并不仅仅与状态本身有关，还与状态机的输入有关，所以这是一个Mealy状态机。</p>
-<p>接下来就是见证奇迹的时刻。高呼，汽车人，变形！哦，不，状态机，变形！</p>
-<p>第一步，先确定复位后的初始状态为S0，然后S0临近的两个状态分别为S1和S2。分别画上指向箭头，然后就存在了S0分别指向S1与S2的状态。如下图：</p>
-<div align="center">
-<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_moore-mealy/mealy2mooreS1.jpg" width="300">
-</div>
-
-<p>第二步，分析原状态机图，发现S1有两个输出，此时再使用一个状态就不太合适了，所以这时将S1拆分成两个状态：S10和S11，分别表示输出为0和1的两个状态；同理将S2也分解为S20与S21。如下图：</p>
-<div align="center">
-<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_moore-mealy/mealy2mooreS2.jpg" width="300">
-</div>
-
-<p>第三步， 在原始状态机中S1有指向S0的箭头，这两个转换过程的输出均为0，所以画两根箭头指向S0。如下图：</p>
-<div align="center">
-<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_moore-mealy/mealy2mooreS3.jpg" width="300">
-</div>
-
-<p>第四步， 参考第三步，S1在输入为0 时会指向S2，而且输出为1，所以这里画两根箭头指向S21。如下图：</p>
-<div align="center">
-<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_moore-mealy/mealy2mooreS4.jpg" width="300">
-</div>
-
-<p>第五步，在完成第四步的基础上画两根箭头由S20和S21指向S10。如下图：</p>
-<div align="center">
-<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_moore-mealy/mealy2mooreS5.jpg" width="300">
-</div>
-
-<p>锵锵，大功告成，Mealy状态机被完美改造成了Moore状态机。<br>稍微做下整形：</p>
-<div align="center">
-<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_moore-mealy/fsm_mealy2moore.png" width="600">
-</div>
-
-<h3 id="再讲Moore-gt-Mealy的过程"><a href="#再讲Moore-gt-Mealy的过程" class="headerlink" title="再讲Moore-&gt;Mealy的过程"></a>再讲Moore-&gt;Mealy的过程</h3><p>Moore状态机转换成Mealy状态机的过程相对来说就要简单一些了。</p>
-<p>下图是需要转换的Moore状态机。</p>
-<div align="center">
-<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_moore-mealy/moore2mealyS0.jpg" width="300">
-</div>
-
-<p>第一步，观察状态机的组成，发现有两个状态机之间没有直接的联系，即这两个状态机之间没有箭头连接，他们就是A和D。然后观察到这两个状态机都有箭头指向状态B和状态C，所以这两个状态是可以融合的。</p>
-<div align="center">
-<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_moore-mealy/moore2mealyS1.jpg" width="300">
-</div>
-
-<p>第二步，将A与D融合后产生新的状态AD’，同时，状态B和状态C就转变成新的状态B’和C’。然后在这个基础上进行调整和整理就得到了下面这张图。</p>
-<div align="center">
-<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_moore-mealy/moore2mealyS2.jpg" width="300">
-</div>
-
-<h2 id="Moore状态机与Mealy状态机的性能对比"><a href="#Moore状态机与Mealy状态机的性能对比" class="headerlink" title="Moore状态机与Mealy状态机的性能对比"></a>Moore状态机与Mealy状态机的性能对比</h2><h3 id="Mealy状态机"><a href="#Mealy状态机" class="headerlink" title="Mealy状态机"></a>Mealy状态机</h3><p>Code：</p>
+Mealy 状态机是时序逻辑输出不但取决于状态，还取决于输入的一类状态机，其状态机输出表达式为输出信号 = G(当前状态，输入信号)。</code></pre><h2 id="Moore状态机与Mealy状态机的性能对比"><a href="#Moore状态机与Mealy状态机的性能对比" class="headerlink" title="Moore状态机与Mealy状态机的性能对比"></a>Moore状态机与Mealy状态机的性能对比</h2><h3 id="Mealy状态机"><a href="#Mealy状态机" class="headerlink" title="Mealy状态机"></a>Mealy状态机</h3><p>Code：</p>
 <figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> top_sys (</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>      clk,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>      rst,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>      i,</span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>       out</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line"><span class="keyword">reg</span> [<span class="number">2</span>:<span class="number">0</span>] NS; <span class="comment">//NextState</span></span><br><span class="line"><span class="keyword">reg</span> [<span class="number">2</span>:<span class="number">0</span>] CS; <span class="comment">//CurrentState</span></span><br><span class="line"><span class="keyword">parameter</span>  S0 = <span class="number">3'b000</span>;</span><br><span class="line"><span class="keyword">parameter</span>  S1 = <span class="number">3'b001</span>;</span><br><span class="line"><span class="keyword">parameter</span>  S2 = <span class="number">3'b010</span>;</span><br><span class="line"><span class="comment">//1st always block, sequential state transition</span></span><br><span class="line"><span class="keyword">always</span> @ (<span class="keyword">posedge</span> clk <span class="keyword">or</span> <span class="keyword">posedge</span> rst)</span><br><span class="line">    <span class="keyword">if</span> (rst)</span><br><span class="line">        CS &lt;= S0;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        CS &lt;= NS;</span><br><span class="line"><span class="comment">//2nd always block, combinational condition judgment</span></span><br><span class="line"><span class="keyword">always</span> @ (*) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">case</span> (CS)</span><br><span class="line">        S0: <span class="keyword">begin</span></span><br><span class="line">            <span class="keyword">if</span> (i) <span class="keyword">begin</span> NS &lt;= S2; <span class="keyword">end</span></span><br><span class="line">            <span class="keyword">else</span>   <span class="keyword">begin</span> NS &lt;= S1; <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">        S1: <span class="keyword">begin</span></span><br><span class="line">            <span class="keyword">if</span> (i) <span class="keyword">begin</span> NS &lt;= S0; <span class="keyword">end</span></span><br><span class="line">            <span class="keyword">else</span>   <span class="keyword">begin</span> NS &lt;= S2; <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">        S2: NS &lt;= S1;</span><br><span class="line">        <span class="keyword">default</span>: NS &lt;= S0;</span><br><span class="line">    <span class="keyword">endcase</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="comment">//3rd always block, the sequential FSM output</span></span><br><span class="line"><span class="keyword">always</span> @ (*) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">case</span> (CS)</span><br><span class="line">        S0: out &lt;= <span class="number">1'b0</span>;</span><br><span class="line">        S1: <span class="keyword">begin</span></span><br><span class="line">            <span class="keyword">if</span> (i) out &lt;= <span class="number">1'b0</span>;</span><br><span class="line">            <span class="keyword">else</span>   out &lt;= <span class="number">1'b1</span>;</span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">        S2: <span class="keyword">begin</span></span><br><span class="line">            <span class="keyword">if</span> (i) out &lt;= <span class="number">1'b0</span>;</span><br><span class="line">            <span class="keyword">else</span>   out &lt;= <span class="number">1'b1</span>;</span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">default</span>: out &lt;= <span class="number">1'b0</span>;</span><br><span class="line">    <span class="keyword">endcase</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
 
 <p>Synplify综合结果，682.2 MHz</p>
@@ -514,7 +450,7 @@ Mealy 机的输出与当前状态和输入有关，而 Moore 机输出仅与当�
         <p><span>本文标题:</span><a href="/2019-01-16/moore-mealy/">摩尔状态机和米勒状态机特性对比</a></p>
         <p><span>文章作者:</span><a href="/" title="回到主页">黑山老喵</a></p>
         <p><span>发布时间:</span>2019-01-16, 21:48:05</p>
-        <p><span>最后更新:</span>2019-07-18, 19:52:28</p>
+        <p><span>最后更新:</span>2019-07-21, 18:49:19</p>
         <p>
             <span>原始链接:</span><a class="post-url" href="/2019-01-16/moore-mealy/" title="摩尔状态机和米勒状态机特性对比">https://catonblack.cn/2019-01-16/moore-mealy/</a>
             <span class="copy-path" data-clipboard-text="原文: https://catonblack.cn/2019-01-16/moore-mealy/　　作者: 黑山老喵" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
@@ -530,8 +466,8 @@ Mealy 机的输出与当前状态和输入有关，而 Moore 机输出仅与当�
     <nav id="article-nav">
         
             <div id="article-nav-newer" class="article-nav-title">
-                <a href="/2019-03-17/hdl-prjsetting/">
-                    Verilog 项目配置
+                <a href="/2019-01-18/mealy2moore/">
+                    Moore 与 Mealy 状态机的互相转换
                 </a>
             </div>
         
@@ -550,7 +486,7 @@ Mealy 机的输出与当前状态和输入有关，而 Moore 机输出仅与当�
     <div id="toc" class="toc-article">
         <strong class="toc-title">文章目录</strong>
         
-            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Moore状态机和Mealy状态机的对比"><span class="toc-number">1.</span> <span class="toc-text">Moore状态机和Mealy状态机的对比</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Moore-与-Mealy-状态机的互相转换"><span class="toc-number">2.</span> <span class="toc-text">Moore 与 Mealy 状态机的互相转换</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#先讲Mealy-gt-Moore的过程"><span class="toc-number">2.1.</span> <span class="toc-text">先讲Mealy-&gt;Moore的过程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#再讲Moore-gt-Mealy的过程"><span class="toc-number">2.2.</span> <span class="toc-text">再讲Moore-&gt;Mealy的过程</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Moore状态机与Mealy状态机的性能对比"><span class="toc-number">3.</span> <span class="toc-text">Moore状态机与Mealy状态机的性能对比</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Mealy状态机"><span class="toc-number">3.1.</span> <span class="toc-text">Mealy状态机</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Moore状态机"><span class="toc-number">3.2.</span> <span class="toc-text">Moore状态机</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Moore-vs-Mealy-状态机"><span class="toc-number">4.</span> <span class="toc-text">Moore vs Mealy 状态机</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#附录："><span class="toc-number">5.</span> <span class="toc-text">附录：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Mealy状态机-1"><span class="toc-number">5.1.</span> <span class="toc-text">Mealy状态机</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Moore状态机-1"><span class="toc-number">5.2.</span> <span class="toc-text">Moore状态机</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">6.</span> <span class="toc-text">参考资料</span></a></li></ol>
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Moore状态机和Mealy状态机的对比"><span class="toc-number">1.</span> <span class="toc-text">Moore状态机和Mealy状态机的对比</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Moore状态机与Mealy状态机的性能对比"><span class="toc-number">2.</span> <span class="toc-text">Moore状态机与Mealy状态机的性能对比</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Mealy状态机"><span class="toc-number">2.1.</span> <span class="toc-text">Mealy状态机</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Moore状态机"><span class="toc-number">2.2.</span> <span class="toc-text">Moore状态机</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Moore-vs-Mealy-状态机"><span class="toc-number">3.</span> <span class="toc-text">Moore vs Mealy 状态机</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#附录："><span class="toc-number">4.</span> <span class="toc-text">附录：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Mealy状态机-1"><span class="toc-number">4.1.</span> <span class="toc-text">Mealy状态机</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Moore状态机-1"><span class="toc-number">4.2.</span> <span class="toc-text">Moore状态机</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">5.</span> <span class="toc-text">参考资料</span></a></li></ol>
         
     </div>
     <style>
@@ -624,7 +560,7 @@ Mealy 机的输出与当前状态和输入有关，而 Moore 机输出仅与当�
 
     <div class="scroll" id="post-nav-button">
         
-            <a href="/2019-03-17/hdl-prjsetting/" title="上一篇: Verilog 项目配置">
+            <a href="/2019-01-18/mealy2moore/" title="上一篇: Moore 与 Mealy 状态机的互相转换">
                 <i class="fa fa-angle-left"></i>
             </a>
         
@@ -638,7 +574,7 @@ Mealy 机的输出与当前状态和输入有关，而 Moore 机输出仅与当�
         
     </div>
 
-    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019-07-17/if-else/">if……else 和 case 的综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/fsm-style/">状态机一段式、二段式和三段式写法的实际效果</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/multisignal-cdc/">跨时钟传递多个时钟信号</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-03-17/hdl-prjsetting/">Verilog 项目配置</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-01-16/moore-mealy/">摩尔状态机和米勒状态机特性对比</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-08-18/up-down-edge/">上下边沿触发</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-18/model-interface/">常见的模块间交互的方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-18/fpga-reset/">FPGA 复位研究</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-16/async-clock-sync/">异步时钟信号同步化及其综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-05-04/wire-reg/">Wire and Reg等定义的综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-13/folder-manage/">工程存档文件夹命名</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-07/use-git/">Git管理工程的方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-03/file-manage/">基于中心库的NAS,云盘和Git的文件管理方式</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-03-01/instant-noodles/">泡面鉴赏</a></li></ul>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019-07-21/race-competition/">race-competition</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-21/setup-hold-time/">setup-hold-time</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-21/latch-vs-flipflop/">latch-vs-flipflop</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-21/metastability/">metastability</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-17/if-else/">if……else 和 case 的综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/fsm-style/">状态机一段式、二段式和三段式写法的实际效果</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/multisignal-cdc/">跨时钟传递多个时钟信号</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-03-17/hdl-prjsetting/">Verilog 项目配置</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-01-18/mealy2moore/">Moore 与 Mealy 状态机的互相转换</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-01-16/moore-mealy/">摩尔状态机和米勒状态机特性对比</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-08-18/up-down-edge/">上下边沿触发</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-18/model-interface/">常见的模块间交互的方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-18/fpga-reset/">FPGA 复位研究</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-16/async-clock-sync/">异步时钟信号同步化及其综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-05-04/wire-reg/">Wire and Reg等定义的综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-13/folder-manage/">工程存档文件夹命名</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-07/use-git/">Git管理工程的方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-03/file-manage/">基于中心库的NAS,云盘和Git的文件管理方式</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-03-01/instant-noodles/">泡面鉴赏</a></li></ul>
 
 
 
@@ -754,6 +690,6 @@ MathJax.Hub.Queue(function() {
 
 <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
 </script>
-  </div>
+  </div><!-- hexo-inject:begin --><!-- hexo-inject:end -->
 </body>
 </html>

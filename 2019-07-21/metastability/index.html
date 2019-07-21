@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<meta name="author" content="黑山老喵">
+
+
+
+<meta name="description" content="当信号在不相关或者异步时钟域之间传送时，会出现亚稳态，它是导致包括FPGA在内的数字器件系统失败的一种现象。通过计算亚稳态导致的平均故障间隔时间(MTBF)，设计者可以知道是否应采取措施来降低这类失败的概率。 本文介绍FPGA 中的亚稳态现象，解释为什么会出现这一现象，讨论它是怎样导致设计失败的。并且介绍了怎样利用各种设计和器件参数来计算MTBF， 以及FPGA工程师怎样提高MTBF。">
+<meta name="keywords" content="硬件，EDA，FPGA">
+<meta property="og:type" content="article">
+<meta property="og:title" content="metastability">
+<meta property="og:url" content="https://catonblack.cn/2019-07-21/metastability/index.html">
+<meta property="og:site_name" content="黑山老喵小窝">
+<meta property="og:description" content="当信号在不相关或者异步时钟域之间传送时，会出现亚稳态，它是导致包括FPGA在内的数字器件系统失败的一种现象。通过计算亚稳态导致的平均故障间隔时间(MTBF)，设计者可以知道是否应采取措施来降低这类失败的概率。 本文介绍FPGA 中的亚稳态现象，解释为什么会出现这一现象，讨论它是怎样导致设计失败的。并且介绍了怎样利用各种设计和器件参数来计算MTBF， 以及FPGA工程师怎样提高MTBF。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-07-21T11:26:21.308Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="metastability">
+<meta name="twitter:description" content="当信号在不相关或者异步时钟域之间传送时，会出现亚稳态，它是导致包括FPGA在内的数字器件系统失败的一种现象。通过计算亚稳态导致的平均故障间隔时间(MTBF)，设计者可以知道是否应采取措施来降低这类失败的概率。 本文介绍FPGA 中的亚稳态现象，解释为什么会出现这一现象，讨论它是怎样导致设计失败的。并且介绍了怎样利用各种设计和器件参数来计算MTBF， 以及FPGA工程师怎样提高MTBF。">
+
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="黑山老喵小窝" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/favicon.png">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>metastability | 黑山老喵小窝</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "//hm.baidu.com/hm.js?9871d0915604e1e9dc64974db7659410";
+            var s = document.getElementsByTagName("script")[0]; 
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+
+</head></html>
+<body>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/avatar.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">黑山老喵</a></h1>
+        </hgroup>
+
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="true">
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class="no-result">No results found <i class="fa fa-spinner fa-pulse"></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/categories/">分类</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto:catonblack@live.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" href="http://github.com/catonblack" title="GitHub"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Git/">Git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/GitHub/">GitHub</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/GitServer/">GitServer</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Gitlab/">Gitlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Mealy/">Mealy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Moore/">Moore</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NAS/">NAS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Negedge-Clock-Edge/">Negedge Clock Edge</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Posedge-Clock-Edge/">Posedge Clock Edge</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reg/">Reg</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Wire/">Wire</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/case/">case</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/if……else/">if……else</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/云盘/">云盘</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/变量定义/">变量定义</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/品鉴/">品鉴</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/器件特性/">器件特性</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/复位/">复位</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/多信号同步/">多信号同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/多段式状态机/">多段式状态机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/实际电路/">实际电路</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/工程存档/">工程存档</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/异步时钟/">异步时钟</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/扁平化命名/">扁平化命名</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/文件管理/">文件管理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/有限状态机/">有限状态机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/模块交互/">模块交互</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/泡面/">泡面</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/状态机转换/">状态机转换</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/电平同步/">电平同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/综合/">综合</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/脉冲同步/">脉冲同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/规范/">规范</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/边沿检测同步/">边沿检测同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进口/">进口</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/项目存档/">项目存档</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/">MOxFIVE</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://catonblack.cn">Github</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://console.cloud.tencent.com/domain">腾讯云</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://tongji.baidu.com/web/28226238/overview/index?siteId=13598139">百度统计</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://www.livere.com/city-demo/insight">来必力</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://portal.qiniu.com/create">七牛云</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://valine.js.org/quickstart.html">Valine</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.coding.me/yelee/">Yelee</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">来自老和山职业技术学院的非典型理工男。专注于硬件、嵌入式、FPGA设计，涉足领域包括科学仪器、医疗仪器和可穿戴设备，在相关领域有6年一线实战经验。喜欢尝试新鲜事物，对物理、化学、医学、心理学等学科有一定的了解。</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">黑山老喵</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/avatar.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">黑山老喵</a></h1>
+            </hgroup>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/categories/">分类</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto:catonblack@live.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="http://github.com/catonblack" title="GitHub"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我">
+</nav>
+      <div class="body-wrap"><article id="post-metastability" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019-07-21/metastability/" class="article-date">
+      <time datetime="2019-07-21T10:53:40.000Z" itemprop="datePublished">2019-07-21</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      metastability
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+
+        
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>当信号在不相关或者异步时钟域之间传送时，会出现亚稳态，它是导致包括FPGA在内的数字器件系统失败的一种现象。通过计算亚稳态导致的平均故障间隔时间(MTBF)，设计者可以知道是否应采取措施来降低这类失败的概率。</p>
+<p>本文介绍FPGA 中的亚稳态现象，解释为什么会出现这一现象，讨论它是怎样导致设计失败的。并且介绍了怎样利用各种设计和器件参数来计算MTBF， 以及FPGA工程师怎样提高MTBF。</p>
+<a id="more"></a>
+
+<h2 id="什么是亚稳态？"><a href="#什么是亚稳态？" class="headerlink" title="什么是亚稳态？"></a>什么是亚稳态？</h2><p>对于时序逻辑电路，FPGA等数字器件中所有触发器都有确定的信号时序要求，使每一个触发器能够正确的采集输入数据，产生输出信号。</p>
+<p>为保证能够可靠的工作，寄存器输入必须在时钟沿之前稳定一段时间(寄存器建立时间，即tSU)，在时钟沿之后也要保持稳定一段时间(寄存器保持时间，即tH)。一定的时钟至输出延时 (tCO) 之后，寄存器输出有效。如果信号转换不能满足寄存器的tSU 或者tH 要求，寄存器输出就有可能进入亚稳态。在亚稳态中，寄存器输出在高电平和低电平状态之间徘徊一段时间，这意味着，输出延时超出设定的tCO之后才能转换到确定的高电平或者低电平状态。</p>
+<p>按照是否由异步时钟产生，亚稳态的来源分为同步时钟亚稳态与异步时钟亚稳态。</p>
+<p>同步时钟亚稳态现象指的是信号在同步时钟区域中传递时产生的亚稳态；异步时钟亚稳态现象指的信号在跨时钟传递的过程中所产生的亚稳态。</p>
+<p>但是无论是哪种原因产生的亚稳态现象，产生亚稳态的根本原因都是<strong>信号的到达时间不满足接收触发器的tSU和tH</strong>。</p>
+<p>触发器是否会进入压稳态以及返回稳定状态所需要的时间与器件制造工艺以及实际工作条件有关。在大部分情况下，触发器会很快返回稳定状态。</p>
+<p>网上关于触发器有一个非常形象的比喻：把触发器在时钟边沿采样数据信号看成是球从山上滚落下来，如下图所示。山的两边代表稳态，上坡代表旧的数据，下坡代表新的数据，山顶代表亚稳态。如果球处于山顶，它就会处于一种不确定状态，稍微偏向哪一侧就会滚向山下。从山顶滚到山脚的这个过程意味着球到达稳定状态的速度越来越快。</p>
+<p>类比到信号上，如果数据信号在时钟沿之后不满足最小的tH，这就类似球从山的“旧数据”一侧落下，输出信号保持在该时钟转换的最初值不变。当触发器数据输入满足于到达时钟沿前的最小tSU时，只要保持时间大于最小tH，这就类似球从山的“新数据”一侧落下，输出信号很快达到稳定的新状态，这样就满足确定的tCO时间要求。但是，当寄存器数据输入不能满足tSU或者 tH时，这就类似于球落在山顶附近，那么它会花很长时间才能落到山脚，增加了时钟转换到稳定输出的延时，超出了要求的tCO。</p>
+<p>如下图所示：时钟信号转换时，输入信号从低电平状态转换到高电平状态，不能满足触发器的tSU要求。数据输出信号从低电平状态开始，进入亚稳态，在高电平和低电平状态之间徘徊。信号输出A 转换到输入数据的新逻辑1 状态，输出B 返回到数据输入最初的逻辑0 状态。在这两种情况下，输出转换到确定的1 或者0 状态的时间被延迟了，超出了触发器要求的tCO。</p>
+<p>在<a href="http://www.fpga-faq.com/FAQ_Pages/0017_Tell_me_about_metastables.htm" target="_blank" rel="noopener">Tell me about Metastability</a>找到了实际测量得到的波形。</p>
+<p>在<a href="http://webee.technion.ac.il/~ran/papers/Metastability-and-Synchronizers.IEEEDToct2011.pdf" target="_blank" rel="noopener">Metastability and Synchronizers: A Tutorial</a>中找到了下图，输入信号与时钟的相互关系会导致不同的输出：</p>
+<p>找到了关于亚稳态的另一个解释：</p>
+<p>以一个CMOS反相器为例，我们从机理上来看看亚稳态的原因。如下图，反相器的输出电流Iout先是随着输入电压Vin的增加而增加，在输入电压Vin达到最大值的一半时，输出电流Iout达到最大值，此时反相器处于亚稳态。可以看到，当Vin处于最大值与最小值时，Iout几乎为0，而Vin处于中间值时Iout值最大，也就是说亚稳态时的电流消耗也是最大。对于触发器来说，输出一般都是反向器，这也就意味着触发器有可能产生亚稳态。</p>
+<p>下图展示了非亚稳态与亚稳态时输出电流Iout的曲线，恶意明显地看到亚稳态时输出电流会持续一段时间。</p>
+<p>我们知道，CMOS逻辑门在其电压特性曲线上有一个“极值点”，但是如果在锁存器里面这又会变成什么样子呢？在锁存器中有两个反相器首尾相连，下图的电压曲线显示了这两个反相器输入电压与输出电压之间的关系，而两条曲线的交叉点就是亚稳态点。锁存器更加容易进入亚稳态，尤其是在输入信号转变更快的情况下。由于触发器实质上是由两个锁存器连接而成，那么它也必将可能进入亚稳态。而区别就在于触发器进入亚稳态的可能性要大大低于锁存器，因为触发器是边沿敏感，而锁存器是电平敏感。</p>
+<h3 id="亚稳态什么时候会导致设计失败？"><a href="#亚稳态什么时候会导致设计失败？" class="headerlink" title="亚稳态什么时候会导致设计失败？"></a>亚稳态什么时候会导致设计失败？</h3><p>如果数据输出信号在寄存器下次采集数据之前，转换到有效状态，那么，压稳态信号不会对系统工作有不利影响。但是，如果压稳态信号不能在它到达下一设计寄存器之前转换到低电平或者高电平状态，那就会导致系统失败。</p>
+<h2 id="同步寄存器"><a href="#同步寄存器" class="headerlink" title="同步寄存器"></a>同步寄存器</h2><p>同步寄存器链或者同步器是满足以下要求的触发器序列：</p>
+<pre><code>链上的寄存器都由相同的或者相位相关的时钟进行同步
+链上的第一个寄存器由不相关的时钟域进行驱动，即异步驱动。
+每个寄存器只扇出连接一个寄存器，链上的最后一个寄存器除外。</code></pre><p>同步寄存器链的长度是满足以上要求的同步时钟域中的寄存器数量。</p>
+<p>关于同步器请参考（异步时钟处理）</p>
+<h2 id="计算亚稳态MTBF"><a href="#计算亚稳态MTBF" class="headerlink" title="计算亚稳态MTBF"></a>计算亚稳态MTBF</h2><p>亚稳态平均故障间隔时间MTBF大致估算了亚稳态导致的两次设施失败之间的平均时间。较大的MTBF( 例如亚稳态失败间隔数百甚至数千年) 表明非常可靠的设计。所需要的MTBF 取决于系统应用。例如，急救医疗设备需要的MTBF 要比消费类视频显示设备长得多。增大亚稳态MTBF 能够减小信号传输导致设备出现亚稳态问题的概率。可以使用设计信息以及器件特征参数来计算设计中某些信号传输或者所有信息传输的亚稳态MTBF。采用下面的公式和参数来计算同步器链的MTBF：</p>
+<p>$$MTBF=\frac{e^{t_{MET} \cdot C_{2}}}{C_{1} \cdot f_{CLK} \cdot f_{DATA}}$$</p>
+<p>其中：<br>C1和C2常数取决于器件工艺和工作条件。<br>fCLK和fDATA参数取决于设计规范：fCLK是接收异步信号时钟域的时钟频率，fDATA是异步输入数据信号的触发频率。较快的时钟频率以及触发数据能够降低(或者劣化)MTBF。<br>tMET 参数是亚稳态信号达到确切状态的亚稳态建立时间，即超出寄存器tCO的时序余量。同步链的tMET是链上每一寄存器输出时序余量之和。<br>设计中每一同步器链的MTBF 确定了总的设计MTBF。同步器的失效率是1/MTBF，将每一同步器链的失败概率相加得到整个设计的失败概率，如下所示：<br>_ { failure_\text {design} } = \frac { 1 } { M T B F _ { \text {design} } } = \sum _ { i = 1 } ^ { \text { number of chains } } \frac { 1 } { M T B F _ { i } }</p>
+<p>设计亚稳态MTBF为</p>
+<p>多级同步器的MTBF计算公式如下：</p>
+<p>M T B F = \frac { e ^ { t _ { r } / \tau } } { T _ { o } \times f \times a } \times k \left( \frac { e ^ { t _ { r } / \tau } } { T _ { o } \times f } \right)</p>
+<p>在网上值找到了Altera Flex 10K的参数，貌似现在厂家都不土工这种参数了。。。</p>
+<p>就用这种参数来计算一下吧：</p>
+<p>C1=1.01x10^-13， C2=1.268x10^10，tMET=1.41ns</p>
+<p>MTBF=2970579s≈1年</p>
+<p>两级连用</p>
+<p>MTBF=1747394975872859s=5.54*10^7年</p>
+<h3 id="确定亚稳态常数"><a href="#确定亚稳态常数" class="headerlink" title="确定亚稳态常数"></a>确定亚稳态常数</h3><p>FPGA供应商可以通过FPGA的亚稳态特性来确定MTBF方程中的常数。确定特性的难点在于典型FPGA设计的MTBF 一般在几年以上，因此，使用真实设计，在实际工作条件下测量亚稳态事件之间的时间间隔是不可行的。</p>
+<h4 id="以下是Altera提供的测量MTBF的方法"><a href="#以下是Altera提供的测量MTBF的方法" class="headerlink" title="以下是Altera提供的测量MTBF的方法"></a>以下是Altera提供的测量MTBF的方法</h4><p>为确定器件亚稳态常数， Altera 使用了如下的测试电路，这一电路具有较短的可测量MTBF。</p>
+<p>在这一设计中， clka和clkb是两路不相关的时钟信号。同步器输入数据在每一时钟周期进行触发(较大的fDATA)。同步器长度为1，这是因为一个同步寄存器连接了两个目的触发器。目的触发器在一个时钟周期后以及一个半时钟周期后采集同步器输出。如果信号在下一时钟沿到达之前进入亚稳态，电路探测到采样信号出现了不同，输出一个错误信号。这一电路能够探测到半时钟周期内出现的大部分亚稳态事件。</p>
+<p>在器件中很多地方复制了这一电路，以减小本地差异的影响，对每一例化模块进行连续测试，以消除耦合噪声。Altera 对每一测试结构测量一分钟，记录错误数。以不同的时钟频率进行测试，在对数坐标上画出MTBF 与tMET 的关系。常数C2 对应于试验结果趋势线的斜率，以常数C1 线性标出曲线。</p>
+<h4 id="Xilinx提供的测量方法如下："><a href="#Xilinx提供的测量方法如下：" class="headerlink" title="Xilinx提供的测量方法如下："></a>Xilinx提供的测量方法如下：</h4><p>本质上的测量原理与Altera提供的是一样的，这里六这一笔是因为在Xilinx的应用笔记XAPP094《Metastable Recovery in Virtex-II Pro FPGAs》中提到：<strong>在时钟速率小于300MHz的时候压根儿就没观察到亚稳态现象</strong>。突然间感觉Xilinx好拽。。。毕竟Altera的FAE建议我Cyclone4不要超过100MHz，Cyclone5不要超过150MHz。</p>
+<h4 id="下图是来自网络的一个真实案例，来自认识FPGA触发器的亚稳态"><a href="#下图是来自网络的一个真实案例，来自认识FPGA触发器的亚稳态" class="headerlink" title="下图是来自网络的一个真实案例，来自认识FPGA触发器的亚稳态"></a>下图是来自网络的一个真实案例，来自<a href="http://blog.sina.com.cn/s/blog_aec06aac01011zgm.html" target="_blank" rel="noopener">认识FPGA触发器的亚稳态</a></h4><pre><code>在这个案例中，我们测试一个FPGA逻辑单元中的亚稳态现象。在测试中，我们让sel信号固定在0，那么逻辑关系为 F1 &lt;= local_2m输入，F0 &lt;= local_2m输入，local_2m和cdr_2m都是2MHz的方波信号，被一个50MHz的异步时钟作同步化处理。Verilog代码为:</code></pre><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">always</span> @(<span class="keyword">posedge</span> clk_50m)</span><br><span class="line">  <span class="keyword">if</span>(sel==<span class="number">1</span>)<span class="keyword">begin</span></span><br><span class="line">    clk2m_oa &lt;= cdr_2m ;</span><br><span class="line">    clk2m_ob &lt;= cdr_2m ;</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line">  <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">    clk2m_oa &lt;= local_2m ;</span><br><span class="line">    clk2m_ob &lt;= local_2m ;</span><br><span class="line">  <span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+<pre><code>测试中我们发现触发器的输出clk2m_ob上偶尔有毛刺出现，但是触发器的输入F1和F0上并没有毛刺。而且这个毛刺和下一个clk2m_ob跳变沿的间隔刚好是50MHz的一个周期20nS。 参考图4，红色为F1，黄色为clk2m_ob。</code></pre><p>我们来分析下这个毛刺。由于2MHz输入信号local_2m和50MHz时钟clk_50m是异步的，因此毫无疑问会有亚稳态的出现。当亚稳态出现的时候，触发器的输出一开始随机震荡到高电平，但很快亚稳态结束，并返回到”错误的”低电平状态。于是就表现为毛刺。</p>
+<pre><code>在测试中，每大约一小时，clk2m_ob就会出现一次这样的毛刺。可以看出亚稳态的捕捉窗口是非常小的。这个实验中大约发生了 60 minutes * 60 seconds/20nS =  180*10^9次采样。因此捕捉窗口的大致范围为20nS * (2/25) / (180*10^9)  ~= 9 *10^(-12) s = 9 fs. 这么高的精度，没有任何仪器可以精确模拟，这也是为什么亚稳态现象只能用统计的方法去研究的原因。
+
+ 另一方面，同样的电路功能，clk2m_oa却从来没有出现过这样的毛刺。这说明亚稳态掉表现形式不是固定的。猜测clk2m_oa的亚稳态表现为中间电平的形式，并最终返回到”正确”的状态。由于tR时间非常短，并且亚稳态和信号的边沿混和在一起，无法和正常情况进行区分。根据XAPP094的解释，亚稳态的表现是和器件的PVT(制作工艺Process，电压Voltage，温度Temperature)相关的，并且和具体电路的增益，噪声相关。如果是这样，clk2m_oa和clk2m_ob的各自触发器的或增益或噪声是有差异的，所以表现不一致。</code></pre><h2 id="提高亚稳态MTBF"><a href="#提高亚稳态MTBF" class="headerlink" title="提高亚稳态MTBF"></a>提高亚稳态MTBF</h2><p>由于MTBF 方程中的指数因子， tMET/C2 项对MTBF 计算的影响最大。因此，可以通过优化器件常数C2，改进体系结构来提高亚稳态性能，或者优化设计，增大同步寄存器的tMET。</p>
+<h3 id="设计优化"><a href="#设计优化" class="headerlink" title="设计优化"></a>设计优化</h3><p>MTBF 方程中的指数因子意味着增大设计相关tMET 值能够指数增大同步器MTBF。例如，如果某一器件的常数C2，设置工作条件为50 ps，那么， tMET 只需要增大200 ps，就能够实现指数200/50，提高MTBF e4 倍，即50 多倍，而增大400 ps，提高MTBF e8 倍，即3000 倍。</p>
+<p>另一方面，最差MTBF 链对设计MTBF 的影响最大。例如，考虑具有10 个同步链的两个不同设计。一个设计的10 个链有相同的10,000 年MTBF，另一设计的9 个链有一百万年的MTBF，但是一个链的MTBF为100 年。设计失败概率是每一链的失败概率之和，失败概率为1/MTBF。第一个设计的亚稳态失败概率为10 个链× 1/10,000 年 = 0.001，因此，设计MTBF是1000 年。第二个设计的失败概率为9 个链 × 1/1,000,000 +1/100 = 0.01009，设计MTBF 为99 年，略小于最差链的MTBF。</p>
+<p>换言之，设计较差的同步链决定了设计的亚稳态总MTBF。由于这一效应，对所有异步信号和时钟域传输进行亚稳态分析非常重要。设计人员或者工具供应商提高最差MTBF同步链的tMET，会对设计MTBF有很大的影响。</p>
+<p>为提高亚稳态MTBF，设计人员可以在同步寄存器链上增加额外的寄存器级，以提高tMET 。增加的每一寄存器至寄存器连接时序余量被加到tMET 值中。设计人员一般使用两个寄存器来同步信号，而Altera的白皮书建议使用三个寄存器作为标准，以实现更好的亚稳态保护。然而，增加一个寄存器会在同步逻辑中加入额外的延时级，因此，设计人员必须综合考虑这是否可行。</p>
+<h3 id="Xilinx提供的方法"><a href="#Xilinx提供的方法" class="headerlink" title="Xilinx提供的方法"></a>Xilinx提供的方法</h3><p>如果发现输入信号存在潜在的亚稳态问题，只需创建与同一时钟有相位关系的时钟驱动的寄存器链就能解决此问题。这需要提供如下图所示的电路。</p>
+<p>图中，将寄存器链放置在两个单元中：第一个为 ILOGIC 单元，而另外两个寄存器放置在 SLICE 单元中（选择具有相同时钟的 3 个寄存器和链）。这是减少亚稳态问题的一种快速且非常简单的方法，还有其他一些方法不但可减少亚稳态问题，还可优化性能。</p>
+<p>使用赛灵思逻辑块的 IDDR 方法<br>在 Virtex-4 和 Virtex-5 FPGA 中，赛灵思将其 ILOGIC 模块直接放置在 I/O 驱动器和接收器的后面。该模块包括 4 个存储元件寄存器和 1 个可编程绝对延迟元件。</p>
+<p>Virtex-4 与 Virtex-5 器件均采用这 4 个寄存器来实现双倍数据率输入 (IDDR) 寄存器，功能设计师只需例化 IDDR 原语便能实现。这将使 受益匪浅。</p>
+<p>这种原语的其中一个模式称为 SAME_EDGE_PIPELINED。图 2 显示了采用这种模式的 DDR 输入寄存器及相关信号。绿色矩形框显示了一系列最优的寄存器，可用其解决亚稳态问题。此外，使用 IDDR 方法还有一个优势，即能使用两三倍之多的主时钟，同时又不会造成任何设计时延问题。</p>
+<p>只需少量代码<br>在《Virtex-4 用户指南》的 328～329 页，举例说明采用 VHDL 和 Verilog 语言编写的 IDDR 原语的例化。以下采用 Verilog 语言的 IDDR 原码例化的典型实例：</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">defparam</span> IDDR_INT2<span class="variable">.DDR_CLK_EDGE</span> = <span class="string">"SAME_EDGE_PIPELINED"</span>; </span><br><span class="line"><span class="keyword">defparam</span> IDDR_INT2<span class="variable">.INIT_Q1</span>      = <span class="number">1'b1</span>; </span><br><span class="line"><span class="keyword">defparam</span> IDDR_INT2<span class="variable">.INIT_Q2</span>      = <span class="number">1'b1</span>; </span><br><span class="line"><span class="keyword">defparam</span> IDDR_INT2<span class="variable">.SRTYPE</span>       = <span class="string">"SYNC"</span>; </span><br><span class="line"></span><br><span class="line">IDDR IDDR_INT2(</span><br><span class="line">    <span class="variable">.Q1</span> (sync_data     ),</span><br><span class="line">    <span class="variable">.Q2</span> (signal_noload ),</span><br><span class="line">    <span class="variable">.C</span>  (CLK_2X        ),</span><br><span class="line">    <span class="variable">.CE</span> (<span class="number">1'b1</span>          ),</span><br><span class="line">    <span class="variable">.D</span>  (async_data    ),</span><br><span class="line">    <span class="variable">.R</span>  (),</span><br><span class="line">    <span class="variable">.S</span>  ()</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>下图是用IDDR设计的全新布局图。 用这种方法将寄存器链放置在两个单元：前两个寄存器放置在 ILOGIC 单元中，另一个寄存器则放置在 SLICE 单元中（这里选择的链具有 3 个寄存器和 2 个不同的时钟，其中一个时钟速度是另一个的两倍）。</p>
+<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>只要信号不满足触发器的建立保持时间，就会产生亚稳态问题。亚稳态失败平均时间间隔与器件工艺技术、设计规范和同步逻辑的时序余量有关。FPGA 设计人员可以通过增大tMET ，采用增加同步寄存器时序余量等设计方法来提高系统可靠性，增大亚稳态MTBF。</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2019-07-21/metastability/">metastability</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">黑山老喵</a></p>
+        <p><span>发布时间:</span>2019-07-21, 18:53:40</p>
+        <p><span>最后更新:</span>2019-07-21, 19:26:21</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2019-07-21/metastability/" title="metastability">https://catonblack.cn/2019-07-21/metastability/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://catonblack.cn/2019-07-21/metastability/　　作者: 黑山老喵" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target="_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2019-07-21/latch-vs-flipflop/">
+                    latch-vs-flipflop
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2019-07-17/if-else/">
+                    if……else 和 case 的综合结果
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#什么是亚稳态？"><span class="toc-number">1.</span> <span class="toc-text">什么是亚稳态？</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#亚稳态什么时候会导致设计失败？"><span class="toc-number">1.1.</span> <span class="toc-text">亚稳态什么时候会导致设计失败？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#同步寄存器"><span class="toc-number">2.</span> <span class="toc-text">同步寄存器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#计算亚稳态MTBF"><span class="toc-number">3.</span> <span class="toc-text">计算亚稳态MTBF</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#确定亚稳态常数"><span class="toc-number">3.1.</span> <span class="toc-text">确定亚稳态常数</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#以下是Altera提供的测量MTBF的方法"><span class="toc-number">3.1.1.</span> <span class="toc-text">以下是Altera提供的测量MTBF的方法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Xilinx提供的测量方法如下："><span class="toc-number">3.1.2.</span> <span class="toc-text">Xilinx提供的测量方法如下：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#下图是来自网络的一个真实案例，来自认识FPGA触发器的亚稳态"><span class="toc-number">3.1.3.</span> <span class="toc-text">下图是来自网络的一个真实案例，来自认识FPGA触发器的亚稳态</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#提高亚稳态MTBF"><span class="toc-number">4.</span> <span class="toc-text">提高亚稳态MTBF</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#设计优化"><span class="toc-number">4.1.</span> <span class="toc-text">设计优化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Xilinx提供的方法"><span class="toc-number">4.2.</span> <span class="toc-text">Xilinx提供的方法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#结论"><span class="toc-number">5.</span> <span class="toc-text">结论</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录" title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"metastability　| 黑山老喵小窝　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+        <section id="comments" style="margin: 2em; padding: 2em; background: rgba(255, 255, 255, 0.5)">
+    <div id="vcomment" class="comment"></div>
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src="//unpkg.com/valine@1.2.0-beta1/dist/Valine.min.js"></script>
+    <script>
+      new Valine({
+        el: '#vcomment',
+        notify: 'true',
+        verify: 'true',
+        app_id: "0tk0hycE3Yips8Txim7EBtm5-gzGzoHsz",
+        app_key: "nW716Qi1t7lY4m6zXI9MSYJs",
+        placeholder: "Just go go!",
+        avatar: "mp"
+      });
+    </script>
+</section>
+
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2019-07-21/latch-vs-flipflop/" title="上一篇: latch-vs-flipflop">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2019-07-17/if-else/" title="下一篇: if……else 和 case 的综合结果">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019-07-21/race-competition/">race-competition</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-21/setup-hold-time/">setup-hold-time</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-21/latch-vs-flipflop/">latch-vs-flipflop</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-21/metastability/">metastability</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-17/if-else/">if……else 和 case 的综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/fsm-style/">状态机一段式、二段式和三段式写法的实际效果</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/multisignal-cdc/">跨时钟传递多个时钟信号</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-03-17/hdl-prjsetting/">Verilog 项目配置</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-01-18/mealy2moore/">Moore 与 Mealy 状态机的互相转换</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-01-16/moore-mealy/">摩尔状态机和米勒状态机特性对比</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-08-18/up-down-edge/">上下边沿触发</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-18/model-interface/">常见的模块间交互的方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-18/fpga-reset/">FPGA 复位研究</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-16/async-clock-sync/">异步时钟信号同步化及其综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-05-04/wire-reg/">Wire and Reg等定义的综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-13/folder-manage/">工程存档文件夹命名</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-07/use-git/">Git管理工程的方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-03/file-manage/">基于中心库的NAS,云盘和Git的文件管理方式</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-03-01/instant-noodles/">泡面鉴赏</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2019 黑山老喵
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style="display:none">
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style="display:none">
+                        <span id="page-visit" title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 5;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+</body>
+</html>
