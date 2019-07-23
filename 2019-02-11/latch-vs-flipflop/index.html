@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<meta name="author" content="黑山老喵">
+
+
+
+<meta name="description" content="对于数字工程师来说，锁存器的存在一直是一个暧昧而又说不清道不明的存在。经常会在综合报告中看到一些warning提示生成了锁存器，而且一般的设计规则也不建议有锁存器。那么，锁存器到底是啥？它跟触发器又有什么区别和联系呢？">
+<meta name="keywords" content="锁存器,触发器,锁存器处理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Latch vs Flip-Flop">
+<meta property="og:url" content="https://catonblack.cn/2019-02-11/latch-vs-flipflop/index.html">
+<meta property="og:site_name" content="黑山老喵小窝">
+<meta property="og:description" content="对于数字工程师来说，锁存器的存在一直是一个暧昧而又说不清道不明的存在。经常会在综合报告中看到一些warning提示生成了锁存器，而且一般的设计规则也不建议有锁存器。那么，锁存器到底是啥？它跟触发器又有什么区别和联系呢？">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_latch-vs-flipflop/cover.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_latch-vs-flipflop/nordlatch.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_latch-vs-flipflop/nanddlatch.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_latch-vs-flipflop/nordff.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_latch-vs-flipflop/nanddff.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_latch-vs-flipflop/dff.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_latch-vs-flipflop/cpld_latch.gif">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_latch-vs-flipflop/latch_tech.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_latch-vs-flipflop/latch_real.png">
+<meta property="og:updated_time" content="2019-07-22T12:07:16.588Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Latch vs Flip-Flop">
+<meta name="twitter:description" content="对于数字工程师来说，锁存器的存在一直是一个暧昧而又说不清道不明的存在。经常会在综合报告中看到一些warning提示生成了锁存器，而且一般的设计规则也不建议有锁存器。那么，锁存器到底是啥？它跟触发器又有什么区别和联系呢？">
+<meta name="twitter:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_latch-vs-flipflop/cover.png">
+
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="黑山老喵小窝" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/favicon.png">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>Latch vs Flip-Flop | 黑山老喵小窝</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "//hm.baidu.com/hm.js?9871d0915604e1e9dc64974db7659410";
+            var s = document.getElementsByTagName("script")[0]; 
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+
+</head></html>
+<body>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/avatar.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">黑山老喵</a></h1>
+        </hgroup>
+
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="true">
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class="no-result">No results found <i class="fa fa-spinner fa-pulse"></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/categories/">分类</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto:catonblack@live.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" href="http://github.com/catonblack" title="GitHub"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Git/">Git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/GitHub/">GitHub</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/GitServer/">GitServer</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Gitlab/">Gitlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Mealy/">Mealy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Moore/">Moore</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NAS/">NAS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Negedge-Clock-Edge/">Negedge Clock Edge</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Posedge-Clock-Edge/">Posedge Clock Edge</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reg/">Reg</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Wire/">Wire</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/case/">case</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/if……else/">if……else</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/云盘/">云盘</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/亚稳态/">亚稳态</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/亚稳态优化/">亚稳态优化</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代数法/">代数法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/保持时间/">保持时间</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/冒险/">冒险</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/卡诺图法/">卡诺图法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/变量定义/">变量定义</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/品鉴/">品鉴</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/器件特性/">器件特性</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/复位/">复位</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/多信号同步/">多信号同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/多段式状态机/">多段式状态机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/实际电路/">实际电路</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/工程存档/">工程存档</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平均无故障时间/">平均无故障时间</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/建立时间/">建立时间</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/异步时钟/">异步时钟</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/扁平化命名/">扁平化命名</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/文件管理/">文件管理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/有限状态机/">有限状态机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/模块交互/">模块交互</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/毛刺/">毛刺</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/泡面/">泡面</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/状态机转换/">状态机转换</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/电平同步/">电平同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/竞争/">竞争</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/综合/">综合</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/脉冲同步/">脉冲同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/规范/">规范</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/触发器/">触发器</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/边沿检测同步/">边沿检测同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进口/">进口</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/锁存器/">锁存器</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/锁存器处理/">锁存器处理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/项目存档/">项目存档</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/">MOxFIVE</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://catonblack.cn">Github</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://console.cloud.tencent.com/domain">腾讯云</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://tongji.baidu.com/web/28226238/overview/index?siteId=13598139">百度统计</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://www.livere.com/city-demo/insight">来必力</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://portal.qiniu.com/create">七牛云</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://valine.js.org/quickstart.html">Valine</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.coding.me/yelee/">Yelee</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">来自老和山职业技术学院的非典型理工男。专注于硬件、嵌入式、FPGA设计，涉足领域包括科学仪器、医疗仪器和可穿戴设备，在相关领域有6年一线实战经验。喜欢尝试新鲜事物，对物理、化学、医学、心理学等学科有一定的了解。</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">黑山老喵</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/avatar.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">黑山老喵</a></h1>
+            </hgroup>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/categories/">分类</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto:catonblack@live.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="http://github.com/catonblack" title="GitHub"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我">
+</nav>
+      <div class="body-wrap"><article id="post-latch-vs-flipflop" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019-02-11/latch-vs-flipflop/" class="article-date">
+      <time datetime="2019-02-11T10:55:18.000Z" itemprop="datePublished">2019-02-11</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Latch vs Flip-Flop
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/FPGA血泪史/">FPGA血泪史</a><a class="article-category-link" href="/categories/FPGA进阶款/">FPGA进阶款</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/触发器/">触发器</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/锁存器/">锁存器</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/锁存器处理/">锁存器处理</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_latch-vs-flipflop/cover.png" width="600">
+</div>
+
+<p>对于数字工程师来说，锁存器的存在一直是一个暧昧而又说不清道不明的存在。经常会在综合报告中看到一些warning提示生成了锁存器，而且一般的设计规则也不建议有锁存器。那么，锁存器到底是啥？它跟触发器又有什么区别和联系呢？</p>
+<a id="more"></a>
+
+<p>除非特别声明，否则本文中的锁存器特指D锁存器，触发器特指D触发器。</p>
+<h2 id="基本定义"><a href="#基本定义" class="headerlink" title="基本定义"></a>基本定义</h2><h3 id="D锁存器"><a href="#D锁存器" class="headerlink" title="D锁存器"></a>D锁存器</h3><p>Latch 是 透明的(transparent)，就是说输入的变换立即就能传递到输出端口，当几个透明的锁存器级联时，输入端的信号也能立即传递到输出端。当给锁存器添加额外的逻辑电路（比如使能信号 enable 无效时），就会使它变为 不透明的(non-transparent)。下面的D锁存器就是这样的例子。</p>
+<p>仔细观察SR锁存器的功能表，就可以发现，R 的取值为 S 的补。D锁存器利用了这一特点，而且避免了SR锁存器中的禁止状态的出现。</p>
+<p>因为SR锁存器的实现有两种，所以D锁存器的实现也对应有两种：</p>
+<h4 id="NOR-D-Latch"><a href="#NOR-D-Latch" class="headerlink" title="NOR D Latch"></a>NOR D Latch</h4><div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_latch-vs-flipflop/nordlatch.png" width="600">
+</div>
+
+<h4 id="NAND-D-Latch"><a href="#NAND-D-Latch" class="headerlink" title="NAND D Latch"></a>NAND D Latch</h4><div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_latch-vs-flipflop/nanddlatch.png" width="600">
+</div>
+
+<p>D锁存器的真值表：</p>
+<table>
+<tr><th>E/C</th><th>D</th><th>Q</th><th>Q'</th><th>备注</th></tr>
+<tr><td>0</td><td>X</td><td>Q<sub>prev</sub></td><td>Q'<sub>prev</sub></td><td>无变化</td></tr>
+<tr><td>0</td><td>0</td><td>0</td><td>1</td><td>复位</td></tr>
+<tr><td>0</td><td>1</td><td>1</td><td>0</td><td>置位</td></tr>
+</table>
+
+<p>D锁存器也称为非透明锁存器、数据锁存器、门控存器。它有一个数据输入端和一个使能端 enable(clock、control)。</p>
+<h3 id="D触发器"><a href="#D触发器" class="headerlink" title="D触发器"></a>D触发器</h3><p>下图是基本触发器的内部结构示意图：</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_latch-vs-flipflop/nordff.png" width="600">
+</div>
+
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_latch-vs-flipflop/nanddff.png" width="600">
+</div>
+
+<p>如果D锁存器的控制端口加入时钟信号，就得到了基本触发器，只要时钟信号 CLK = 1，则触发器就会受到触发，当 CLK 保持为 1 时，数据输入端口的任何变化都将影响到锁存器的状态。</p>
+<p>锁存器的这个特点应用到时序电路中，就会出现比较<strong>严重的问题</strong>：</p>
+<p>一般时序逻辑的输出会经过组合电路的反馈通道，返回到时序逻辑的输入。当时钟信号有效时，锁存器的输出通过组合电路反馈到锁存器的输入端，如果经过组合逻辑后，反馈的信号和之前的信号不同，则反馈信号会导致锁存器的输出变为新的值。在时钟信号有效的期间内，锁存器的输出一直在变化，出现了不可预测的结果，这是<strong>不可靠</strong>的工作。</p>
+<p>锁存器的<strong>问题</strong>就在于：<em>它在时钟有效期间内一直在被触发，这种触发时间过长</em>。</p>
+<p>这个问题的<strong>解决方法</strong>就是：<em>将触发条件变为时钟沿触发，这样就得到了触发器 flip-flop</em>。</p>
+<p><strong>D 触发器</strong></p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_latch-vs-flipflop/dff.png" width="600">
+</div>
+
+<p>将锁存器改造为边沿敏感的触发器，最简单的就是D触发器，搭建电路最经济有效的方法就是使用D触发器，因为它需要的门电路最少，其他类型的触发器都是在D触发器的基础上得到的。</p>
+<p>实现 DFF 可以有两种方法：</p>
+<pre><code>Classical positive-edge-triggered D flip-flop
+
+Master–slave edge-triggered D flip-flop</code></pre><p>clk = 1 时，master D-latch 使能，D 传递到输出端 Q；</p>
+<p>clk = 0 时，slave D-latch 使能，输入 D (master D-latch 的输出 Q) 传递到输出 Q；</p>
+<p>可以看到，当 clk 从 1 变为 0 时，输入端的 D 才传递到输出端 Q，也就是说在时钟的下降沿才触发，其他时刻都保持输出不变。（如果需要上升沿触发，只需要在 clk 输入端键入一个反相器）</p>
+<p>DFF 的特点就是在时钟信号的特定点触发（上升沿 or 下降沿），真值表：</p>
+<table>
+<tr><th>CLK</th><th>D</th><th>Q<sub>next</sub></th></tr>
+<tr><td>上升沿</td><td>0</td><td>0</td></tr>
+<tr><td>上升沿</td><td>1</td><td>1</td></tr>
+<tr><td>非上升沿</td><td>X</td><td>Q</td></tr>
+</table>
+
+<h2 id="两者的对比"><a href="#两者的对比" class="headerlink" title="两者的对比"></a>两者的对比</h2><table>
+<tr><th>Latches</th><th>Flip-Flops</th></tr>
+<tr><td><div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">面积比触发器小。门电路是构建组合逻辑电路的基础，而锁存器和触发器是构建时序逻辑电路的基础。门电路是由晶体管构成的，锁存器是由门电路构成的，而触发器是由锁存器构成的。也就是 晶体管->门电路->锁存器->触发器，前一级是后一级的基础。锁存器完成同一个功能所需要的门较触发器要少，所以在asic中用的较多。</div></td><td><div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">由于一个Flip-Flop至少由两级SR锁存器组成，那么其面积肯定比锁存器大，消耗的门电路比锁存器多。在CPLD中，基本单元 LE 是查找表 LUT 和触发器 FF 组成的，如果要实现锁存器，反而需要更多的资源。</div></td></tr>
+<tr><td><div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">锁存器由电平触发，非同步控制。在使能信号有效时锁存器相当于通路，在使能信号无效时 latch 保持输出状态。</div></td><td><div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">触发器由时钟沿触发，同步控制，用于存储二进制数据。</div></td></tr>
+<tr><td><div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">电平触发，非同步设计，受布线延迟影响较大，很难保证输出没有毛刺产生，这对于下一级电路是极其危险的。</div></td><td><div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">边沿触发，同步设计，不容易受毛刺的印象。</div></td></tr>
+<tr><td><div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">不能异步复位，所以上电以后处于不确定的状态。</div></td><td><div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">可以异步复位</div></td></tr>
+<tr><td><div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">Latch会使静态时序分析变得非常复杂。</div></td><td><div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">时序分析简单</div></td></tr>
+<tr><td><div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">锁存器根据控制信号类型可以分为：D锁存器、SR锁存器、T锁存器和JK锁存器。</div></td><td><div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">R触发器根据控制信号类型可以分为：D触发器、SR触发器、T触发器和JK触发器。</div></td></tr>
+<tr><td><div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">锁存器是由逻辑门组成的。</div></td><td><div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">触发器是由锁存器与额外的时钟信号组成的。</div></td></tr>
+<tr><td><div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">锁存器很快，用在地址锁存是很合适的，不过一定要保证所有的latch信号源的质量，锁存器在CPU设计中很常见，正是由于它的应用使得CPU的速度比外部IO部件逻辑快许多。</div></td><td><div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">触发器比较慢</div></td></tr>
+<tr><td><div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">锁存器耗电更少，因为触发器一直要受时钟边沿控制。</div></td><td><div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">触发器耗电较多，因为锁存器既可以不使用时钟，也可以使用时钟。</div></td></tr>
+<tr><td><div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">通常，透明锁存器仅考虑D-Q传播延时。</div></td><td><div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">触发器要考虑CLK到Q延时，以及建立保持时间。</div></td></tr>
+<tr><td><div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">锁存器一般被认为是"透明"的。</div></td><td><div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">触发器因为边沿触发影响，往往是“非透明”的。</div></td></tr>
+</table>
+
+
+<h2 id="锁存器是否真的碰不得？"><a href="#锁存器是否真的碰不得？" class="headerlink" title="锁存器是否真的碰不得？"></a>锁存器是否真的碰不得？</h2><p>一般的设计规则是：在绝大多数设计中避免产生 latch。它会让您设计的时序完蛋，并且它的隐蔽性很强，非老手不能查出。latch 最大的危害在于不能过滤毛刺。这对于下一级电路是极其危险的。所以，只要能用 D 触发器的地方，就不用 latch。</p>
+<p>但是，锁存器作为一种电路单元，必然有其存在的理由及应用场景，在实际应用中，有些设计不可避免的要使用Latch，特别是总线应用上，例如，地址锁存器，数据锁存器，复位信号锁存器等。但是在更多的情况下，很容易产生未预料到的锁存器，使逻辑功能不满足要求，浪费大量时间。比较好的应用规则是：<em>要学会分析是否需要Latch以及代码是否会产生意外的Latch</em>。</p>
+<h3 id="“期望”的锁存器"><a href="#“期望”的锁存器" class="headerlink" title="“期望”的锁存器"></a>“期望”的锁存器</h3><p>通过Verilog HDL实现序列最大值搜索程序，并保持检测到的最大值：</p>
+<p>Code：</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> top_sys(</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> [<span class="number">7</span>:<span class="number">0</span>] a,</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span>       rst_n,</span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>  [<span class="number">7</span>:<span class="number">0</span>] abmax</span><br><span class="line">);</span><br><span class="line"><span class="keyword">always</span> @ (*) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">if</span> (!rst_n)</span><br><span class="line">        abmax &lt;= <span class="number">8'h00</span>;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    <span class="keyword">if</span> (a &gt; abmax)</span><br><span class="line">        abmax &lt;= a;</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">=========================================================================</span><br><span class="line">*                           HDL Synthesis                               *</span><br><span class="line">=========================================================================</span><br><span class="line"></span><br><span class="line">Synthesizing Unit &lt;top_sys&gt;.</span><br><span class="line">    Related source file is &quot;E:\GitRepository\Blog_Temple\FPGA_LATCH_VS_FF\rtl\top_sys.v&quot;.</span><br><span class="line">WARNING:Xst:737 - Found 1-bit latch for signal &lt;abmax&lt;6&gt;&gt;. Latches may be generated from incomplete case or if statements. We do not recommend the use of latches in FPGA/CPLD designs, as they may lead to timing problems.</span><br><span class="line">WARNING:Xst:737 - Found 1-bit latch for signal &lt;abmax&lt;5&gt;&gt;. Latches may be generated from incomplete case or if statements. We do not recommend the use of latches in FPGA/CPLD designs, as they may lead to timing problems.</span><br><span class="line">WARNING:Xst:737 - Found 1-bit latch for signal &lt;abmax&lt;4&gt;&gt;. Latches may be generated from incomplete case or if statements. We do not recommend the use of latches in FPGA/CPLD designs, as they may lead to timing problems.</span><br><span class="line">WARNING:Xst:737 - Found 1-bit latch for signal &lt;abmax&lt;3&gt;&gt;. Latches may be generated from incomplete case or if statements. We do not recommend the use of latches in FPGA/CPLD designs, as they may lead to timing problems.</span><br><span class="line">WARNING:Xst:737 - Found 1-bit latch for signal &lt;abmax&lt;2&gt;&gt;. Latches may be generated from incomplete case or if statements. We do not recommend the use of latches in FPGA/CPLD designs, as they may lead to timing problems.</span><br><span class="line">WARNING:Xst:737 - Found 1-bit latch for signal &lt;abmax&lt;1&gt;&gt;. Latches may be generated from incomplete case or if statements. We do not recommend the use of latches in FPGA/CPLD designs, as they may lead to timing problems.</span><br><span class="line">WARNING:Xst:737 - Found 1-bit latch for signal &lt;abmax&lt;0&gt;&gt;. Latches may be generated from incomplete case or if statements. We do not recommend the use of latches in FPGA/CPLD designs, as they may lead to timing problems.</span><br><span class="line">WARNING:Xst:737 - Found 1-bit latch for signal &lt;abmax&lt;7&gt;&gt;. Latches may be generated from incomplete case or if statements. We do not recommend the use of latches in FPGA/CPLD designs, as they may lead to timing problems.</span><br><span class="line">    Found 8-bit comparator greater for signal &lt;abmax[7]_a[7]_LessThan_1_o&gt; created at line 12</span><br><span class="line">    Summary:</span><br><span class="line">    inferred   8 Latch(s).</span><br><span class="line">    inferred   1 Comparator(s).</span><br><span class="line">Unit &lt;top_sys&gt; synthesized.</span><br></pre></td></tr></table></figure>
+
+<p>上述代码在ISE中的综合结果会给出设计中包含Latch的警告。但实际上，abmax_tmp锁存器正是我们需要的，所以，虽然有警告，但是代码设计是没有问题的。将上述代码的if语句补全：</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (a &gt; abmax)</span><br><span class="line">    abmax &lt;= a;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    abmax &lt;= abmax;</span><br></pre></td></tr></table></figure>
+
+
+<p>经过综合后，仍然有Latch的警告。无论Latch是否是用户需要的，ISE都会给出警告，主要原因就是Latch对整个设计的时序性能影响较大。所以，在设计中要尽量避免Latch，但是确实需要使用的情况，也可以使用。</p>
+<p>###“不期望”latch</p>
+<p>指的是与设计意图不符，产生的Latch。<em>主要问题在于设计人员没有合理使用Verilog HDL语言，常见的原因是对条件语句（if、casse）的分支描述不完整</em>。典型例子：用Verilog HDL实现一个锁存器，当输入数据大于127时，将输入数据输出，否则输出0。</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> latch_demo(</span><br><span class="line">    <span class="keyword">input</span>  <span class="keyword">wire</span> [<span class="number">7</span>:<span class="number">0</span>] din,</span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>  [<span class="number">7</span>:<span class="number">0</span>] dout</span><br><span class="line">);</span><br><span class="line"><span class="keyword">always</span> @ (din) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">if</span> (din&gt;<span class="number">127</span>)</span><br><span class="line">        dout &lt;= din;</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<p>综合后的结果，在比较器后面级联了锁存器，这是因为if语句缺少else分支造成的。查看仿真结果，当输入小于127时，输出保持了上次的127，不是0，没有达到设计要求。修改方法很简单，就是将if-else补全。</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (din&gt;<span class="number">127</span>)</span><br><span class="line">    dout &lt;= din;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    dout &lt;= <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<p>在ISE中综合后的结果中，可以看到补全if-else后，在比较器后面级联了与门，代替原来的锁存器，仿真结果也正确。</p>
+<h2 id="D锁存器的其他应用"><a href="#D锁存器的其他应用" class="headerlink" title="D锁存器的其他应用"></a>D锁存器的其他应用</h2><p>锁存器用来锁存数据，这是初始的功能应用，这里来聊聊锁存的其他的简单应用吧。</p>
+<ol>
+<li><p>锁存器的常用应用就是用来防电路毛刺了，具体的应用就是门控时钟了，这里请查看我的另外一篇博文，那里有较为详细的关于门控电路的描述。大家看到这条是不是有点蒙？没关系，我也是，之后我会写一篇来介绍的。</p>
+</li>
+<li><p>锁存器有一种叫做锁定锁存器（ lockup latch）的玩意用于修复扫描链插入时引起的时钟偏移问题，帮助修复保持时间违规，具体情况可以查看<a href="https://vlsiuniverse.blogspot.com/2013/06/lockup-latches-soul-mate-of-scan-based.html" target="_blank" rel="noopener">Lockup latch – principle, application and timing</a>。</p>
+</li>
+<li><p>有 些地方没有时钟，也只能用 latch 了。比如现在用一个 clk 接到 latch 的使能端 (假设是高电平使能), 这样需要的 setup 时间，就是数据在时钟的 下降沿之前需要的时间，但是如果是一个 DFF，那么 setup 时间就是在时钟的上升沿需要的时间。这就说明如果数据晚于控制信号的情况下，只能用 latch, 这种情况就是，前面所提到的 latch timing borrow。基本上相当于借了一个高电平时间。也就是说，latch 借的时间也是有限的。</p>
+</li>
+<li><p>类似通过修复保持时间来增强性能、锁存器流水线的应用，这些应用很难三言两语的说明，有些我也不太懂，以后用到的时候再详细研究吧。</p>
+</li>
+</ol>
+<h2 id="PS："><a href="#PS：" class="headerlink" title="PS："></a>PS：</h2><pre><code>1. 关于SR锁存器和触发器建立/保持时间的相关内容 可以参考我的另一篇博客。
+
+2. 以前想过一个问题，明明在FPGA的结构中看到了锁存器，但是为什么大多数资料都会说锁存器会导致消耗更多的资源呢？主要是因为CPLD中没有锁存器，所以需要大量的逻辑。
+
+由于我并没有使用CPLD的项目，所以在网上找到一张示意图展示用DFF来生成锁存器：</code></pre><div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_latch-vs-flipflop/cpld_latch.gif" width="600">
+</div>
+
+<pre><code>3. FPGA的FF是否可以配置成LATCH？
+
+试了一下布局布线后的结果，在FPGA中FF可以配置成LATCH，FF中的CLK在这里被配置成G，RST被配置成CLR。</code></pre><div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_latch-vs-flipflop/latch_tech.png" width="600">
+</div>
+
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_latch-vs-flipflop/latch_real.png" width="600">
+</div>
+
+<pre><code>4. ASIC中Latch面积更小？
+（待补充一个直观的结果）</code></pre><h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><pre><code>这篇笔记参考网上众多资料实验并整理而成，如果涉及侵权烦请请告知，我将第一时间处理。</code></pre><ol>
+<li><a href="https://vlsiuniverse.blogspot.com/2013/06/lockup-latches-soul-mate-of-scan-based.html" target="_blank" rel="noopener">Lockup latch – principle, application and timing</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/36484225" target="_blank" rel="noopener">FPGA中Verilog语言综合出锁存器的问题</a></li>
+<li><a href="https://blog.csdn.net/beikezhouxue/article/details/40107955" target="_blank" rel="noopener">Verilog 锁存器 触发器 寄存器区别</a></li>
+<li><a href="http://blog.sina.com.cn/s/blog_bff0927b01015k8m.html" target="_blank" rel="noopener">FPGA设计中latch的产生原因、危害与避免措施</a></li>
+<li><a href="https://www.eefocus.com/liuyuxue/blog/13-11/300280_d7008.html" target="_blank" rel="noopener">FPGA 中的latch 锁存器</a></li>
+<li><a href="http://blog.51cto.com/yuqix/214878" target="_blank" rel="noopener">锁存器的一点总结</a></li>
+<li><a href="http://guqian110.github.io/pages/2014/09/23/latch_versus_flip_flop.html" target="_blank" rel="noopener">锁存器 Latch v.s. 触发器 Flip-Flop</a></li>
+<li><a href="https://blog.csdn.net/Times_poem/article/details/73063155" target="_blank" rel="noopener">IC 设计基础系列之 CDC 篇 7：从 CMOS 到触发器</a></li>
+<li><a href="http://www.labri.fr/perso/strandh/Teaching/AMP/Common/Strandh-Tutorial/flip-flops.html" target="_blank" rel="noopener">Latches and flip-flops</a></li>
+<li><a href="https://blog.csdn.net/h_kingone/article/details/56671517" target="_blank" rel="noopener">锁存器（latch）、触发器（flip-flop）、寄存器（register）的区别</a></li>
+<li><a href="https://www.elprocus.com/difference-between-latches-and-flip-flops/" target="_blank" rel="noopener">Difference between Latches and Flip-Flops</a></li>
+<li><a href="https://www.edgefx.in/digital-electronics-latches-and-flip-flops/" target="_blank" rel="noopener">Know all about Latches and Flip Flops</a></li>
+<li><a href="https://www.electronicshub.org/d-flip-flop/" target="_blank" rel="noopener">Designing of D Flip Flop</a></li>
+<li><a href="https://www.fpgarelated.com/showarticle/3.php" target="_blank" rel="noopener">The Spartans</a></li>
+<li><a href="https://www.xilinx.com/support/documentation/sw_manuals/help/iseguide/mergedProjects/destech/html/cd_creating_latches_in_schematics.htm" target="_blank" rel="noopener">Creating Latches in Schematics</a></li>
+<li><a href="https://www.xilinx.com/support/documentation/sw_manuals/help/iseguide/mergedProjects/destech/html/cd_creating_latches.htm" target="_blank" rel="noopener">Creating Latches</a></li>
+<li><a href="http://xilinx.eetrend.com/d6-xilinx/blog/2016-05/10127.html" target="_blank" rel="noopener">Spartan-6 Slice</a></li>
+<li><a href="https://vjordan.info/log/fpga/spartan6-slice-m-configuration.html" target="_blank" rel="noopener">Spartan6 Slice M configuration</a></li>
+<li><a href="http://barrywatson.se/dd/dd_d_flip_flop_edge_triggered.html" target="_blank" rel="noopener">D Flip-Flop (edge-triggered)</a></li>
+<li><a href="http://worldclassprogramme.com/D-FlipFlop.php" target="_blank" rel="noopener">D Flip-Flop</a></li>
+<li><a href="http://www.play-hookey.com/digital/sequential/d_nand_flip-flop.html" target="_blank" rel="noopener">The D Flip-Flop</a></li>
+</ol>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2019-02-11/latch-vs-flipflop/">Latch vs Flip-Flop</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">黑山老喵</a></p>
+        <p><span>发布时间:</span>2019-02-11, 18:55:18</p>
+        <p><span>最后更新:</span>2019-07-22, 20:07:16</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2019-02-11/latch-vs-flipflop/" title="Latch vs Flip-Flop">https://catonblack.cn/2019-02-11/latch-vs-flipflop/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://catonblack.cn/2019-02-11/latch-vs-flipflop/　　作者: 黑山老喵" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target="_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2019-02-18/setup-hold-time/">
+                    建立保持时间的原理解释
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2019-01-18/mealy2moore/">
+                    Moore 与 Mealy 状态机的互相转换
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#基本定义"><span class="toc-number">1.</span> <span class="toc-text">基本定义</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#D锁存器"><span class="toc-number">1.1.</span> <span class="toc-text">D锁存器</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#NOR-D-Latch"><span class="toc-number">1.1.1.</span> <span class="toc-text">NOR D Latch</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#NAND-D-Latch"><span class="toc-number">1.1.2.</span> <span class="toc-text">NAND D Latch</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#D触发器"><span class="toc-number">1.2.</span> <span class="toc-text">D触发器</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#两者的对比"><span class="toc-number">2.</span> <span class="toc-text">两者的对比</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#锁存器是否真的碰不得？"><span class="toc-number">3.</span> <span class="toc-text">锁存器是否真的碰不得？</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#“期望”的锁存器"><span class="toc-number">3.1.</span> <span class="toc-text">“期望”的锁存器</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#D锁存器的其他应用"><span class="toc-number">4.</span> <span class="toc-text">D锁存器的其他应用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#PS："><span class="toc-number">5.</span> <span class="toc-text">PS：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">6.</span> <span class="toc-text">参考资料</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录" title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"Latch vs Flip-Flop　| 黑山老喵小窝　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+        <section id="comments" style="margin: 2em; padding: 2em; background: rgba(255, 255, 255, 0.5)">
+    <div id="vcomment" class="comment"></div>
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src="//unpkg.com/valine@1.2.0-beta1/dist/Valine.min.js"></script>
+    <script>
+      new Valine({
+        el: '#vcomment',
+        notify: 'true',
+        verify: 'true',
+        app_id: "0tk0hycE3Yips8Txim7EBtm5-gzGzoHsz",
+        app_key: "nW716Qi1t7lY4m6zXI9MSYJs",
+        placeholder: "Just go go!",
+        avatar: "mp"
+      });
+    </script>
+</section>
+
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2019-02-18/setup-hold-time/" title="上一篇: 建立保持时间的原理解释">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2019-01-18/mealy2moore/" title="下一篇: Moore 与 Mealy 状态机的互相转换">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019-07-17/if-else/">if……else 和 case 的综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/fsm-style/">状态机一段式、二段式和三段式写法的实际效果</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/multisignal-cdc/">跨时钟传递多个时钟信号</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-03-17/hdl-prjsetting/">Verilog 项目配置</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-02-18/setup-hold-time/">建立保持时间的原理解释</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-02-11/latch-vs-flipflop/">Latch vs Flip-Flop</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-01-18/mealy2moore/">Moore 与 Mealy 状态机的互相转换</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-01-16/moore-mealy/">摩尔状态机和米勒状态机特性对比</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-10-21/metastability/">令人闻风丧胆的亚稳态</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-08-18/up-down-edge/">上下边沿触发</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-18/model-interface/">常见的模块间交互的方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-18/fpga-reset/">FPGA 复位研究</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-16/async-clock-sync/">异步时钟信号同步化及其综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-11/race-competition/">竞争与冒险</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-05-04/wire-reg/">Wire and Reg等定义的综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-13/folder-manage/">工程存档文件夹命名</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-07/use-git/">Git管理工程的方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-03/file-manage/">基于中心库的NAS,云盘和Git的文件管理方式</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-03-01/instant-noodles/">泡面鉴赏</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2019 黑山老喵
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style="display:none">
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style="display:none">
+                        <span id="page-visit" title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 5;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+</body>
+</html>

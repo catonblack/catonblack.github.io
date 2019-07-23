@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<meta name="author" content="黑山老喵">
+
+
+
+<meta name="description" content="我们知道，对于时序逻辑电路，有一个比较重要的参数便是采样/保持时间。理想电路的时钟上升沿时间是0，只要信号在时钟上升沿之前就可以实现触发器的数据改变；而实际电路的时钟上升时间不为0，信号也必须要在时钟上升沿前后保持一段时间才可以实现锁存，否则就可能遇到亚稳态问题。可是时序逻辑电路为什么会需要采样/保持时间？这篇笔记就是为了探究这个现象背后的原理。">
+<meta name="keywords" content="锁存器,触发器,建立时间,保持时间">
+<meta property="og:type" content="article">
+<meta property="og:title" content="建立保持时间的原理解释">
+<meta property="og:url" content="https://catonblack.cn/2019-02-18/setup-hold-time/index.html">
+<meta property="og:site_name" content="黑山老喵小窝">
+<meta property="og:description" content="我们知道，对于时序逻辑电路，有一个比较重要的参数便是采样/保持时间。理想电路的时钟上升沿时间是0，只要信号在时钟上升沿之前就可以实现触发器的数据改变；而实际电路的时钟上升时间不为0，信号也必须要在时钟上升沿前后保持一段时间才可以实现锁存，否则就可能遇到亚稳态问题。可是时序逻辑电路为什么会需要采样/保持时间？这篇笔记就是为了探究这个现象背后的原理。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_setup-hold-time/cover.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_setup-hold-time/srlatchinit.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_setup-hold-time/srlatchinit_r21.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_setup-hold-time/srlatchinit_s21.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_setup-hold-time/dtrigger.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_setup-hold-time/masterlatch.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_setup-hold-time/setuptrue.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_setup-hold-time/sr.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_setup-hold-time/setupfault.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_setup-hold-time/holdtrue.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_setup-hold-time/holdfault.png">
+<meta property="og:updated_time" content="2019-07-22T11:47:44.108Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="建立保持时间的原理解释">
+<meta name="twitter:description" content="我们知道，对于时序逻辑电路，有一个比较重要的参数便是采样/保持时间。理想电路的时钟上升沿时间是0，只要信号在时钟上升沿之前就可以实现触发器的数据改变；而实际电路的时钟上升时间不为0，信号也必须要在时钟上升沿前后保持一段时间才可以实现锁存，否则就可能遇到亚稳态问题。可是时序逻辑电路为什么会需要采样/保持时间？这篇笔记就是为了探究这个现象背后的原理。">
+<meta name="twitter:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_setup-hold-time/cover.jpg">
+
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="黑山老喵小窝" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/favicon.png">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>建立保持时间的原理解释 | 黑山老喵小窝</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "//hm.baidu.com/hm.js?9871d0915604e1e9dc64974db7659410";
+            var s = document.getElementsByTagName("script")[0]; 
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+
+</head></html>
+<body>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/avatar.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">黑山老喵</a></h1>
+        </hgroup>
+
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="true">
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class="no-result">No results found <i class="fa fa-spinner fa-pulse"></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/categories/">分类</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto:catonblack@live.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" href="http://github.com/catonblack" title="GitHub"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Git/">Git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/GitHub/">GitHub</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/GitServer/">GitServer</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Gitlab/">Gitlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Mealy/">Mealy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Moore/">Moore</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NAS/">NAS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Negedge-Clock-Edge/">Negedge Clock Edge</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Posedge-Clock-Edge/">Posedge Clock Edge</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reg/">Reg</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Wire/">Wire</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/case/">case</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/if……else/">if……else</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/云盘/">云盘</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/亚稳态/">亚稳态</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/亚稳态优化/">亚稳态优化</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代数法/">代数法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/保持时间/">保持时间</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/冒险/">冒险</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/卡诺图法/">卡诺图法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/变量定义/">变量定义</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/品鉴/">品鉴</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/器件特性/">器件特性</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/复位/">复位</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/多信号同步/">多信号同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/多段式状态机/">多段式状态机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/实际电路/">实际电路</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/工程存档/">工程存档</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平均无故障时间/">平均无故障时间</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/建立时间/">建立时间</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/异步时钟/">异步时钟</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/扁平化命名/">扁平化命名</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/文件管理/">文件管理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/有限状态机/">有限状态机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/模块交互/">模块交互</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/毛刺/">毛刺</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/泡面/">泡面</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/状态机转换/">状态机转换</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/电平同步/">电平同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/竞争/">竞争</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/综合/">综合</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/脉冲同步/">脉冲同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/规范/">规范</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/触发器/">触发器</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/边沿检测同步/">边沿检测同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进口/">进口</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/锁存器/">锁存器</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/锁存器处理/">锁存器处理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/项目存档/">项目存档</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/">MOxFIVE</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://catonblack.cn">Github</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://console.cloud.tencent.com/domain">腾讯云</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://tongji.baidu.com/web/28226238/overview/index?siteId=13598139">百度统计</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://www.livere.com/city-demo/insight">来必力</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://portal.qiniu.com/create">七牛云</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://valine.js.org/quickstart.html">Valine</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.coding.me/yelee/">Yelee</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">来自老和山职业技术学院的非典型理工男。专注于硬件、嵌入式、FPGA设计，涉足领域包括科学仪器、医疗仪器和可穿戴设备，在相关领域有6年一线实战经验。喜欢尝试新鲜事物，对物理、化学、医学、心理学等学科有一定的了解。</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">黑山老喵</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/avatar.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">黑山老喵</a></h1>
+            </hgroup>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/categories/">分类</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto:catonblack@live.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="http://github.com/catonblack" title="GitHub"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我">
+</nav>
+      <div class="body-wrap"><article id="post-setup-hold-time" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019-02-18/setup-hold-time/" class="article-date">
+      <time datetime="2019-02-18T10:56:56.000Z" itemprop="datePublished">2019-02-18</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      建立保持时间的原理解释
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/FPGA血泪史/">FPGA血泪史</a><a class="article-category-link" href="/categories/FPGA进阶款/">FPGA进阶款</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/保持时间/">保持时间</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/建立时间/">建立时间</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/触发器/">触发器</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/锁存器/">锁存器</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_setup-hold-time/cover.jpg" width="600">
+</div>
+
+<p>我们知道，对于时序逻辑电路，有一个比较重要的参数便是采样/保持时间。理想电路的时钟上升沿时间是0，只要信号在时钟上升沿之前就可以实现触发器的数据改变；而实际电路的时钟上升时间不为0，信号也必须要在时钟上升沿前后保持一段时间才可以实现锁存，否则就可能遇到亚稳态问题。可是时序逻辑电路为什么会需要采样/保持时间？这篇笔记就是为了探究这个现象背后的原理。</p>
+<a id="more"></a>
+
+<p>关于亚稳态现象，请参考博文《》。</p>
+<h2 id="SR锁存器"><a href="#SR锁存器" class="headerlink" title="SR锁存器"></a>SR锁存器</h2><p>SR锁存器是触发器最基本的组成结构，要解释触发器为啥需要采样/保持时间，首先就要先解释一下SR锁存器的原理。</p>
+<p>我们以使用或非门搭建的SR锁存器为例，来讲解一下：</p>
+<p>如下图，SR锁存器默认状态下Q输出为1，Q’输出为0。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_setup-hold-time/srlatchinit.png" width="600">
+</div>
+
+<p>假设在下个<strong>瞬间</strong>，将R设置为1，此时上面的或非门另一个输入为0，此时输出Q会变为0，那么下面的或非门两个输入均为0，此瞬间Q’的输出则为1，那么上或非门的两个输入即都为1，此时输出Q为0。正好形成稳定的状态。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_setup-hold-time/srlatchinit_r21.png" width="600">
+</div>
+
+<p>在下个<strong>瞬间</strong>，将S设置为1，R设为0，此时下面的或非门两个输入均为1，则输出Q’为0，那么上或非门的两个输入即都为0，此时输出Q为1。正好形成稳定的状态。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_setup-hold-time/srlatchinit_s21.png" width="600">
+</div>
+
+<p>总结一下真值表：</p>
+<table>
+<tr><th>S</th><th>R</th><th>Q</th><th>Q<sub>next</sub></th><th>备注</th></tr>
+<tr><td>0</td><td>0</td><td>0</td><td>0</td><td>维持</td></tr>
+<tr><td>0</td><td>0</td><td>1</td><td>1</td><td>维持</td></tr>
+<tr><td>0</td><td>1</td><td>0</td><td>0</td><td>复位</td></tr>
+<tr><td>0</td><td>1</td><td>1</td><td>0</td><td>复位</td></tr>
+<tr><td>1</td><td>0</td><td>0</td><td>1</td><td>置位</td></tr>
+<tr><td>1</td><td>0</td><td>1</td><td>1</td><td>置位</td></tr>
+<tr><td>1</td><td>1</td><td>0</td><td>-</td><td>不允许</td></tr>
+<tr><td>1</td><td>1</td><td>1</td><td>-</td><td>不允许</td></tr>
+</table>
+
+<h2 id="为啥触发器会需要采样-保持时间？"><a href="#为啥触发器会需要采样-保持时间？" class="headerlink" title="为啥触发器会需要采样/保持时间？"></a>为啥触发器会需要采样/保持时间？</h2><p>下面我们就来探讨一下触发器为什么会有建立时间和保持时间的要求。我们先假设原来的数据为1，新的要锁存的数据为0。</p>
+<p>首先 D 触发器的门级电路原理图如下所示：</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_setup-hold-time/dtrigger.png" width="600">
+</div>
+
+<p>如图所示D触发器内部包含两个D锁存器，靠近输入端的锁存器称为主D锁存器，靠近输出端的锁存器称为从D锁存器。要让触发器的输出为0，也就是要让从锁存器的输出为0，也即要让主锁存器在时钟发生跳变之后将数据稳定地锁存在0。换句话说，时钟边沿跳变之后主锁存器负责锁存数据，而从锁存器则负责传输主锁存器锁存好的数据，这样我们就把问题简化为研究<strong>主锁存器</strong>在时钟跳变瞬间的状态。</p>
+<p>这里以时钟上升沿为例，也就是D触发器在clk信号0-&gt;1时锁存数据，咱们来看下在这个时间点发生了哪些事。将主锁存器单独提取出：</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_setup-hold-time/masterlatch.png" width="600">
+</div>
+
+<h3 id="先讨论建立时间"><a href="#先讨论建立时间" class="headerlink" title="先讨论建立时间"></a>先讨论建立时间</h3><p>假设时钟上升沿到来后数据的建立时间不足，或者说数据0相对于时钟上升沿来的太晚会怎样？</p>
+<p>假设在 T=0ns 的时候，clk 从 0 变成 1（为方便分析，假设时钟是理想的，没有跳变延时）。这时候信号可能会在两个时间点过来，为了便于分析，我们将这两个时间点的信号看成两个信号，分别是D1和D2。其中，D1=0 在 T=-0.7ns 的时候到达数据的端口，这个信号满足建立时间；另一个信号 D2=0 在 T=-0.3ns 的时候才来到数据端口，这个信号不满足建立时间。换句话说就是D1来的足够早，D2来的足够晚。</p>
+<p>D1信号0经过反相器(NOT1)成为了1(B1)，经过与门(AND1)得到1（R1）（此时时钟上升沿还没有来，所以clk为0，即与门的另一个输入为1），经过或非门(NOR1)之后输出Q1变成了0，也就是从锁存器要锁存的0。主锁存器Q刚输出0时还不稳定，需要经过反馈使得或非门(NOR1)的另一个输出为1，即需要t1+t2+t3来维持Q的稳定。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_setup-hold-time/setuptrue.png" width="600">
+</div>
+
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_setup-hold-time/sr.png" width="600">
+</div>
+
+<p>D2信号刚经过非门(NOT1)到达与门(AND1)，时钟上升沿很快就到了，此时在与门(AND1)后形成一个很短的脉冲，在一些极限条件下，这个脉冲甚至可能没有。脉冲的时间肯定小于t1+t2+t3，也就意味着锁存器可能没法实现稳定锁存，这就是建立时间不足的引起锁存不住值的原因。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_setup-hold-time/setupfault.png" width="600">
+</div>
+
+<p>由此分析得出，建立时间的实质应该是主锁存器的稳定时间t1+t2+t3与A，B两段导线传播时间差的和。</p>
+<h3 id="接下来讨论保持时间："><a href="#接下来讨论保持时间：" class="headerlink" title="接下来讨论保持时间："></a>接下来讨论保持时间：</h3><p>也就是说数据相对时钟上升沿撤销地太早会怎样？</p>
+<p>如下图：如果撤销地足够晚，也就是D1在THOLD（这里的THOLD只是示意图，参考下面的分析会看到实际的THOLD十分接近B的下降沿）之后才撤销，S1在这段时间里时钟为0，而R1却会存在一个向上的脉冲（如上段文字所述）。此时即可得到输出Q1为0。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_setup-hold-time/holdtrue.png" width="600">
+</div>
+
+<p>接下来看卡如果撤销的太迅速会咋样：撤销地太迅速，也就意味着D2在B下降沿之前就置位了，R2虽然不受影响，但是此时由于S2是B2与D2做与得到，所以S2会存在一个向上的脉冲，也就是说S2与R2在这个时刻可能会同时置位，由SR锁存器的真值表可知，此时输出Q2可能会出错。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_setup-hold-time/holdfault.png" width="600">
+</div>
+
+<p>由这个分析可知保持时间的本质其实是 从CLK到AND2输入的时间t1 与 从D到AND2输入的时间t2 的差值。</p>
+<p>由于在集成电路中，一个D触发器内部的连接线长度极短，信号通过逻辑门的时间往往要长很多，所以一般情况下保持时间会比建立时间小。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><pre><code>这篇笔记参考网上众多资料实验并整理而成，如果涉及侵权烦请请告知，我将第一时间处理。</code></pre><ol>
+<li><a href="https://vlsiuniverse.blogspot.com/2013/06/lockup-latches-soul-mate-of-scan-based.html" target="_blank" rel="noopener">Lockup latch – principle, application and timing</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/36484225" target="_blank" rel="noopener">FPGA中Verilog语言综合出锁存器的问题</a></li>
+<li><a href="https://blog.csdn.net/beikezhouxue/article/details/40107955" target="_blank" rel="noopener">Verilog 锁存器 触发器 寄存器区别</a></li>
+<li><a href="http://blog.sina.com.cn/s/blog_bff0927b01015k8m.html" target="_blank" rel="noopener">FPGA设计中latch的产生原因、危害与避免措施</a></li>
+<li><a href="https://www.eefocus.com/liuyuxue/blog/13-11/300280_d7008.html" target="_blank" rel="noopener">FPGA 中的latch 锁存器</a></li>
+<li><a href="http://blog.51cto.com/yuqix/214878" target="_blank" rel="noopener">锁存器的一点总结</a></li>
+<li><a href="http://guqian110.github.io/pages/2014/09/23/latch_versus_flip_flop.html" target="_blank" rel="noopener">锁存器 Latch v.s. 触发器 Flip-Flop</a></li>
+<li><a href="https://blog.csdn.net/Times_poem/article/details/73063155" target="_blank" rel="noopener">IC 设计基础系列之 CDC 篇 7：从 CMOS 到触发器</a></li>
+<li><a href="http://www.labri.fr/perso/strandh/Teaching/AMP/Common/Strandh-Tutorial/flip-flops.html" target="_blank" rel="noopener">Latches and flip-flops</a></li>
+<li><a href="https://blog.csdn.net/h_kingone/article/details/56671517" target="_blank" rel="noopener">锁存器（latch）、触发器（flip-flop）、寄存器（register）的区别</a></li>
+<li><a href="https://www.elprocus.com/difference-between-latches-and-flip-flops/" target="_blank" rel="noopener">Difference between Latches and Flip-Flops</a></li>
+<li><a href="https://www.edgefx.in/digital-electronics-latches-and-flip-flops/" target="_blank" rel="noopener">Know all about Latches and Flip Flops</a></li>
+<li><a href="https://www.electronicshub.org/d-flip-flop/" target="_blank" rel="noopener">Designing of D Flip Flop</a></li>
+<li><a href="https://www.fpgarelated.com/showarticle/3.php" target="_blank" rel="noopener">The Spartans</a></li>
+<li><a href="https://www.xilinx.com/support/documentation/sw_manuals/help/iseguide/mergedProjects/destech/html/cd_creating_latches_in_schematics.htm" target="_blank" rel="noopener">Creating Latches in Schematics</a></li>
+<li><a href="https://www.xilinx.com/support/documentation/sw_manuals/help/iseguide/mergedProjects/destech/html/cd_creating_latches.htm" target="_blank" rel="noopener">Creating Latches</a></li>
+<li><a href="http://xilinx.eetrend.com/d6-xilinx/blog/2016-05/10127.html" target="_blank" rel="noopener">Spartan-6 Slice</a></li>
+<li><a href="https://vjordan.info/log/fpga/spartan6-slice-m-configuration.html" target="_blank" rel="noopener">Spartan6 Slice M configuration</a></li>
+<li><a href="http://barrywatson.se/dd/dd_d_flip_flop_edge_triggered.html" target="_blank" rel="noopener">D Flip-Flop (edge-triggered)</a></li>
+<li><a href="http://worldclassprogramme.com/D-FlipFlop.php" target="_blank" rel="noopener">D Flip-Flop</a></li>
+<li><a href="http://www.play-hookey.com/digital/sequential/d_nand_flip-flop.html" target="_blank" rel="noopener">The D Flip-Flop</a></li>
+</ol>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2019-02-18/setup-hold-time/">建立保持时间的原理解释</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">黑山老喵</a></p>
+        <p><span>发布时间:</span>2019-02-18, 18:56:56</p>
+        <p><span>最后更新:</span>2019-07-22, 19:47:44</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2019-02-18/setup-hold-time/" title="建立保持时间的原理解释">https://catonblack.cn/2019-02-18/setup-hold-time/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://catonblack.cn/2019-02-18/setup-hold-time/　　作者: 黑山老喵" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target="_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2019-03-17/hdl-prjsetting/">
+                    Verilog 项目配置
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2019-02-11/latch-vs-flipflop/">
+                    Latch vs Flip-Flop
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#SR锁存器"><span class="toc-number">1.</span> <span class="toc-text">SR锁存器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#为啥触发器会需要采样-保持时间？"><span class="toc-number">2.</span> <span class="toc-text">为啥触发器会需要采样/保持时间？</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#先讨论建立时间"><span class="toc-number">2.1.</span> <span class="toc-text">先讨论建立时间</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#接下来讨论保持时间："><span class="toc-number">2.2.</span> <span class="toc-text">接下来讨论保持时间：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">3.</span> <span class="toc-text">参考资料</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录" title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"建立保持时间的原理解释　| 黑山老喵小窝　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+        <section id="comments" style="margin: 2em; padding: 2em; background: rgba(255, 255, 255, 0.5)">
+    <div id="vcomment" class="comment"></div>
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src="//unpkg.com/valine@1.2.0-beta1/dist/Valine.min.js"></script>
+    <script>
+      new Valine({
+        el: '#vcomment',
+        notify: 'true',
+        verify: 'true',
+        app_id: "0tk0hycE3Yips8Txim7EBtm5-gzGzoHsz",
+        app_key: "nW716Qi1t7lY4m6zXI9MSYJs",
+        placeholder: "Just go go!",
+        avatar: "mp"
+      });
+    </script>
+</section>
+
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2019-03-17/hdl-prjsetting/" title="上一篇: Verilog 项目配置">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2019-02-11/latch-vs-flipflop/" title="下一篇: Latch vs Flip-Flop">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019-07-17/if-else/">if……else 和 case 的综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/fsm-style/">状态机一段式、二段式和三段式写法的实际效果</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/multisignal-cdc/">跨时钟传递多个时钟信号</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-03-17/hdl-prjsetting/">Verilog 项目配置</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-02-18/setup-hold-time/">建立保持时间的原理解释</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-02-11/latch-vs-flipflop/">Latch vs Flip-Flop</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-01-18/mealy2moore/">Moore 与 Mealy 状态机的互相转换</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-01-16/moore-mealy/">摩尔状态机和米勒状态机特性对比</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-10-21/metastability/">令人闻风丧胆的亚稳态</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-08-18/up-down-edge/">上下边沿触发</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-18/model-interface/">常见的模块间交互的方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-18/fpga-reset/">FPGA 复位研究</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-16/async-clock-sync/">异步时钟信号同步化及其综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-11/race-competition/">竞争与冒险</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-05-04/wire-reg/">Wire and Reg等定义的综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-13/folder-manage/">工程存档文件夹命名</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-07/use-git/">Git管理工程的方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-03/file-manage/">基于中心库的NAS,云盘和Git的文件管理方式</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-03-01/instant-noodles/">泡面鉴赏</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2019 黑山老喵
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style="display:none">
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style="display:none">
+                        <span id="page-visit" title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 5;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+</body>
+</html>
