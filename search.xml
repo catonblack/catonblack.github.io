@@ -138,9 +138,9 @@
         <category>FPGA入门款</category>
       </categories>
       <tags>
+        <tag>综合</tag>
         <tag>Posedge Clock Edge</tag>
         <tag>Negedge Clock Edge</tag>
-        <tag>综合</tag>
       </tags>
   </entry>
   <entry>
@@ -213,10 +213,10 @@
         <category>FPGA入门款</category>
       </categories>
       <tags>
-        <tag>综合</tag>
         <tag>变量定义</tag>
         <tag>Wire</tag>
         <tag>Reg</tag>
+        <tag>综合</tag>
         <tag>实际电路</tag>
       </tags>
   </entry>
