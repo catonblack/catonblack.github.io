@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<meta name="author" content="黑山老喵">
+
+
+
+<meta name="description" content="这是我业余时间做的一个项目，最开始只是没在网上找到合适自己的键盘，后来随着想法的增加就逐渐地想要做一个适合自己的键盘，然后就变成了现在的模样。最近遇到了一些瓶颈加上手边的项目比较紧，这块儿暂时没有推进，如果有小伙伴可以给我一些建议的话那也是极好的^_^">
+<meta name="keywords" content="智能硬件,键盘,人因工程,轨迹球,触摸板">
+<meta property="og:type" content="article">
+<meta property="og:title" content="懒人键盘纪实">
+<meta property="og:url" content="https://catonblack.cn/2017-08-14/lazy-keyboard/index.html">
+<meta property="og:site_name" content="黑山老喵小窝">
+<meta property="og:description" content="这是我业余时间做的一个项目，最开始只是没在网上找到合适自己的键盘，后来随着想法的增加就逐渐地想要做一个适合自己的键盘，然后就变成了现在的模样。最近遇到了一些瓶颈加上手边的项目比较紧，这块儿暂时没有推进，如果有小伙伴可以给我一些建议的话那也是极好的^_^">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/cover.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/QWERTY.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/DVORAK.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/backlight.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/KeyChoose.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/redKey.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/brownKey.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/cyanKey.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/blackKey.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/spine_weight.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/sit_left.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/sit_top.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/sit_laptop.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/mindmap.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_KINESIS.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_Natural.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_Microsoft4000.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_uTron.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_Ergonomic.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_KeyMouse.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_KeyMouse_trackball.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_Combimouse.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_ergodox0.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_ergodox1.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_ergodox2.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_ergodox3.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_netmate1.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_netmate2.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_ideal1.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_ideal2.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_ideal3.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_ideal4.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_ideal5.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_ideal6.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/carbonciber.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round1_sketch1.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round1_sketch2.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round1_key.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round1_3D.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round2_3D1.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round2_3D2.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round2_3Dprint1.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round2_3Dprint2.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round2_3Dprint3.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round2_schematic1.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round2_schematic2.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round2_schematic3.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round2_schematic4.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round2_schematic5.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round2_schematic6.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round2_schematic7.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round2_blecompare.jpg">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round2_pcb1.png">
+<meta property="og:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round2_pcb2.png">
+<meta property="og:updated_time" content="2019-08-14T12:12:24.485Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="懒人键盘纪实">
+<meta name="twitter:description" content="这是我业余时间做的一个项目，最开始只是没在网上找到合适自己的键盘，后来随着想法的增加就逐渐地想要做一个适合自己的键盘，然后就变成了现在的模样。最近遇到了一些瓶颈加上手边的项目比较紧，这块儿暂时没有推进，如果有小伙伴可以给我一些建议的话那也是极好的^_^">
+<meta name="twitter:image" content="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/cover.png">
+
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="黑山老喵小窝" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/favicon.png">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>懒人键盘纪实 | 黑山老喵小窝</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "//hm.baidu.com/hm.js?9871d0915604e1e9dc64974db7659410";
+            var s = document.getElementsByTagName("script")[0]; 
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+
+</head></html>
+<body>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/avatar.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">黑山老喵</a></h1>
+        </hgroup>
+
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="true">
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class="no-result">No results found <i class="fa fa-spinner fa-pulse"></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/categories/">分类</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto:catonblack@live.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" href="http://github.com/catonblack" title="GitHub"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Git/">Git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/GitHub/">GitHub</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/GitServer/">GitServer</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Gitlab/">Gitlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Mealy/">Mealy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Moore/">Moore</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NAS/">NAS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Negedge-Clock-Edge/">Negedge Clock Edge</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Posedge-Clock-Edge/">Posedge Clock Edge</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reg/">Reg</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Wire/">Wire</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/case/">case</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/if……else/">if……else</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/云盘/">云盘</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/亚稳态/">亚稳态</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/亚稳态优化/">亚稳态优化</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/人因工程/">人因工程</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代数法/">代数法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/保持时间/">保持时间</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/冒险/">冒险</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/卡诺图法/">卡诺图法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/变量定义/">变量定义</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/品鉴/">品鉴</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/器件特性/">器件特性</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/复位/">复位</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/多信号同步/">多信号同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/多段式状态机/">多段式状态机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/实际电路/">实际电路</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/工程存档/">工程存档</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平均无故障时间/">平均无故障时间</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/建立时间/">建立时间</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/异步时钟/">异步时钟</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/扁平化命名/">扁平化命名</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/文件管理/">文件管理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/智能硬件/">智能硬件</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/有限状态机/">有限状态机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/模块交互/">模块交互</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/毛刺/">毛刺</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/泡面/">泡面</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/状态机转换/">状态机转换</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/电平同步/">电平同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/竞争/">竞争</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/综合/">综合</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/脉冲同步/">脉冲同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/规范/">规范</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/触发器/">触发器</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/触摸板/">触摸板</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/轨迹球/">轨迹球</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/边沿检测同步/">边沿检测同步</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进口/">进口</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/锁存器/">锁存器</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/锁存器处理/">锁存器处理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/键盘/">键盘</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/项目存档/">项目存档</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/">MOxFIVE</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://catonblack.cn">Github</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://console.cloud.tencent.com/domain">腾讯云</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://tongji.baidu.com/web/28226238/overview/index?siteId=13598139">百度统计</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://www.livere.com/city-demo/insight">来必力</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://portal.qiniu.com/create">七牛云</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://valine.js.org/quickstart.html">Valine</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.coding.me/yelee/">Yelee</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">来自老和山职业技术学院的非典型理工男。专注于硬件、嵌入式、FPGA设计，涉足领域包括科学仪器、医疗仪器和可穿戴设备，在相关领域有6年一线实战经验。喜欢尝试新鲜事物，对物理、化学、医学、心理学等学科有一定的了解。</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">黑山老喵</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/avatar.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">黑山老喵</a></h1>
+            </hgroup>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/categories/">分类</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto:catonblack@live.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="http://github.com/catonblack" title="GitHub"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我">
+</nav>
+      <div class="body-wrap"><article id="post-lazy-keyboard" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2017-08-14/lazy-keyboard/" class="article-date">
+      <time datetime="2017-08-14T10:26:51.000Z" itemprop="datePublished">2017-08-14</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      懒人键盘纪实
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/个人项目/">个人项目</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/人因工程/">人因工程</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/智能硬件/">智能硬件</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/触摸板/">触摸板</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/轨迹球/">轨迹球</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/键盘/">键盘</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/cover.png" width="500">
+</div>
+
+<p>这是我业余时间做的一个项目，最开始只是没在网上找到合适自己的键盘，后来随着想法的增加就逐渐地想要做一个适合自己的键盘，然后就变成了现在的模样。最近遇到了一些瓶颈加上手边的项目比较紧，这块儿暂时没有推进，如果有小伙伴可以给我一些建议的话那也是极好的^_^</p>
+<a id="more"></a>
+
+<h3 id="1801更新"><a href="#1801更新" class="headerlink" title="1801更新"></a>1801更新</h3><p>目前遇到的几个问题：</p>
+<ol>
+<li>Solidworks并不适合用来做造型，需要找一个更合适的工具；</li>
+<li>现在的键盘手感貌似还差一点，主要是轨迹球的位置并不是特别合适，左手拇指的控制手感差点；</li>
+<li>感觉当前的设计主要是多个设计的集成，最好是可以有种真正意义上的创新。</li>
+</ol>
+<hr>
+<h2 id="设计背景"><a href="#设计背景" class="headerlink" title="设计背景"></a>设计背景</h2><p>某日，按捺不住内心的躁动（其实是看到别人的机械键盘有点心痒痒），想着去搞一把比较合适的机械键盘。</p>
+<p>但是网上找了一圈也没有找到适合自己的，遂打算自己做一把。</p>
+<h2 id="需求分析"><a href="#需求分析" class="headerlink" title="需求分析"></a>需求分析</h2><p>让我们开始先罗列一下我需要哪些功能：</p>
+<h3 id="机械键盘"><a href="#机械键盘" class="headerlink" title="机械键盘"></a>机械键盘</h3><p>不解释，只是想告诫每个年轻人，千万不要碰机械键盘，否则你这辈子可能都忘不了这种手感。</p>
+<p>机械键盘最常见的轴体无非是黑轴、青轴、红轴和茶轴，其他轴体暂时不考虑，毕竟很难买。</p>
+<h3 id="有线无线双模"><a href="#有线无线双模" class="headerlink" title="有线无线双模"></a>有线无线双模</h3><p>我特别讨厌桌面上有很多线的感觉，桌面无线化是以后的趋势。同时，蓝牙技术可以让一把键盘适配多个键盘，这对于拥有多个设备的人来说的确是福音。</p>
+<h3 id="符合人体工学"><a href="#符合人体工学" class="headerlink" title="符合人体工学"></a>符合人体工学</h3><p>现有的键盘结构其实是违反人体工程学的，一方面受制造工艺水平的影响，另一方面也是历史遗留原因。</p>
+<p>对于键盘这种消费类电子产品，可否量产是一个非常重要的因素，传统键盘这种直板型的结构还是比较便于量产的，而符合人体工程学的设备往往奇形怪状，不利于量产。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/QWERTY.png" width="600">
+</div>
+
+<p>当前流行的这种键盘布局称为QWERTY，其本意是为了降低人的打字速度，因为老式的打字机受机械结构限制，打字速度太快可能导致卡壳，所以需要适当限制人的打字速度。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/DVORAK.png" width="600">
+</div>
+
+<p>当前还有一种键盘布局模式，称为DVORAK，据说这种键盘布局可以提高打字速度，但是由于QWERTY布局早已深入人心，这导致DVORAK至今没有推广开来。但是这在程序员界还是比较流行的，所以如果可以通过软件来配置的话就最好了。</p>
+<h3 id="可调背光"><a href="#可调背光" class="headerlink" title="可调背光"></a>可调背光</h3><div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/backlight.jpg" width="600">
+</div>
+
+<p>这年头，如果没有酷炫的背光灯，都不好意思跟人家说这个是机械键盘。但是其实这还有一个重要作用：通过背光灯可以对功能区域做划分，进而提高人的反应速度。</p>
+<h3 id="尽可能少地减少手部的移动"><a href="#尽可能少地减少手部的移动" class="headerlink" title="尽可能少地减少手部的移动"></a>尽可能少地减少手部的移动</h3><p>对于我这种软硬件工程师来说，最烦的一件事就是在敲代码的过程中需要敲一段代码，然后动动鼠标，然后再敲一段代码。这种方式会打断人的思路，同时也会降低人们的效率。所以最好可以尽可能地减少手部在操作过程中的不必要移动。</p>
+<h3 id="办公环境检测"><a href="#办公环境检测" class="headerlink" title="办公环境检测"></a>办公环境检测</h3><p>这算是给这个键盘加点亮点吧，本人当下的项目就是做一个室内环境空气质量检测的设备，可以把这些功能加进去，给它加点亮点。</p>
+<h3 id="最好可以手脚并用"><a href="#最好可以手脚并用" class="headerlink" title="最好可以手脚并用"></a>最好可以手脚并用</h3><p>每当快捷键用的飞起的时候，总是希望可以手脚并用，一方面可以减轻手指的压力，另一方面还可以在无形中较少翘二郎腿的可能性，让人保持一个正确的坐姿。</p>
+<h2 id="需求确认"><a href="#需求确认" class="headerlink" title="需求确认"></a>需求确认</h2><h3 id="尺寸"><a href="#尺寸" class="headerlink" title="尺寸"></a>尺寸</h3><p>原则上不限尺寸，但是尽可能控制在一个标准104键盘的范围内：450mmX165mm。</p>
+<h3 id="按键数量"><a href="#按键数量" class="headerlink" title="按键数量"></a>按键数量</h3><p>26个按键+10个小键盘+4个方向键+10个特殊符号+ctrl/alt等特殊按键12个+Fn1/Fn2 约等于 64</p>
+<h3 id="轴体选择"><a href="#轴体选择" class="headerlink" title="轴体选择"></a>轴体选择</h3><p>通常大家看机械键盘的介绍，少不了以下这几张经典图。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/KeyChoose.jpg" width="800">
+</div>
+
+<p>也有下面这种标准介绍：</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/redKey.jpg" width="400">
+</div>
+
+<pre><code>压力克数：40
+触发深度：2.0mm
+特点：无段落感
+寿命：5000 万次</code></pre><div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/brownKey.jpg" width="400">
+</div>
+
+<pre><code>压力克数：60
+触发深度：2.0mm
+特点：段落感较钝感
+寿命：5000 万次</code></pre><div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/cyanKey.jpg" width="400">
+</div>
+
+<pre><code>压力克数：60 
+触发深度：2.4mm
+特点：段落感且清脆 
+寿命：2000 万次</code></pre><div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/blackKey.jpg" width="400">
+</div>
+
+<pre><code>压力克数：80　　 
+触发深度：1.5mm
+特点：无段落感
+寿命：5000 万 - 6000 万次</code></pre><p>就我个人来说，我特别喜欢青轴的段落感，尤其是按下去的一瞬间的那种感觉实在是太棒了。但是！人手指的力量并不是均匀分布的，一般认为拇指的力量最打，小指的力量最小，食指、中指和无名指的力量居中且差不多。</p>
+<p>小指对应的按键选用红轴，因为红轴的压力系数比较小，更加适合力量较小的小指；而且小指对应的按键一般为功能键，操作逻辑为长按。为了实现更好的手感，其他按键使用青轴。</p>
+<h3 id="无线方案选择"><a href="#无线方案选择" class="headerlink" title="无线方案选择"></a>无线方案选择</h3><p>目前主流的无线主要是蓝牙与非蓝牙2.4GHz，由于蓝牙有着更好的普适性，故选择蓝牙方案。</p>
+<h3 id="背光方案"><a href="#背光方案" class="headerlink" title="背光方案"></a>背光方案</h3><p>相比单色固定LED方案，RGB LED有着更大的灵活性，每一个按键下方都有一个对应的RGB LED， 并由RGB LED控制器通过调整占空比的方式来调节按键背光颜色。</p>
+<h3 id="符合人体工程学"><a href="#符合人体工程学" class="headerlink" title="符合人体工程学"></a>符合人体工程学</h3><p>一张图解释不同姿势下人体脊椎的承重：</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/spine_weight.jpg" width="600">
+</div>
+
+<p><strong>不论站立还是坐着，前倾的姿势会让腰椎负荷大大增加：</strong></p>
+<p>站立时身体前倾，腰椎负荷增大到150千克；</p>
+<p>坐姿时身体前倾，腰椎负荷接近200千克！</p>
+<p><strong>这是因为，上身前倾时，头、躯干和上肢的重量会集中在腰椎这一个支撑点上，腰椎间盘承载的压力最大。</strong></p>
+<p>不正确的坐姿伤害大</p>
+<p>人体自然坐正的时候胸廓是打开的，此时双手之间会呈120°夹角，而不是平放于身体两侧。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/sit_left.jpg" width="600">
+</div>
+
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/sit_top.png" width="600">
+</div>
+
+<p>打字时双手并非笔直伸直，而是应该存在一定的角度，否则手腕腾空会导致手腕特别酸。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/sit_laptop.jpg" width="600">
+</div>
+
+<p>左右键盘分开，目的是为了让人的胸廓可以自然打开。</p>
+<p>同时，由于手的关节结构更加适合前后运动，而不是左右运动，所以按键的排布应该遵循直上直下的原则进行设计。</p>
+<h3 id="尽可能地减少手部的移动"><a href="#尽可能地减少手部的移动" class="headerlink" title="尽可能地减少手部的移动"></a>尽可能地减少手部的移动</h3><p>我观察到一般左手是不会有过多的移动的，经常移动的往往是右手：一会儿需要到小键盘上按一下数字，一会儿又要动一下鼠标。小键盘对于我这样的工程师来说是十分重要的，不能丢，但是可以靠近右手区的左边。此时发现右手拇指依然可以用，从罗技570得来的灵感，此时可以用右手拇指控制轨迹球。</p>
+<h3 id="测量室内VOC"><a href="#测量室内VOC" class="headerlink" title="测量室内VOC"></a>测量室内VOC</h3><h3 id="10000mAh-锂电池"><a href="#10000mAh-锂电池" class="headerlink" title="10000mAh 锂电池"></a>10000mAh 锂电池</h3><h3 id="micro-usb"><a href="#micro-usb" class="headerlink" title="micro usb"></a>micro usb</h3><h3 id="usb2-0连接PC"><a href="#usb2-0连接PC" class="headerlink" title="usb2.0连接PC"></a>usb2.0连接PC</h3><h3 id="添加足踏开关"><a href="#添加足踏开关" class="headerlink" title="添加足踏开关"></a>添加足踏开关</h3><h3 id="添加一小块电容触摸板，用于部分情况下的手势识别。"><a href="#添加一小块电容触摸板，用于部分情况下的手势识别。" class="headerlink" title="添加一小块电容触摸板，用于部分情况下的手势识别。"></a>添加一小块电容触摸板，用于部分情况下的手势识别。</h3><h3 id="整体思维导图如下："><a href="#整体思维导图如下：" class="headerlink" title="整体思维导图如下："></a>整体思维导图如下：</h3><div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/mindmap.png" width="600">
+</div>
+
+<h2 id="竞品分析，目标用户"><a href="#竞品分析，目标用户" class="headerlink" title="竞品分析，目标用户"></a>竞品分析，目标用户</h2><p>说是竞品分析，倒不如说是将网上各种各样的人体工程学键盘总结了一下，并进行了对比。当然了，这玩意儿主要是我自己用，就先不管目标用户啥的了吧。</p>
+<h3 id="KINESIS-Advangtage"><a href="#KINESIS-Advangtage" class="headerlink" title="KINESIS Advangtage"></a>KINESIS Advangtage</h3><p>这可能是是当下最符合人因工程的键盘了吧，它几乎完美贴合人手的外形。可惜没有无线版本，没有背光，按键冗余也比较多。。。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_KINESIS.jpg" width="600">
+</div>
+
+<h3 id="Natural-Keyboard-Elite"><a href="#Natural-Keyboard-Elite" class="headerlink" title="Natural Keyboard Elite"></a>Natural Keyboard Elite</h3><p>老实说，巨硬的键盘和鼠标做的还是不错的，人体工程学做的也不错，但是键盘上各排的的高度基本是一个平面，只关注了左右手分离和倾斜却没有关注手指方面的人体工程学设计。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_Natural.jpg" width="600">
+</div>
+
+<h3 id="微软的人体工学4000"><a href="#微软的人体工学4000" class="headerlink" title="微软的人体工学4000"></a>微软的人体工学4000</h3><p>这把键盘最特别的地方是装上托盘之后提供了一个反倾角，打字的时候手腕略微下垂，这个角度让手腕非常放松，但可惜是薄膜键盘。。。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_Microsoft4000.jpg" width="600">
+</div>
+
+<h3 id="μTRON"><a href="#μTRON" class="headerlink" title="μTRON"></a>μTRON</h3><p>个人对这种分体式的键盘没有特别多的好感，其中一个原因就是分体式键盘会导致更多的线。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_uTron.jpg" width="600">
+</div>
+
+<h3 id="Truly-Ergonomic-Keyboard"><a href="#Truly-Ergonomic-Keyboard" class="headerlink" title="Truly Ergonomic Keyboard"></a>Truly Ergonomic Keyboard</h3><p>网上很难买到，所以评测资料也特别少，但是目测手感不会很好。。。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_Ergonomic.jpg" width="600">
+</div>
+
+<h3 id="KeyMouse"><a href="#KeyMouse" class="headerlink" title="KeyMouse"></a>KeyMouse</h3><p><a href="https://www.keymouse.com/" target="_blank" rel="noopener">KeyMouse</a></p>
+<p>不喜欢这家的设计理念，毕竟拖着这么大身躯的鼠标是无法实现精确拖动的。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_KeyMouse.png" width="600">
+</div>
+
+<p>但是轨迹球的设计还是不错的。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_KeyMouse_trackball.png" width="600">
+</div>
+
+<h3 id="Combimouse"><a href="#Combimouse" class="headerlink" title="Combimouse"></a>Combimouse</h3><p>我非常赞同这个设计的理念，人的左右手是不一样的，没必要搞得两边对称。但是硬把键盘和鼠标结合在一起貌似就有点不太合适了吧。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_Combimouse.jpg" width="600">
+</div>
+
+<h3 id="Ergodox系列"><a href="#Ergodox系列" class="headerlink" title="Ergodox系列"></a>Ergodox系列</h3><p>它是网上的一个开源项目，至今有好多网友对其进行了改造。第二幅那个带球的很符合我的胃口，但是木有背光。而且一个不小心就有三条线了。。。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_ergodox0.png" width="600">
+</div>
+
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_ergodox1.jpg" width="600">
+</div>
+
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_ergodox2.jpg" width="600">
+</div>
+
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_ergodox3.jpg" width="600">
+</div>
+
+<h3 id="网友作品1"><a href="#网友作品1" class="headerlink" title="网友作品1"></a>网友作品1</h3><p>这是网上找到的一个使用人因工程思想做的一把键盘，实现了左右两边的设计，是一个非常不错的设计。可是，对我来说还是不够贴合人体，冗余按键还是有点多，同时，还是需要一定的左右手移动操作。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_netmate1.jpg" width="600">
+</div>
+
+<h3 id="网友作品2"><a href="#网友作品2" class="headerlink" title="网友作品2"></a>网友作品2</h3><p>金丝魔蛛其实是一个跨时代的设计，真的很好用，但其缺点在于按键上面只有数字，没有字符。而且只有一半的按键，肯定是不够用的。。。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_netmate2.png" width="600">
+</div>
+
+<h3 id="还有一些只可远观而不可亵玩的"><a href="#还有一些只可远观而不可亵玩的" class="headerlink" title="还有一些只可远观而不可亵玩的"></a>还有一些只可远观而不可亵玩的</h3><div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_ideal1.jpg" width="600">
+</div>
+
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_ideal2.jpg" width="600">
+</div>
+
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_ideal3.jpg" width="600">
+</div>
+
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_ideal4.jpg" width="600">
+</div>
+
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_ideal5.png" width="600">
+</div>
+
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/compare_ideal6.png" width="600">
+</div>
+
+<h2 id="使用环境定义和CMF的选择"><a href="#使用环境定义和CMF的选择" class="headerlink" title="使用环境定义和CMF的选择"></a>使用环境定义和CMF的选择</h2><p>使用环境当然是室内环境啦，这样就不用考虑携带问题。主要是给设计师、工程师和程序员使用。</p>
+<p>颜色：白色为主，键盘的按键为透明色（主要是透明色好买），键盘的支撑板使用碳纤维板，黑白双色为主体色，碳纤维的花纹有一定的点缀作用。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/carbonciber.png" width="600">
+</div>
+
+<p>按键使用购买的透明键帽，主要是因为便宜和好买。使用水转印贴纸在键帽上留下字符，或者使用遮盖胶水配合丝网印刷等技术留下字符。</p>
+<h2 id="草图设计"><a href="#草图设计" class="headerlink" title="草图设计"></a>草图设计</h2><div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round1_sketch1.png" width="600">
+</div>
+
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round1_sketch2.jpg" width="600">
+</div>
+
+<h2 id="操作方式的选择"><a href="#操作方式的选择" class="headerlink" title="操作方式的选择"></a>操作方式的选择</h2><p>就当普通键盘用。</p>
+<h2 id="进一步渲染，深化设计"><a href="#进一步渲染，深化设计" class="headerlink" title="进一步渲染，深化设计"></a>进一步渲染，深化设计</h2><p>对按键进行进一步精简，去掉中间的小键盘，跟一边的按键融合。去掉上面的功能键，用Fn按键进行选择。左手拇指区使用一些更加立体的结构进行设计。</p>
+<p>按键排布重新调整过了，如下：</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round1_key.png" width="600">
+</div>
+
+<h2 id="简单手板制作"><a href="#简单手板制作" class="headerlink" title="简单手板制作"></a>简单手板制作</h2><p>糟糕，当时的一些图找不到了。。。</p>
+<h2 id="3D建模"><a href="#3D建模" class="headerlink" title="3D建模"></a>3D建模</h2><div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round1_3D.jpg" width="600">
+</div>
+
+<h2 id="进一步的产品手板"><a href="#进一步的产品手板" class="headerlink" title="进一步的产品手板"></a>进一步的产品手板</h2><p>糟糕，当时的一些图找不到了。。。</p>
+<h2 id="改进优化"><a href="#改进优化" class="headerlink" title="改进优化"></a>改进优化</h2><div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round2_3D1.png" width="600">
+</div>
+
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round2_3D2.png" width="600">
+</div>
+
+<h2 id="确认手板原型"><a href="#确认手板原型" class="headerlink" title="确认手板原型"></a>确认手板原型</h2><div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round2_3Dprint1.jpg" width="600">
+</div>
+
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round2_3Dprint2.jpg" width="600">
+</div>
+
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round2_3Dprint3.jpg" width="600">
+</div>
+
+<h2 id="机械设计-结构设计"><a href="#机械设计-结构设计" class="headerlink" title="机械设计 结构设计"></a>机械设计 结构设计</h2><h2 id="硬件研发"><a href="#硬件研发" class="headerlink" title="硬件研发"></a>硬件研发</h2><h3 id="主控制板原理图设计"><a href="#主控制板原理图设计" class="headerlink" title="主控制板原理图设计"></a>主控制板原理图设计</h3><p>整体由如下几个部分组成：主控，RGB驱动，环境光检测，电源管理，温湿度+VOC检测，电源管理，震动控制。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round2_schematic1.png" width="600">
+</div>
+
+<p>电源分配相对来说还是比较简单的，主要就是5v+3.3V。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round2_schematic2.png" width="600">
+</div>
+
+<p>主控选择Cypress的PSOC，主要是因为没用过这种器件，所以打算使用一下。而且Cypress的USB、BLE和电容触摸等技术在业界的口碑还是不错的。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round2_schematic3.png" width="600">
+</div>
+
+<p>USB保护电路见下图，电源使用BUCK-BOOST以获得更大的输入范围，增加充电管理芯片，目的是为了在插着USB的时候可以选择不给锂电池长时间充电。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round2_schematic4.png" width="600">
+</div>
+
+<p>RGB灯控，使用HOLTEK的方案，效果不错。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round2_schematic5.png" width="600">
+</div>
+
+<p>其他辅助电路。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round2_schematic6.png" width="600">
+</div>
+
+<p>参考网上流传的BLE方案对比，并进行选型。最后选择PSOC4 BLE， 一方面是因为CYPRESS的BLE开发环境比较友好，可以快速搭建；另一方面CYPRESS的BLE器件有电容触摸功能，可以补全主控管脚不够用的问题。</p>
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round2_schematic7.png" width="600">
+</div>
+
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round2_blecompare.jpg" width="600">
+</div>
+
+<h3 id="主控制板PCB设计"><a href="#主控制板PCB设计" class="headerlink" title="主控制板PCB设计"></a>主控制板PCB设计</h3><div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round2_pcb1.png" width="600">
+</div>
+
+<div align="center">
+<img src="https://catonblackweb-1259418199.cos.ap-shanghai.myqcloud.com/BLG_post_lazy-keyboard/round2_pcb2.png" width="600">
+</div>
+
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><pre><code>这篇笔记参考网上众多资料实验并整理而成，如果涉及侵权烦请请告知，我将第一时间处理。</code></pre><ol>
+<li><a href="http://www.51hanghai.com/thread-54517-1-1.html" target="_blank" rel="noopener">碳纤维纹路那些事儿</a></li>
+<li><a href="https://www.wstx.com/m-18050-1" target="_blank" rel="noopener">一时冲动，自己做了个键盘</a></li>
+<li><a href="http://post.smzdm.com/p/44468/" target="_blank" rel="noopener">奇葩人体工学机械键盘 KINESIS Advangtage</a></li>
+<li><a href="https://www.chiphell.com/thread-837738-1-1.html" target="_blank" rel="noopener">人体工学键盘自己做 ergodox来袭</a></li>
+<li><a href="http://tieba.baidu.com/p/4232766013" target="_blank" rel="noopener">金丝魔蛛键盘底座改造过程（完整版）</a></li>
+<li><a href="https://www.chiphell.com/thread-550972-1-1.html" target="_blank" rel="noopener">人体工学系列 I：机械键盘Kinesis Advantage Contoured Keyboard</a></li>
+<li><a href="https://www.chiphell.com/thread-559446-1-1.html" target="_blank" rel="noopener">人体工学系列 II：肯辛通轨迹球 Expert Mouse 兼谈立式鼠标</a></li>
+<li><a href="https://www.chiphell.com/thread-565316-1-1.html" target="_blank" rel="noopener">人体工学系列 III：肯辛通轨迹球SlimBlade 兼比较 Expert Mouse</a></li>
+<li><a href="https://www.chiphell.com/thread-576295-1-1.html" target="_blank" rel="noopener">人体工学系列 IV : Bean Bag腕托 &amp; 数位板客串鼠标</a></li>
+<li><a href="http://www.pcviva.com/jianmaoyinshuajishu.html" target="_blank" rel="noopener">机械键盘的几种键帽印刷技术</a></li>
+<li><a href="http://www.guokr.com/post/572495/" target="_blank" rel="noopener">教你在家自制碳纤维车架</a></li>
+<li><a href="https://www.chiphell.com/thread-1499401-1-1.html" target="_blank" rel="noopener">全球首发，DIY了史上第一把可编程无线优联40%机械键盘</a></li>
+<li><a href="http://www.geeknaut.com/cool-computer-keyboards-2219350.html" target="_blank" rel="noopener">15 Super Cool Keyboards You Have Never Seen</a></li>
+<li><a href="https://mp.weixin.qq.com/s?__biz=MjM5ODU2MzM3Nw==&mid=2657200401&idx=5&sn=346e75577bd7953b68a2b22eb9a5edf4&chksm=bd5dd24f8a2a5b595904ed328e60c634396b3f85e9d5b10df4aa0ec4a0db694ef717da9f2c01&mpshare=1&scene=1&srcid=1113ftDajRJfcUNFN0jWZrM8" target="_blank" rel="noopener">现在你的姿势让腰椎承受多少斤？一张图表吓哭你</a></li>
+<li><a href="https://3g.163.com/dy/article/DVHA5I8H0511D04U.html" target="_blank" rel="noopener">还可以这样玩，UHK 分体机械键盘首发</a></li>
+<li><a href="https://www.v2ex.com/t/372555" target="_blank" rel="noopener">无线分体机械键盘 Mitosis</a></li>
+<li><a href="http://aleung.github.io/blog/2019/08/04/DIY-keyboard/" target="_blank" rel="noopener">DIY 人体工学分体键盘</a></li>
+</ol>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2017-08-14/lazy-keyboard/">懒人键盘纪实</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">黑山老喵</a></p>
+        <p><span>发布时间:</span>2017-08-14, 18:26:51</p>
+        <p><span>最后更新:</span>2019-08-14, 20:12:24</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2017-08-14/lazy-keyboard/" title="懒人键盘纪实">https://catonblack.cn/2017-08-14/lazy-keyboard/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://catonblack.cn/2017-08-14/lazy-keyboard/　　作者: 黑山老喵" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target="_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2018-05-04/wire-reg/">
+                    Wire and Reg等定义的综合结果
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2017-08-13/folder-manage/">
+                    工程存档文件夹命名
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1801更新"><span class="toc-number">1.</span> <span class="toc-text">1801更新</span></a></li></ol><li class="toc-item toc-level-2"><a class="toc-link" href="#设计背景"><span class="toc-number"></span> <span class="toc-text">设计背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#需求分析"><span class="toc-number"></span> <span class="toc-text">需求分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#机械键盘"><span class="toc-number">1.</span> <span class="toc-text">机械键盘</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#有线无线双模"><span class="toc-number">2.</span> <span class="toc-text">有线无线双模</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#符合人体工学"><span class="toc-number">3.</span> <span class="toc-text">符合人体工学</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#可调背光"><span class="toc-number">4.</span> <span class="toc-text">可调背光</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#尽可能少地减少手部的移动"><span class="toc-number">5.</span> <span class="toc-text">尽可能少地减少手部的移动</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#办公环境检测"><span class="toc-number">6.</span> <span class="toc-text">办公环境检测</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#最好可以手脚并用"><span class="toc-number">7.</span> <span class="toc-text">最好可以手脚并用</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#需求确认"><span class="toc-number"></span> <span class="toc-text">需求确认</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#尺寸"><span class="toc-number">1.</span> <span class="toc-text">尺寸</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#按键数量"><span class="toc-number">2.</span> <span class="toc-text">按键数量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#轴体选择"><span class="toc-number">3.</span> <span class="toc-text">轴体选择</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#无线方案选择"><span class="toc-number">4.</span> <span class="toc-text">无线方案选择</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#背光方案"><span class="toc-number">5.</span> <span class="toc-text">背光方案</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#符合人体工程学"><span class="toc-number">6.</span> <span class="toc-text">符合人体工程学</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#尽可能地减少手部的移动"><span class="toc-number">7.</span> <span class="toc-text">尽可能地减少手部的移动</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#测量室内VOC"><span class="toc-number">8.</span> <span class="toc-text">测量室内VOC</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#10000mAh-锂电池"><span class="toc-number">9.</span> <span class="toc-text">10000mAh 锂电池</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#micro-usb"><span class="toc-number">10.</span> <span class="toc-text">micro usb</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#usb2-0连接PC"><span class="toc-number">11.</span> <span class="toc-text">usb2.0连接PC</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#添加足踏开关"><span class="toc-number">12.</span> <span class="toc-text">添加足踏开关</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#添加一小块电容触摸板，用于部分情况下的手势识别。"><span class="toc-number">13.</span> <span class="toc-text">添加一小块电容触摸板，用于部分情况下的手势识别。</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#整体思维导图如下："><span class="toc-number">14.</span> <span class="toc-text">整体思维导图如下：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#竞品分析，目标用户"><span class="toc-number"></span> <span class="toc-text">竞品分析，目标用户</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#KINESIS-Advangtage"><span class="toc-number">1.</span> <span class="toc-text">KINESIS Advangtage</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Natural-Keyboard-Elite"><span class="toc-number">2.</span> <span class="toc-text">Natural Keyboard Elite</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#微软的人体工学4000"><span class="toc-number">3.</span> <span class="toc-text">微软的人体工学4000</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#μTRON"><span class="toc-number">4.</span> <span class="toc-text">μTRON</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Truly-Ergonomic-Keyboard"><span class="toc-number">5.</span> <span class="toc-text">Truly Ergonomic Keyboard</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#KeyMouse"><span class="toc-number">6.</span> <span class="toc-text">KeyMouse</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Combimouse"><span class="toc-number">7.</span> <span class="toc-text">Combimouse</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Ergodox系列"><span class="toc-number">8.</span> <span class="toc-text">Ergodox系列</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#网友作品1"><span class="toc-number">9.</span> <span class="toc-text">网友作品1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#网友作品2"><span class="toc-number">10.</span> <span class="toc-text">网友作品2</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#还有一些只可远观而不可亵玩的"><span class="toc-number">11.</span> <span class="toc-text">还有一些只可远观而不可亵玩的</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用环境定义和CMF的选择"><span class="toc-number"></span> <span class="toc-text">使用环境定义和CMF的选择</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#草图设计"><span class="toc-number"></span> <span class="toc-text">草图设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#操作方式的选择"><span class="toc-number"></span> <span class="toc-text">操作方式的选择</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#进一步渲染，深化设计"><span class="toc-number"></span> <span class="toc-text">进一步渲染，深化设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#简单手板制作"><span class="toc-number"></span> <span class="toc-text">简单手板制作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3D建模"><span class="toc-number"></span> <span class="toc-text">3D建模</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#进一步的产品手板"><span class="toc-number"></span> <span class="toc-text">进一步的产品手板</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#改进优化"><span class="toc-number"></span> <span class="toc-text">改进优化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#确认手板原型"><span class="toc-number"></span> <span class="toc-text">确认手板原型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#机械设计-结构设计"><span class="toc-number"></span> <span class="toc-text">机械设计 结构设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#硬件研发"><span class="toc-number"></span> <span class="toc-text">硬件研发</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#主控制板原理图设计"><span class="toc-number">1.</span> <span class="toc-text">主控制板原理图设计</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#主控制板PCB设计"><span class="toc-number">2.</span> <span class="toc-text">主控制板PCB设计</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number"></span> <span class="toc-text">参考资料</span></a>
+        
+    </li></div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录" title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"懒人键盘纪实　| 黑山老喵小窝　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+        <section id="comments" style="margin: 2em; padding: 2em; background: rgba(255, 255, 255, 0.5)">
+    <div id="vcomment" class="comment"></div>
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src="//unpkg.com/valine@1.2.0-beta1/dist/Valine.min.js"></script>
+    <script>
+      new Valine({
+        el: '#vcomment',
+        notify: 'true',
+        verify: 'true',
+        app_id: "0tk0hycE3Yips8Txim7EBtm5-gzGzoHsz",
+        app_key: "nW716Qi1t7lY4m6zXI9MSYJs",
+        placeholder: "Just go go!",
+        avatar: "mp"
+      });
+    </script>
+</section>
+
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2018-05-04/wire-reg/" title="上一篇: Wire and Reg等定义的综合结果">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2017-08-13/folder-manage/" title="下一篇: 工程存档文件夹命名">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019-07-17/if-else/">if……else 和 case 的综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/fsm-style/">状态机一段式、二段式和三段式写法的实际效果</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-07-16/multisignal-cdc/">跨时钟传递多个时钟信号</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-03-17/hdl-prjsetting/">Verilog 项目配置</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-02-18/setup-hold-time/">建立保持时间的原理解释</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-02-11/latch-vs-flipflop/">Latch vs Flip-Flop</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-01-18/mealy2moore/">Moore 与 Mealy 状态机的互相转换</a></li><li class="post-list-item"><a class="post-list-link" href="/2019-01-16/moore-mealy/">摩尔状态机和米勒状态机特性对比</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-10-21/metastability/">令人闻风丧胆的亚稳态</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-08-18/up-down-edge/">上下边沿触发</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-18/model-interface/">常见的模块间交互的方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-18/fpga-reset/">FPGA 复位研究</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-16/async-clock-sync/">异步时钟信号同步化及其综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-07-11/race-competition/">竞争与冒险</a></li><li class="post-list-item"><a class="post-list-link" href="/2018-05-04/wire-reg/">Wire and Reg等定义的综合结果</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-14/lazy-keyboard/">懒人键盘纪实</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-13/folder-manage/">工程存档文件夹命名</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-07/use-git/">Git管理工程的方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-08-03/file-manage/">基于中心库的NAS,云盘和Git的文件管理方式</a></li><li class="post-list-item"><a class="post-list-link" href="/2017-03-01/instant-noodles/">泡面鉴赏</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2019 黑山老喵
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style="display:none">
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style="display:none">
+                        <span id="page-visit" title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 5;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div><!-- hexo-inject:begin --><!-- Begin: Injected MathJax -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({"tex2jax":{"inlineMath":[["$","$"],["\\(","\\)"]],"skipTags":["script","noscript","style","textarea","pre","code"],"processEscapes":true},"TeX":{"equationNumbers":{"autoNumber":"AMS"}}});
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js">
+</script>
+<!-- End: Injected MathJax -->
+<!-- hexo-inject:end -->
+</body>
+</html>
